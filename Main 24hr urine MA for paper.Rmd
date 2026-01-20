@@ -1,0 +1,4334 @@
+---
+title: "24 Hour Urine Ranges MA & Comparison to Clinical Cohort"
+author: "R Geraghty"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: hide
+    toc_depth: 2
+    fig_width: 10
+    fig_height: 10
+  pdf_document: 
+    toc: true
+    fig_width: 15
+    fig_height: 15
+    number_sections: true
+  word_document:
+    toc: true
+    number_sections: true
+always_allow_html: true
+    
+---
+
+# Setup {.tabset .tabset-pills}
+## Import Libraries
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE) 
+library(shiny)
+library(tidyverse)
+library(janitor)
+library(ggplot2)
+library(gt)
+library(gtExtras)
+library(DataExplorer)
+library(meta)
+library(metafor)
+library(forestplot)
+library(grid)
+library(gridExtra)
+library(data.table)
+library(gt)
+library(gtExtras)
+library(patchwork)
+```
+\newpage
+
+## Import data
+```{r}
+ncl_1 <- read.csv("NCL_1.csv", header = TRUE) %>% janitor::clean_names()
+ncl_2 <- read.csv("NCL_2.csv", header = TRUE) %>% janitor::clean_names()
+
+bern <- read.csv("Bern.csv", header = TRUE) %>% janitor::clean_names()
+
+soton <- read.csv("Soton.csv", header = TRUE) %>% janitor::clean_names()
+
+urine_ma <- fread("24_hr_urine_ma_12082025.csv", header = TRUE) %>% janitor::clean_names()
+
+hpfs_nhs_I_II_summary <- fread("24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>% 
+  janitor::clean_names()
+
+phosphate_phosphorous <- fread("phosphate_phosphorous.csv", header = TRUE) %>% janitor::clean_names()
+```
+\newpage
+
+## Import and Sort Bias analysis
+```{r}
+bias_observational <- fread("cochrane_risk_observational_studies.csv", header = TRUE) %>%
+  janitor::clean_names()
+
+bias_rcts <- fread("cochrane_risk_rct.csv", header = TRUE) %>%
+  janitor::clean_names() %>%
+    mutate(overall = case_when(overall_risk_of_bias_low_some_concern_high == "Some concern" ~ "Moderate",
+                               overall_risk_of_bias_low_some_concern_high == "High" ~ "High",
+                               overall_risk_of_bias_low_some_concern_high == "Low" ~ "Low",
+                               TRUE ~ NA_character_),
+           .keep = "unused")
+
+overall_bias <- bias_observational %>% 
+  subset(select = c(study, overall)) %>%
+  rbind(bias_rcts %>% subset(select = c(
+    study, overall
+  )) 
+  ) %>% 
+  as_tibble() %>%
+  drop_na(overall)
+
+overall_bias$overall <- factor(overall_bias$overall,
+                               levels = c("Low",
+                                          "Moderate",
+                                          "High"))
+```
+\newpage
+
+## Sort data
+### Newcastle data
+```{r}
+ncl_1 <-
+  ncl_1 %>% mutate(social_security_number = str_replace_all(social_security_number, " ", "")) %>% subset(select = c(social_security_number, test_name, result_rw))
+ncl_2 <-
+  ncl_2 %>% mutate(social_security_number = str_replace_all(social_security_number, " ", "")) %>% subset(select = c(social_security_number, test_name, result_rw))
+
+ncl_pre <- rbind(ncl_1, ncl_2)
+
+ncl <- ncl_pre  %>% pivot_wider(
+  id_cols = social_security_number,
+  names_from = test_name,
+  values_from = result_rw,
+  values_fn = list(result_rw = ~ .[1])
+) %>% janitor::clean_names()
+
+ncl <- ncl %>%  rename(
+  volume = urine_volume,
+  creatinine1 = urine_creatinine,
+  calcium = urine_calcium,
+  oxalate1 = urine_oxalate_24_hour,
+  uric_acid1 = urine_uric_acid,
+  ph = urine_p_h,
+  citrate = urine_citrate_24_hour,
+  cystine = urine_cystine,
+  phosphate = urine_phosphate
+) %>% mutate(
+  oxalate = ifelse(oxalate1<1,
+    as.numeric(oxalate1) * 100,
+    as.numeric(oxalate1) / 10),
+  creatinine = as.numeric(creatinine1),
+  uric_acid = ifelse(as.numeric(uric_acid1) > 100,
+                     as.numeric(uric_acid1) / 1000,
+                     as.numeric(uric_acid1)),
+  sex = NA,
+  .keep = "unused"
+)
+
+ncl <- ncl %>% select(volume,
+                      creatinine ,
+                      calcium ,
+                      oxalate,
+                      uric_acid,
+                      ph,
+                      citrate,
+                      cystine,
+                      phosphate,
+                      sex)
+
+ncl$volume <- as.numeric(ncl$volume)
+ncl$calcium <- as.numeric(ncl$calcium)
+ncl$ph <- as.numeric(ncl$ph)
+ncl$citrate <- as.numeric(ncl$citrate)
+ncl$phosphate <- as.numeric(ncl$phosphate)
+ncl$sex <- factor(ncl$sex,
+                  levels = c("M", "F"))
+
+```
+\newpage
+
+### Bern data
+```{r}
+bern_1 <-
+  bern %>% subset(
+    select = c(
+      random_1_24_hour_urine_volume_in_ml,
+      random_2_24_hour_urine_volume_in_ml,
+      ran_1_creatinine_in_umol_l,
+      ran_2_creatinine_in_umol_l,
+      ran_1_calcium_in_mmol_24_hours,
+      ran_2_calcium_in_mmol_24_hours,
+      ran_1_oxalate_umol_mmol_creatinine,
+      ran_2_oxalate_umol_mmol_creatinine,
+      ran_1_uric_acid_in_umol_24_hours,
+      ran_2_uric_acid_in_umol_24_hours,
+      ran_1_citrate_mmol_mol_creatinine,
+      ran_2_citrate_mmol_mol_creatinine,
+      ran_1_p_h_sticks,
+      sex
+    )
+  ) %>% rename(
+    volume = random_1_24_hour_urine_volume_in_ml,
+    creatinine1 = ran_1_creatinine_in_umol_l,
+    calcium = ran_1_calcium_in_mmol_24_hours,
+    oxalate = ran_1_oxalate_umol_mmol_creatinine,
+    uric_acid1 = ran_1_uric_acid_in_umol_24_hours,
+    citrate = ran_1_citrate_mmol_mol_creatinine,
+    ph = ran_1_p_h_sticks
+  ) %>% mutate(creatinine = creatinine1 * 0.001 * (volume/1000),
+               uric_acid = uric_acid1 / 1000,
+    citrate = NA,
+               cystine = NA,
+               phosphate = NA,
+    sex = ifelse(sex == "men",
+                 "M",
+                 "F"))
+
+bern <- bern_1 %>% select(volume,
+                      creatinine ,
+                      calcium ,
+                      oxalate,
+                      uric_acid,
+                      ph,
+                      citrate,
+                      cystine,
+                      phosphate,
+                      sex)
+
+ncl <- ncl %>% rbind(bern)
+```
+\newpage
+
+### Southampton data
+```{r}
+soton <- soton %>% subset(
+  select = c(
+    urine_volume_h_cl,
+    urinary_creatinine_mmol_24h,
+    urinary_calcium_mmol_24h,
+    urinary_oxalate_mmol_24h,
+    urine_volume_thymol,
+    urinary_uric_acid_mmol_24h,
+    p_h,
+    creatinine_clearance_l_24_h,
+    male
+  )
+) %>%
+  rename(
+    volume1 = urine_volume_h_cl,
+    creatinine1 = urinary_creatinine_mmol_24h,
+    calcium = urinary_calcium_mmol_24h,
+    oxalate1 = urinary_oxalate_mmol_24h,
+    volume_thymol = urine_volume_thymol,
+    uric_acid1 = urinary_uric_acid_mmol_24h,
+    ph = p_h,
+    crcl = creatinine_clearance_l_24_h
+  ) %>% 
+  mutate(
+    volume = volume1 * 1000,
+    creatinine = creatinine1,
+    oxalate = oxalate1 * 100,
+    uric_acid = uric_acid1,
+    citrate = NA,
+    cystine = NA,
+    phosphate = NA,
+    sex = ifelse(male == TRUE,
+                 "M",
+                 "F"),
+    .keep = "unused"
+  )
+
+soton <- soton %>% select(volume,
+                      creatinine ,
+                      calcium ,
+                      oxalate,
+                      uric_acid,
+                      ph,
+                      citrate,
+                      cystine,
+                      phosphate,
+                      sex)
+
+ncl <- ncl %>% rbind(soton)
+ncl$sex <- as.factor(ncl$sex)
+```
+\newpage
+
+### MA data
+```{r}
+hpfs_nhs_I_II_summary1 <- hpfs_nhs_I_II_summary %>%
+  subset(
+    select = -c(
+      assay,
+      comments,
+      phosphate_mean_mmol_24h,
+      phosphate_sd_mmol_24h,
+      phosphorus_mean_mmol_24h,
+      phosphorus_sd_mmol_24h
+    )
+  )
+
+hpfs_nhs_I_II_summary2 <- hpfs_nhs_I_II_summary %>%
+  subset(
+    select = c(
+      phosphate_mean_mmol_24h,
+      phosphate_sd_mmol_24h,
+      phosphorus_mean_mmol_24h,
+      phosphorus_sd_mmol_24h
+    )
+  )
+
+hpfs_nhs_I_II_summary <- hpfs_nhs_I_II_summary1 %>%
+  cbind(hpfs_nhs_I_II_summary2)
+
+urine_ma1 <- urine_ma %>%
+  select(-starts_with("x")) %>%
+  subset(select = -c(phosphate_mean_mmol_24h, phosphate_sd_mmol_24h)) %>%
+  mutate(join_key = paste0(first_author, year)) %>%
+  left_join(
+    phosphate_phosphorous %>% mutate(join_key = paste0(authors, year), 
+                                     .keep = "unused"),
+    by = "join_key"
+  ) %>% 
+  select(-c(join_key, comments, ok_measurement)) %>%
+  rbind(hpfs_nhs_I_II_summary) %>%
+  cbind(urine_ma %>% select(ok_measurement))
+
+
+
+urine_ma1$age_sd <- as.numeric(urine_ma1$age_sd)
+urine_ma1$child_adult <- as.factor(urine_ma1$child_adult)
+urine_ma1$underlying_cause <- as.factor(urine_ma1$underlying_cause)
+urine_ma1$stone_vs_no_stone <- as.factor(urine_ma1$stone_vs_no_stone)
+urine_ma1$ok_measurement <- as.factor(urine_ma1$ok_measurement)
+urine_ma1$male_n <- as.integer(urine_ma1$male_n)
+urine_ma1$female_n <- as.integer(urine_ma1$female_n)
+urine_ma1$ph_mean <- as.numeric(urine_ma1$ph_mean)
+urine_ma1$ph_sd <- as.numeric(urine_ma1$ph_sd)
+urine_ma1$volume_mean_m_l <- as.numeric(urine_ma1$volume_mean_m_l)
+urine_ma1$total_n <- as.integer(urine_ma1$total_n)
+urine_ma1$restricted_diet <- as.factor(urine_ma1$restricted_diet)
+urine_ma1$other_demographic_variant <- as.factor(urine_ma1$other_demographic_variant)
+
+urine_ma1 <- urine_ma1 %>% mutate(
+  urea_mean_mmol_24h = ifelse(urea_mean_mmol_24h < 1,
+                              urea_mean_mmol_24h * 1000,
+                              urea_mean_mmol_24h),
+  urea_sd_mmol_24h = ifelse(urea_sd_mmol_24h < 1,
+                              urea_sd_mmol_24h * 1000,
+                              urea_sd_mmol_24h),
+)
+
+urine_ma1 <- urine_ma1 %>% mutate(
+  study_name = case_when(
+    first_author == "HPFS & NHS I/II" ~ first_author,
+    and == "no" & first_author != "HPFS & NHS I/II" ~ paste0(first_author, " et al. ", year),
+    and == "yes" ~ paste0(first_author, ", ", year),
+  TRUE ~ NA_character_),
+  underlying_cause = case_when(
+        other_demographic_variant == "pre_menopausal" ~ "pre_menopausal",
+        other_demographic_variant == "post_menopausal" ~ "post_menopausal",
+        TRUE ~ other_demographic_variant
+  ),
+  other_demographic_variant = case_when(
+    other_demographic_variant == "black" ~ "black",
+    other_demographic_variant == "white" ~ "white",
+    other_demographic_variant == "no" ~ "mixed",
+    other_demographic_variant == "pre_menopausal" ~ "mixed",
+    other_demographic_variant == "post_menopausal" ~ "mixed"
+  ),
+  .keep = "all"
+)
+
+urine_ma1$other_demographic_variant <- as.factor(urine_ma1$other_demographic_variant)
+
+urine_ma2 <- urine_ma1 %>%
+  filter(
+    stone_vs_no_stone == "no_stone") %>%
+  filter(
+      (underlying_cause == "no" |
+        underlying_cause == "pre_menopausal")) %>%
+  filter(!first_author %in% c("Prochaska", "Ferraro", "Curhan", "Taylor and Curhan")) %>%
+  drop_na(total_n)
+
+urine_ma2 <- urine_ma2 %>% 
+  mutate(
+    age_band = case_when(
+      age_band == "20-29" | age_band == "20-30" ~ "20-30",
+      age_band == "30-39" | age_band == "30-40" ~ "30-40",
+      age_band == "40-49" | age_band == "40-50" ~ "40-50",
+      age_band == "50-59" | age_band == "50-60" ~ "50-60",
+      age_band == "60-70" | age_band == "60+" | age_band == "70-80" ~ "60+",
+      TRUE ~ age_band
+    )
+  )
+
+urine_ma2$race <- as.factor(urine_ma2$race)
+urine_ma2$male_female <- as.factor(urine_ma2$male_female)
+urine_ma2$age_band <- as.factor(urine_ma2$age_band)
+```
+\newpage
+
+# Explore MA data {.tabset .tabset-pills}
+## Plot Missing
+```{r}
+plot_missing(urine_ma2)
+```
+\newpage
+
+\newpage
+
+## Number of Papers in MA
+```{r}
+urine_ma2 %>%
+  summarise(
+    n = n_distinct(first_author)
+  ) %>%
+  gt() %>%
+  tab_header(
+    title = md("**Number of Studies**")
+  ) %>%
+  tab_options(
+    table.border.top.color = "white",
+    table.border.bottom.color = "white",
+    data_row.padding = px(8),
+    table.font.size = 14
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  )
+```
+\newpage
+
+
+## Table of Papers Included in Review
+```{r}
+urine_ma1 %>% 
+  arrange(year) %>%
+  drop_na(year) %>%
+  mutate(first_author = case_when(
+    and == "no" ~ paste0(first_author, ", ", year),
+    first_author == "HPFS" | first_author == "NHS" ~ first_author,
+    TRUE ~ paste0(first_author, " et al. ", year)
+  )) %>%
+  group_by(first_author) %>%
+  select(first_author,
+         stone_vs_no_stone,
+         underlying_cause,
+         other_demographic_variant,
+         mean_age,
+         age_sd,
+         total_n,
+         male_n,
+         female_n) %>% 
+  gt() %>%
+  gt_theme_espn() %>%
+  tab_header(
+    title = md("**Summary of Included Full Texts**")
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())
+  ) %>%
+  tab_options(
+    table.border.top.width = px(2),
+    table.border.bottom.width = px(2),
+    table.font.size = px(14),
+    data_row.padding = px(10)
+  )
+```
+\newpage
+
+## Table of Papers Included in Meta-analysis
+```{r}
+urine_ma2 %>% 
+  arrange(year) %>%
+  drop_na(year) %>%
+  mutate(first_author = case_when(
+    and == "no" ~ paste0(first_author, ", ", year),
+    first_author == "HPFS" | first_author == "NHS" ~ first_author,
+    TRUE ~ paste0(first_author, " et al. ", year)
+  )) %>%
+  group_by(first_author) %>%
+  select(stone_vs_no_stone,
+         underlying_cause,
+         other_demographic_variant,
+         first_author,
+         mean_age,
+         age_sd,
+         total_n,
+         male_n,
+         female_n) %>% 
+  gt() %>%
+  gt_theme_espn() %>%
+  tab_header(
+    title = md("**Summary of Papers included in Meta-Analysis**")
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())
+  ) %>%
+  tab_options(
+    table.border.top.width = px(2),
+    table.border.bottom.width = px(2),
+    table.font.size = px(14),
+    data_row.padding = px(10)
+  )
+```
+\newpage
+
+## Summary table of Included patients
+```{r}
+mean_age_summary <- urine_ma2 %>%
+  mutate(first_author = ifelse(
+    and == "no",
+    paste0(first_author, " et al. ", year),
+    paste0(first_author, ", ", year)
+  ))   %>% metamean(
+    n = total_n,
+    mean = mean_age,
+    sd = age_sd,
+    studlab = study_name
+  )
+
+urine_ma2 %>% 
+  arrange(year) %>%
+  mutate(first_author = ifelse(
+    and == "no",
+    paste0(first_author, " et al. ", year),
+    paste0(first_author, ", ", year)
+  )) %>%
+  select(total_n, male_n, female_n, first_author) %>%
+  summarise(
+    "Total Papers, n" = n_distinct(first_author),
+    "Total Patients, n" = sum(total_n, na.rm = TRUE),
+    "Male Patients, n" = sum(male_n, na.rm = TRUE),
+    "Female Patients, n" = sum(female_n, na.rm = TRUE),
+    "Mean Age, years ± SD" = paste0(
+      round(mean_age_summary$TE.random),
+      " ± ",
+      round(mean_age_summary$seTE.random)
+    )
+  ) %>%
+  gt() %>%
+  gt_theme_espn() %>%
+  tab_header(
+    title = md("**Summary of Included Studies for MA**"),
+    subtitle = "Only non kidney stone forming patients included in analysis"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(everything())
+  ) %>%
+  tab_options(
+    table.border.top.width = px(2),
+    table.border.bottom.width = px(2),
+    table.font.size = px(14),
+    data_row.padding = px(10)
+  ) %>%
+  tab_footnote(footnote = "Some studies only provided a total number of patients, rather than subdividing by sex",
+    locations = cells_column_labels(
+      columns = c("Male Patients, n", "Female Patients, n")
+    ),
+    placement = "right"
+  )
+
+```
+\newpage
+
+
+# Current Reference Ranges {.tabset .tabset-pills}
+## EAU
+<br>
+EAU Guidelines - Skolarikos, A., Geraghty, R., Somani, B., Tailly, T., Jung, H., Neisius, A., Petřík, A., Kamphuis, G.M., Davis, N., Bezuidenhout, C. and Lardas, M., 2025. European association of urology guidelines on the diagnosis and treatment of urolithiasis. European Urology, 88(1), pp.64-75. <br>
+```{r}
+current_ref_range1 <- as_tibble(
+  cbind(
+    "urine_component" = c("Volume (L / 24hrs)", #1
+                          "pH", #2
+                          "Creatinine (mmol / 24hrs) - Overall", #3
+                          "Creatinine (mmol / 24hrs) - Men Only", #4
+                          "Creatinine (mmol / 24hrs) - Women Only", #5
+                          "Calcium (mmol / 24hrs)", #6
+                          "Oxalate (mmol / 24hrs)", #7
+                          "Urate (mmol / 24hrs) - Overall", #8
+                          "Urate (mmol / 24hrs) - Men Only", #9
+                          "Urate (mmol / 24hrs) - Women Only", #10
+                          "Citrate (mmol / 24hrs) - Overall", #11
+                          "Citrate (mmol / 24hrs) - Men Only", #12
+                          "Citrate (mmol / 24hrs) - Women Only", #13
+                          "Phosphate (mmol / 24hrs)", #14
+                          "Sodium (mmol / 24hrs)", #15
+                          "Potassium (mmol / 24hrs)", #16
+                          "Magnesium (mmol / 24hrs)", #17
+                          "Ammonium (mmol / 24hrs)", #18
+                          "Chloride (mmol / 24hrs)", #19
+                          "Sulphate (mmol / 24hrs)", #20
+                          "Urea (mmol / 24hrs)"),
+    "lower_limit" = c(0.5, #1
+                      5.5, #2 
+                      NA, #3
+                      13, #4
+                      7, #5
+                      NA, #6
+                      NA, #7
+                      NA, #8
+                      NA, #9
+                      NA, #10
+                      NA, #11
+                      1.7, #12
+                      1.9, #13
+                      NA, #14
+                      NA, #15
+                      NA, #16
+                      3, #17
+                      NA, #18
+                      NA, #19
+                      NA, #20
+                      NA #21
+                      ),
+    "upper_limit" = c(NA,
+                      7,
+                      NA,
+                      18,
+                      13,
+                      8,
+                      0.5,
+                      NA,
+                      5,
+                      4,
+                      NA,
+                      NA,
+                      NA,
+                      35,
+                      NA,
+                      NA,
+                      NA,
+                      50,
+                      NA,
+                      NA,
+                      NA
+                      ),
+    "source" = "EAU"
+  )
+  )
+
+# EAU Guidelines - Skolarikos, A., Geraghty, R., Somani, B., Tailly, T., Jung, H., Neisius, A., Petřík, A., Kamphuis, G.M., Davis, N., Bezuidenhout, C. and Lardas, M., 2025. European association of urology guidelines on the diagnosis and treatment of urolithiasis. European Urology, 88(1), pp.64-75.
+# Date accessed 20/8/25
+```
+\newpage
+
+## NHS
+<br>
+References: 
+North Bristol NHS Trust & York (https://www.nbt.nhs.uk/severn-pathology/requesting/test-information?search=urine) <br>
+Scarborough NHS Trust (https://www.yorkhospitals.nhs.uk/our-services/organdonation/a-z-of-services/laboratory-medicine/test-directory/) <br>
+```{r}
+current_ref_range2 <- as_tibble(
+  cbind(
+    "urine_component" = c("Volume (L / 24hrs)", #1
+                          "pH", #2
+                          "Creatinine (mmol / 24hrs) - Overall", #3
+                          "Creatinine (mmol / 24hrs) - Men Only", #4
+                          "Creatinine (mmol / 24hrs) - Women Only", #5
+                          "Calcium (mmol / 24hrs)", #6
+                          "Oxalate (mmol / 24hrs)", #7
+                          "Urate (mmol / 24hrs) - Overall", #8
+                          "Urate (mmol / 24hrs) - Men Only", #9
+                          "Urate (mmol / 24hrs) - Women Only", #10
+                          "Citrate (mmol / 24hrs) - Overall", #11
+                          "Citrate (mmol / 24hrs) - Men Only", #12
+                          "Citrate (mmol / 24hrs) - Women Only", #13
+                          "Phosphate (mmol / 24hrs)", #14
+                          "Sodium (mmol / 24hrs)", #15
+                          "Potassium (mmol / 24hrs)", #16
+                          "Magnesium (mmol / 24hrs)", #17
+                          "Ammonium (mmol / 24hrs)", #18
+                          "Chloride (mmol / 24hrs)", #19
+                          "Sulphate (mmol / 24hrs)", #20
+                          "Urea (mmol / 24hrs)"),
+    "lower_limit" = c(NA,
+                      NA, 
+                      NA,
+                      9,
+                      6,
+                      2.5,
+                      0.1,
+                      1.5,
+                      NA,
+                      NA,
+                      0.6,
+                      NA,
+                      NA,
+                      15,
+                      40,
+                      25,
+                      2.4,
+                      NA,
+                      110,
+                      NA,
+                      250
+                      ),
+    "upper_limit" = c(3,
+                      NA,
+                      NA,
+                      19,
+                      13,
+                      7.5,
+                      0.46,
+                      4.5,
+                      NA,
+                      NA,
+                      4.8,
+                      NA,
+                      NA,
+                      50,
+                      250,
+                      125,
+                      6.5,
+                      NA,
+                      250,
+                      NA,
+                      570
+                      ),
+    "source" = "NHS" 
+    # North Bristol NHS Trust & York (https://www.nbt.nhs.uk/severn-pathology/requesting/test-information?search=urine) 
+    # / Scarborough NHS Trust (https://www.yorkhospitals.nhs.uk/our-services/organdonation/a-z-of-services/laboratory-medicine/test-directory/)
+  # Date accessed 20/8/25
+  )                  
+)
+```
+\newpage
+
+## Mayo Clinic
+<br>
+Reference: Mayo Clinic Laboratory - (https://www.mayocliniclabs.com/api/sitecore/TestCatalog/DownloadTestCatalog?testId=616228) <br>
+```{r}
+current_ref_range3 <- as_tibble(
+  cbind(
+    "urine_component" = c("Volume (L / 24hrs)", #1
+                          "pH", #2
+                          "Creatinine (mmol / 24hrs) - Overall", #3
+                          "Creatinine (mmol / 24hrs) - Men Only", #4
+                          "Creatinine (mmol / 24hrs) - Women Only", #5
+                          "Calcium (mmol / 24hrs)", #6
+                          "Oxalate (mmol / 24hrs)", #7
+                          "Urate (mmol / 24hrs) - Overall", #8
+                          "Urate (mmol / 24hrs) - Men Only", #9
+                          "Urate (mmol / 24hrs) - Women Only", #10
+                          "Citrate (mmol / 24hrs) - Overall", #11
+                          "Citrate (mmol / 24hrs) - Men Only", #12
+                          "Citrate (mmol / 24hrs) - Women Only", #13
+                          "Phosphate (mmol / 24hrs)", #14
+                          "Sodium (mmol / 24hrs)", #15
+                          "Potassium (mmol / 24hrs)", #16
+                          "Magnesium (mmol / 24hrs)", #17
+                          "Ammonium (mmol / 24hrs)", #18
+                          "Chloride (mmol / 24hrs)", #19
+                          "Sulphate (mmol / 24hrs)", #20
+                          "Urea (mmol / 24hrs)"),
+    "lower_limit" = c(NA,
+                      4.5, 
+                      NA,
+                      930 / 113.12, #convert mg/24h to mmol/24h - MW of creatinine = 113.12
+                      603 / 113.12,
+                      NA,
+                      0.11,
+                      NA,
+                      200 / 168.11,
+                      250 / 168.11,
+                      242 / 192.1,
+                      NA,
+                      NA,
+                      226 /  30.97, # 14
+                      22,
+                      16,
+                      51 / 24.3,
+                      15, 
+                      34,
+                      7,
+                      7/(28.013 * 2) * 1000 # Urea Nitrogen - multiple MW of Nitrogen by 2 then multiply by 1000 to convert from g/24h to mmol/24h
+                      ),
+    "upper_limit" = c(NA,
+                      8,  
+                      NA,
+                      2955 / 113.12,
+                      1783 / 113.12,
+                      200 / 40.08,
+                      0.46,
+                      NA,
+                      1000 / 168.11,
+                      750 / 168.11,
+                      1191/192.1,
+                      NA,
+                      NA,
+                      1797 / 30.97, #14 MW PO4 = 94.97 P = 30.97
+                      328,
+                      105,
+                      105 / 24.3,
+                      56, 
+                      286,
+                      47,
+                      42 / (28.013 * 2) * 1000 
+                      ),
+    "source" = "Mayo Clinic" 
+  # Mayo Clinic Laboratory - (https://www.mayocliniclabs.com/api/sitecore/TestCatalog/DownloadTestCatalog?testId=616228)
+    # Date accessed 20/8/25
+  )
+)
+```
+\newpage
+
+## Litholink
+<br>
+Reference: https://litholink.labcorp.com/testing/sample-reports <br>
+```{r}
+current_ref_range4 <- as_tibble(
+  cbind(
+    "urine_component" = c("Volume (L / 24hrs)", #1
+                          "pH", #2
+                          "Creatinine (mmol / 24hrs) - Overall", #3
+                          "Creatinine (mmol / 24hrs) - Men Only", #4
+                          "Creatinine (mmol / 24hrs) - Women Only", #5
+                          "Calcium (mmol / 24hrs)", #6
+                          "Oxalate (mmol / 24hrs)", #7
+                          "Urate (mmol / 24hrs) - Overall", #8
+                          "Urate (mmol / 24hrs) - Men Only", #9
+                          "Urate (mmol / 24hrs) - Women Only", #10
+                          "Citrate (mmol / 24hrs) - Overall", #11
+                          "Citrate (mmol / 24hrs) - Men Only", #12
+                          "Citrate (mmol / 24hrs) - Women Only", #13
+                          "Phosphate (mmol / 24hrs)", #14
+                          "Sodium (mmol / 24hrs)", #15
+                          "Potassium (mmol / 24hrs)", #16
+                          "Magnesium (mmol / 24hrs)", #17
+                          "Ammonium (mmol / 24hrs)", #18
+                          "Chloride (mmol / 24hrs)", #19
+                          "Sulphate (mmol / 24hrs)", #20
+                          "Urea (mmol / 24hrs)"), #21
+    "lower_limit" = c(0.5, #1
+                      5.8,  #2
+                      NA, #3
+                      18 * 80 / 113.12, #Assume 80kg man convert, mg/24h to mmol/24h - MW of creat = 113.12  #4
+                      15 * 70 / 113.12, # Assume 70kg woman  #5
+                      NA, # 6
+                      20 / 88.02, #7
+                      NA, #8
+                      NA, #9
+                      NA, #10
+                      NA, #11
+                      450 / 192.12, #12
+                      550 / 192.12, #13
+                      0.6 / 30.97 * 1000, #14
+                      50, #15
+                      20, #16
+                      30 / 24.3, #17
+                      15, #18
+                      70, #19
+                      10, #20
+                      6/(28.013) * 1000  #21
+                      ),
+    "upper_limit" = c(4, #1
+                      6.2, #2
+                      NA, #3
+                      24 * 80 / 113.12, #4
+                      20 * 70 / 113.12, #5
+                      200 / 40.08, #6
+                      40 / 88.02, #7
+                      0.75 / 116.11 * 1000, #8
+                      NA, #9
+                      NA, #10
+                      NA, #11
+                      NA, #12
+                      NA, #13
+                      1.2 / 30.97 * 1000, #14
+                      150, #15
+                      100, #16
+                      120 / 24.3, #17
+                      60, #18
+                      250, #19
+                      40, #20
+                      14 / (28.013) * 1000  #21
+                      ),
+    "source" = "Litholink" 
+  # https://litholink.labcorp.com/testing/sample-reports
+    # Date accessed 22/8/25
+  )
+)
+```
+\newpage
+
+## Northern District Hospital (NDH), Hong Kong
+<br>
+Reference: https://litholink.labcorp.com/testing/sample-reports <br>
+```{r}
+current_ref_range5 <- as_tibble(
+  cbind(
+    "urine_component" = c("Volume (L / 24hrs)", #1
+                          "pH", #2
+                          "Creatinine (mmol / 24hrs) - Overall", #3
+                          "Creatinine (mmol / 24hrs) - Men Only", #4
+                          "Creatinine (mmol / 24hrs) - Women Only", #5
+                          "Calcium (mmol / 24hrs)", #6
+                          "Oxalate (mmol / 24hrs)", #7
+                          "Urate (mmol / 24hrs) - Overall", #8
+                          "Urate (mmol / 24hrs) - Men Only", #9
+                          "Urate (mmol / 24hrs) - Women Only", #10
+                          "Citrate (mmol / 24hrs) - Overall", #11
+                          "Citrate (mmol / 24hrs) - Men Only", #12
+                          "Citrate (mmol / 24hrs) - Women Only", #13
+                          "Phosphate (mmol / 24hrs)", #14
+                          "Sodium (mmol / 24hrs)", #15
+                          "Potassium (mmol / 24hrs)", #16
+                          "Magnesium (mmol / 24hrs)", #17
+                          "Ammonium (mmol / 24hrs)", #18
+                          "Chloride (mmol / 24hrs)", #19
+                          "Sulphate (mmol / 24hrs)", #20
+                          "Urea (mmol / 24hrs)"), #21
+    "lower_limit" = c(NA, #1
+                      4.5,  #2
+                      NA, #3
+                      7.1,  #4
+                      5.3,   #5
+                      2, # 6
+                      NA, #7
+                      1.5, #8
+                      NA, #9
+                      NA, #10
+                      NA, #11
+                      NA, #12
+                      NA, #13
+                      12.9, #14
+                      40, #15
+                      25, #16
+                      NA, #17
+                      NA, #18
+                      110, #19
+                      NA, #20
+                      250  #21
+                      ),
+    "upper_limit" = c(NA, #1
+                      8, #2
+                      NA, #3
+                      17.7, #4
+                      15.9, #5
+                      7.4, #6
+                      NA, #7
+                      4.5, #8
+                      NA, #9
+                      NA, #10
+                      NA, #11
+                      NA, #12
+                      NA, #13
+                      42, #14
+                      220, #15
+                      125, #16
+                      NA, #17
+                      NA, #18
+                      250, #19
+                      NA, #20
+                      4.5  #21
+                      ),
+    "source" = "NDH" 
+  # Northern District Hospital, Hong Kong
+    # Date accessed 8/9/25
+  )
+)
+```
+\newpage
+
+## Combine Current Reference ranges
+```{r}
+current_ref_range <- rbind(current_ref_range1,
+                           current_ref_range2,
+                           current_ref_range3,
+                           current_ref_range4,
+                           current_ref_range5) %>% as_tibble()
+
+current_ref_range$source <- as.factor(current_ref_range$source)
+current_ref_range$lower_limit <- as.numeric(current_ref_range$lower_limit)
+current_ref_range$upper_limit <- as.numeric(current_ref_range$upper_limit)
+```
+\newpage
+
+## Visualise current reference ranges
+```{r}
+current_ref_plot_data <- current_ref_range %>%
+  # Filter out rows where both limits are missing
+  filter(!is.na(lower_limit) | !is.na(upper_limit)) %>%
+  mutate(
+    # Determine the type of limit
+    limit_type = case_when(
+      !is.na(lower_limit) & !is.na(upper_limit) ~ "range",
+      !is.na(lower_limit) & is.na(upper_limit) ~ "lower_only", 
+      is.na(lower_limit) & !is.na(upper_limit) ~ "upper_only"
+    ),
+    # Clean up component names
+    urine_component = case_when(
+      urine_component == "creatinine_overall" ~ "Creatinine (Overall)",
+      urine_component == "creatinine_men" ~ "Creatinine (Men)",  
+      urine_component == "creatinine_women" ~ "Creatinine (Women)",
+      urine_component == "volume" ~ "Volume",
+      urine_component == "ph" ~ "pH",
+      TRUE ~ str_to_title(gsub("_", " ", urine_component))
+    ),
+    # Create display value for ordering (use available limit)
+    display_value = case_when(
+      limit_type == "range" ~ (lower_limit + upper_limit) / 2,
+      limit_type == "lower_only" ~ lower_limit,
+      limit_type == "upper_only" ~ upper_limit
+    )
+  )
+
+# Create source ordering based on overall display values
+source_order <- current_ref_plot_data %>%
+  group_by(source) %>%
+  summarise(avg_display = mean(display_value, na.rm = TRUE)) %>%
+  arrange(avg_display) %>%
+  pull(source)
+
+# Apply ordering
+current_ref_plot_data <- current_ref_plot_data %>%
+  mutate(source = factor(source, levels = source_order))
+
+# Create the forest plot with faceting by urine_component
+forest_plot_current_ref_ranges <- current_ref_plot_data %>%
+  ggplot(aes(y = source, color = source)) +
+  
+  # Two-sided ranges (traditional error bars)
+  geom_errorbarh(data = filter(current_ref_plot_data, limit_type == "range"),
+                 aes(xmin = lower_limit, xmax = upper_limit), 
+                 height = 0.3, size = 1.2) +
+  
+  # Points for midpoint of ranges
+  geom_point(data = filter(current_ref_plot_data, limit_type == "range"),
+             aes(x = display_value), size = 0) +
+  
+  # Lower limit only - left arrow
+  geom_segment(data = filter(current_ref_plot_data, limit_type == "lower_only"),
+               aes(x = lower_limit * 0.8, xend = lower_limit, 
+                   y = source, yend = source),
+               arrow = arrow(length = unit(0.01, "cm"), type = "closed", ends = "last"),
+               size = 1.2) +
+  
+  # Upper limit only - right arrow  
+  geom_segment(data = filter(current_ref_plot_data, limit_type == "upper_only"),
+               aes(x = upper_limit, xend = upper_limit * 1.2,
+                   y = source, yend = source), 
+               arrow = arrow(length = unit(0.01, "cm"), type = "closed", ends = "first"),
+               size = 1.2) +
+  
+  # Points for one-sided limits
+  geom_point(data = filter(current_ref_plot_data, limit_type %in% c("lower_only", "upper_only")),
+             aes(x = display_value), size = 0) +
+  
+  # Text labels for ranges
+  geom_text(data = filter(current_ref_plot_data, limit_type == "range"),
+            aes(x = upper_limit * 1.1, 
+                label = paste0("[", round(lower_limit, 1), " - ", round(upper_limit, 1), "]")),
+            size = 2.5, hjust = 0, color = "gray30") +
+  
+  # Text labels for lower only
+  geom_text(data = filter(current_ref_plot_data, limit_type == "lower_only"),
+            aes(x = lower_limit * 1.1, 
+                label = paste0("> ", round(lower_limit, 1))),
+            size = 2.5, hjust = 0, color = "gray30") +
+  
+  # Text labels for upper only  
+  geom_text(data = filter(current_ref_plot_data, limit_type == "upper_only"),
+            aes(x = upper_limit * 1.1,
+                label = paste0("< ", round(upper_limit, 1))),
+            size = 2.5, hjust = 0, color = "gray30") +
+  
+  # Facet by urine_component
+  facet_wrap(~ urine_component, ncol = 2, scales = "free_x") +
+  
+  # Formatting
+  labs(title = "Current Reference Ranges for 24-Hour Urine Components",
+       subtitle = "Comparison across clinical guidelines (arrows indicate one-sided limits)",
+       x = "Reference Values (Log Scale)", 
+       y = "Source",
+       color = "Source",
+       caption = "Arrows (←) indicate 'greater than' limits; Arrows (→) indicate 'less than' limits") +
+  
+  # Use log scale
+  scale_x_log10(labels = scales::label_comma(),
+                n.breaks = 10,
+                limits = c(0.08, 350)) + 
+  
+  # Color scheme
+  scale_color_manual(values = c("EAU" = "orange", 
+                               "Mayo Clinic" = "black", 
+                               "NHS" = "darkblue",
+                               "Litholink" = "cyan2")) +
+  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 12, color = "gray60"),
+    plot.caption = element_text(size = 9, color = "gray60", hjust = 0.5),
+    axis.title = element_text(size = 12),
+    axis.text.y = element_text(size = 9),
+    axis.text.x = element_text(size = 8),
+    legend.position = "none",  # Remove legend since colors identify sources
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(size = 11, face = "bold"),
+    plot.margin = margin(5.5, 80, 5.5, 5.5, "pt")
+  )
+
+forest_plot_current_ref_ranges
+```
+\newpage
+
+## Tabulate Current Reference ranges
+```{r}
+summary_table_data <- current_ref_plot_data %>%
+  select(urine_component, source, lower_limit, upper_limit, limit_type) %>%
+  mutate(
+    # Create formatted range column
+    range_text = case_when(
+      limit_type == "range" ~ paste0(round(lower_limit, 1), " - ", round(upper_limit, 1)),
+      limit_type == "lower_only" ~ paste0("> ", round(lower_limit, 1)),
+      limit_type == "upper_only" ~ paste0("< ", round(upper_limit, 1))
+    )
+  ) %>%
+  select(urine_component, source, range_text) %>%
+  pivot_wider(names_from = source, values_from = range_text)
+
+summary_table <- summary_table_data %>%
+  gt() %>%
+  tab_header(
+    title = md("**Current Reference Ranges for 24-Hour Urine Components**"),
+    subtitle = "Comparison across clinical guidelines"
+  ) %>%
+  cols_label(
+    urine_component = "Urine Component"
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = urine_component)
+  ) %>%
+  tab_options(
+    table.font.size = px(12),
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(13),
+    column_labels.font.weight = "bold",
+    row_group.font.weight = "bold"
+  ) %>%
+  tab_source_note(
+    source_note = md("*Note: '>' indicates lower limit only; '<' indicates upper limit only*")
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = -urine_component
+  ) %>%
+  cols_align(
+    align = "left",
+    columns = urine_component
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#f0f0f0"),
+    locations = cells_body(rows = seq(2, nrow(summary_table_data), 2))
+  )
+
+summary_table
+```
+\newpage
+
+# Flow Diagram detailing Decision Making {.tabset .tabset-pills}
+```{r, out.width="80%", fig.align="center", fig.cap="Figure 1. Flow Diagram detailing Decision making. MA = Meta-analysis"}
+knitr::include_graphics("MA result flow diagram.pdf")
+```
+\newpage
+
+# Functions {.tabset .tabset-pills}
+### Main MA Helper Function
+```{r}
+urine_components = c("volume",
+                     "ph",
+                     "creat",
+                     "calcium",
+                     "oxalate",
+                     "urate",
+                     "citrate",
+                     "phosphate",
+                     "sodium",
+                     "potassium",
+                     "magnesium",
+                     "ammonium",
+                     "chloride",
+                     "sulphate",
+                     "urea")
+
+age_bands <- levels(urine_ma2$age_band)
+
+main_ma <- function(urine_component, 
+                    data = urine_ma2) {
+  
+  
+  # --- 1. Identify mean and SD columns -----------
+  mean_colname <- dplyr::case_when(
+    urine_component == "volume" ~ "volume_mean_m_l",
+    urine_component == "ph"     ~ "ph_mean",
+    urine_component == "creat"  ~ "creatinine_mean_mmol_24h",
+    TRUE                        ~ paste0(urine_component, "_mean_mmol_24h")
+  )
+  sd_colname <- dplyr::case_when(
+    urine_component == "volume" ~ "volume_sd_m_l",
+    urine_component == "ph"     ~ "ph_sd",
+    urine_component == "creat"  ~ "creatinine_sd_mmol_24h",
+    TRUE                        ~ paste0(urine_component, "_sd_mmol_24h")
+  )
+
+  urine_component_for_title <- dplyr::case_when(
+    urine_component == "volume" ~ "Volume (L/24h)",
+    urine_component == "ph" ~ "pH",
+    urine_component == "creat" ~ "Creatinine (mmol/24h)",
+    TRUE ~ paste0(str_to_title(urine_component), " (mmol/24h)")
+  )
+
+  # --- 2. Prepare data -----------
+  data1 <- data %>%
+    dplyr::select(study_name, total_n,
+                  mean_col = all_of(mean_colname),
+                  sd_col = all_of(sd_colname)) %>%
+    tidyr::drop_na(mean_col, sd_col) %>%
+    dplyr::arrange(mean_col)
+
+  # Convert volume to log-normal
+  if (urine_component == "volume") {
+    data1 <- data1 %>%
+      dplyr::mutate(
+        mean_raw = mean_col,
+        sd_raw = sd_col,
+        mean_col = log(mean_raw^2 / sqrt(sd_raw^2 + mean_raw^2)),
+        sd_col = sqrt(log(1 + (sd_raw^2 / mean_raw^2)))
+      ) %>%
+      dplyr::select(-mean_raw, -sd_raw)
+  }
+  
+  # Run meta-analysis
+  ma_result <- metamean(
+    n = data1$total_n,
+    mean = data1$mean_col,
+    sd   = data1$sd_col,
+    studlab = data1$study_name
+  )
+  
+  # Extract pooled results
+  k <- ma_result$k
+  
+  if (k == 1) {
+    model_utilised <- "Single study"
+    pooled_estimate <- ma_result$TE
+    pooled_sd <- ma_result$seTE * sqrt(sum(data1$total_n))
+    I2_value <- NA
+    Q_value <- NA
+    Q_pval <- NA
+  } else {
+    model_utilised <- if (ma_result$I2 > 0.2) "Random" else "Fixed"
+    pooled_estimate <- if (ma_result$I2 > 0.2) ma_result$TE.random else ma_result$TE.common
+    pooled_sd <- if (ma_result$I2 > 0.2) ma_result$tau else ma_result$seTE.common * sqrt(sum(data1$total_n))
+    I2_value <- ma_result$I2
+    Q_value <- ma_result$Q
+    Q_pval <- ma_result$pval.Q
+  }
+  
+  # Create summary tibble
+  summary <- tibble(
+    urine_component = urine_component,
+    sex_group = "all",
+    age_band = "overall",
+    total_participants = sum(data1$total_n),
+    n_studies = k,
+    pooled_estimate = pooled_estimate,
+    pooled_sd = pooled_sd,
+    I2 = I2_value,
+    Q = Q_value,
+    Q_pval = Q_pval,
+    model_utilised = model_utilised
+  )
+  
+  # Back-transform volume results if needed
+  if (urine_component == "volume") {
+    summary <- summary %>%
+      mutate(
+        lower_95 = exp(pooled_estimate - 1.96 * pooled_sd) / 1000,
+        upper_95 = exp(pooled_estimate + 1.96 * pooled_sd) / 1000,
+        pooled_estimate = exp(pooled_estimate) / 1000
+      )
+  } else {
+    summary <- summary %>%
+      mutate(
+        lower_95 = pooled_estimate - 1.96 * pooled_sd,
+        upper_95 = pooled_estimate + 1.96 * pooled_sd
+      )
+  }
+  
+  return(summary)
+}
+```
+\newpage
+
+### Single MA Helper function
+```{r}
+run_single_ma <- function(data1, urine_component, sex, age) {
+  
+  # Volume → convert to log-normal parameters
+  if (urine_component == "volume") {
+    data1 <- data1 %>%
+      mutate(
+        mean_raw = mean_col,
+        sd_raw   = sd_col,
+        mean_col = log(mean_raw^2 / sqrt(sd_raw^2 + mean_raw^2)),
+        sd_col   = sqrt(log(1 + (sd_raw^2 / mean_raw^2)))
+      ) %>%
+      select(-mean_raw, -sd_raw)
+  }
+  
+  # Run meta-analysis
+  ma_result <- metamean(
+    n = data1$total_n,
+    mean = data1$mean_col,
+    sd   = data1$sd_col,
+    studlab = data1$study_name
+  )
+  
+  # Extract pooled results
+  k <- ma_result$k
+  
+  if (k == 1) {
+    model_utilised <- "Single study"
+    pooled_estimate <- ma_result$TE
+    pooled_sd <- ma_result$seTE * sqrt(sum(data1$total_n))
+    I2_value <- NA
+    Q_value <- NA
+    Q_pval <- NA
+  } else {
+    model_utilised <- if (ma_result$I2 > 0.2) "Random" else "Fixed"
+    pooled_estimate <- if (ma_result$I2 > 0.2) ma_result$TE.random else ma_result$TE.common
+    pooled_sd <- if (ma_result$I2 > 0.2) ma_result$tau else ma_result$seTE.common * sqrt(sum(data1$total_n))
+    I2_value <- ma_result$I2
+    Q_value <- ma_result$Q
+    Q_pval <- ma_result$pval.Q
+  }
+  
+  # Create summary tibble
+  summary <- tibble(
+    urine_component = urine_component,
+    sex_group = sex,
+    age_band = age,
+    total_participants = sum(data1$total_n),
+    n_studies = k,
+    pooled_estimate = pooled_estimate,
+    pooled_sd = pooled_sd,
+    I2 = I2_value,
+    Q = Q_value,
+    Q_pval = Q_pval,
+    model_utilised = model_utilised
+  )
+  
+  # Back-transform volume results if needed
+  if (urine_component == "volume") {
+    summary <- summary %>%
+      mutate(
+        lower_95 = exp(pooled_estimate - 1.96 * pooled_sd) / 1000,
+        upper_95 = exp(pooled_estimate + 1.96 * pooled_sd) / 1000,
+        pooled_estimate = exp(pooled_estimate) / 1000
+      )
+  } else {
+    summary <- summary %>%
+      mutate(
+        lower_95 = pooled_estimate - 1.96 * pooled_sd,
+        upper_95 = pooled_estimate + 1.96 * pooled_sd
+      )
+  }
+  
+  return(summary)
+}
+```
+\newpage
+
+### Meta-Regression function
+```{r}
+urine_ma2_for_meta_reg <- urine_ma2_for_meta_reg <- urine_ma2 %>%
+  left_join(overall_bias,
+            by = c("study_name"="study"))
+
+meta_regression <- function(data_subset = "none",
+                            data = urine_ma2_for_meta_reg,
+                            urine_component = "volume") {
+  
+  # --- 1. Determine correct column names ------------------------------------
+  mean_colname <- dplyr::case_when(
+    urine_component == "volume" ~ "volume_mean_m_l",
+    urine_component == "ph" ~ "ph_mean",
+    urine_component == "creat" ~ "creatinine_mean_mmol_24h",
+    TRUE ~ paste0(urine_component, "_mean_mmol_24h")
+  )
+  
+  sd_colname <- dplyr::case_when(
+    urine_component == "volume" ~ "volume_sd_m_l",
+    urine_component == "ph" ~ "ph_sd",
+    urine_component == "creat" ~ "creatinine_sd_mmol_24h",
+    TRUE ~ paste0(urine_component, "_sd_mmol_24h")
+  )
+  
+  sex_group_name <- case_when(
+    data_subset == "none" ~ "main meta-analysis",
+    data_subset == "male" ~ "male",
+    data_subset == "female" ~ "female",
+    TRUE ~ NA_character_
+  )
+  
+  # --- 2. Build dataset -------------------------------------------------------
+  if (data_subset == "none") {
+    data1 <- data %>%
+      dplyr::select(
+        study_name, age_band, total_n, male_female, female_n, race,
+        restricted_diet, mean = dplyr::all_of(mean_colname),
+        sd   = dplyr::all_of(sd_colname),
+        overall  
+      ) %>%
+      dplyr::mutate(
+        women_prop = dplyr::case_when(
+          male_female == "female" ~ female_n / total_n,
+          male_female == "male" ~ 0,
+          male_female == "mixed" & !is.na(female_n) ~ female_n / total_n,
+          male_female == "mixed" & is.na(female_n) ~ 0.5,
+          TRUE ~ NA_real_
+        ),
+        women_prop_c = women_prop - mean(women_prop, na.rm = TRUE),
+        total_n_c = total_n - mean(total_n, na.rm = TRUE)
+      ) %>%
+      tidyr::drop_na(mean, sd, women_prop_c, overall)
+  } else {
+    data1 <- data %>%
+      dplyr::filter(male_female == data_subset) %>%
+      dplyr::select(
+        study_name, age_band, total_n, male_female, female_n, race,
+        restricted_diet, mean = dplyr::all_of(mean_colname),
+        sd   = dplyr::all_of(sd_colname),
+        overall  
+      ) %>%
+      dplyr::mutate(
+        women_prop = dplyr::case_when(
+          data_subset == "female" ~ 1,
+          data_subset == "male" ~ 0,
+          male_female == "mixed" & !is.na(female_n) ~ female_n / total_n,
+          male_female == "mixed" & is.na(female_n) ~ 0.5,
+          TRUE ~ NA_real_
+        ),
+        women_prop_c = women_prop - mean(women_prop, na.rm = TRUE),
+        total_n_c = total_n - mean(total_n, na.rm = TRUE)
+      ) %>%
+      tidyr::drop_na(mean, sd, women_prop_c, overall)
+  }
+  
+  # --- 3. Meta-analysis -------------------------------------------------------
+  if (urine_component == "volume"){
+    data1 <- data1 %>%
+      mutate(
+        mean_raw = mean,
+        sd_raw = sd,
+        mean = log(mean_raw^2 / sqrt(sd_raw^2 + mean_raw^2)),
+        sd = sqrt(log(1 + (sd_raw^2 / mean_raw^2)))
+      ) %>%
+      dplyr::select(-mean_raw, -sd_raw)
+    
+  ma_result <- metamean(
+    n = data1$total_n,
+    mean = data1$mean,
+    sd = data1$sd,
+    studlab = data1$study_name,
+    data = data1,
+    sm = "MRAW",
+    method.tau = "REML",
+    method.random.ci = "HK"
+  )}
+  else {
+    ma_result <- metamean(
+    n = data1$total_n,
+    mean = data1$mean,
+    sd = data1$sd,
+    studlab = data1$study_name,
+    data = data1,
+    sm = "MRAW",
+    method.tau = "REML",
+    method.random.ci = "HK"
+  )
+  }
+  
+  k <- ma_result$k
+  n_total <- sum(data1$total_n)
+
+  predictors <- c("women_prop_c", "age_band", "race", "overall", "total_n_c")
+  p <- length(predictors)
+  
+  # --- 4. Format output helper ------------------------------------------------
+  format_output <- function(tbl, model_type) {
+    tbl %>%
+      dplyr::transmute(
+        term = term,
+        type = gsub("_c$", "", predictor %||% term),
+        estimate = estimate,
+        std.error = std.error,
+        statistic = statistic,
+        p.value = p.value,
+        model_type = model_type,
+        k = k,
+        n = n_total
+      )
+  }
+  
+  # --- 5. Multivariable model if feasible ------------------------------------
+  if (k > (p + 1)) {
+    model <- metareg(
+      ma_result,
+      formula = as.formula(paste("~", paste(predictors, collapse = " + "))),
+      intercept = TRUE,
+      method.tau = "REML"
+    )
+    
+    tbl <- broom::tidy(model)
+    tbl$predictor <- tbl$term
+    
+    if (urine_component == "volume") {
+      tbl1 <- tbl %>%
+        filter(term == "intercept") %>%  
+        mutate(
+          urine_component = urine_component,
+          sex_group = sex_group_name,
+          age_band = "Meta-Regression",
+          n_studies = k,
+          total_participants = sum(ma_result$n),
+          I2 = model$I2 / 100,
+          Q = model$QE,
+          Q_pval = model$QEp,
+          model_utilised = "Multivariable",
+          pooled_estimate = estimate,  
+          pooled_sd = case_when(
+            model$tau2 > 0 ~ sqrt(model$tau2),
+            TRUE ~ sqrt(mean(data1$sd^2) + model$tau2)),   
+          lower_95 = exp(pooled_estimate - (1.96 * pooled_sd)) / 1000,  
+          upper_95 = exp(pooled_estimate + (1.96 * pooled_sd)) / 1000,
+          pooled_estimate = exp(estimate) / 1000
+        ) %>%
+        select(urine_component,
+               sex_group,
+               age_band,
+               total_participants,
+               n_studies,
+               pooled_estimate,
+               pooled_sd,
+               I2,
+               Q,
+               Q_pval,
+               model_utilised,
+               lower_95,
+               upper_95)
+    } else {
+      tbl1 <- tbl %>%
+        filter(term == "intercept") %>%  
+        mutate(
+          urine_component = urine_component,
+          sex_group = sex_group_name,
+          age_band = "Meta-Regression",
+          n_studies = k,
+          total_participants = sum(ma_result$n),
+          I2 = model$I2 / 100,
+          Q = model$QE,
+          Q_pval = model$QEp,
+          model_utilised = "Multivariable",
+          pooled_estimate = estimate,
+          pooled_sd = case_when(
+            model$tau2 > 0 ~ sqrt(model$tau2),
+            TRUE ~ sqrt(mean(data1$sd^2) + model$tau2)),
+          lower_95 = pooled_estimate - 1.96 * pooled_sd,
+          upper_95 = pooled_estimate + 1.96 * pooled_sd
+        ) %>%
+        select(urine_component,
+               sex_group,
+               age_band,
+               total_participants,
+               n_studies,
+               pooled_estimate,
+               pooled_sd,
+               I2,
+               Q,
+               Q_pval,
+               model_utilised,
+               lower_95,
+               upper_95)
+    }
+    
+    return(tbl1)
+  }
+  
+  message(
+    paste0("Not enough studies for multivariable meta-regression (k = ", 
+           k, ", need > ", p + 1, "). Running univariable models instead.")
+  )
+  
+  # --- 6. Helper to count parameters -----------------------------------------
+  param_count <- function(var) {
+    x <- data1[[var]]
+    if (is.numeric(x)) return(2) # intercept + slope
+    return(length(unique(x[!is.na(x)])))
+  }
+  
+  # --- 7. Run univariable models ---------------------------------------------
+  first_model <- NULL
+  
+  results <- purrr::map_df(predictors, function(pred) {
+    needed <- param_count(pred)
+    
+    if (needed >= k) {
+      return(tibble::tibble(
+        term = pred,
+        type = pred,
+        estimate = NA_real_,
+        std.error = NA_real_,
+        statistic = NA_real_,
+        p.value = NA_real_,
+        model_type = "univariable_skipped",
+        k = k,
+        n = n_total
+      ))
+    }
+    
+    model <- tryCatch(
+      metareg(ma_result, as.formula(paste("~", pred)),
+              intercept = TRUE,
+              method.tau = "REML"),
+      error = function(e) NULL
+    )
+    
+    if (is.null(model)) {
+      return(tibble::tibble(
+        term = pred,
+        type = pred,
+        estimate = NA_real_,
+        std.error = NA_real_,
+        statistic = NA_real_,
+        p.value = NA_real_,
+        model_type = "univariable_error",
+        k = k,
+        n = n_total
+      ))
+    }
+    
+    # Såtore first successful model
+    if (is.null(first_model)) {
+      first_model <<- model
+    }
+    
+    tbl <- broom::tidy(model)
+    tbl$predictor <- pred
+    format_output(tbl, model_type = "Univariable")
+  })
+  
+  # Check if we have a valid model before proceeding
+  if (is.null(first_model)) {
+    warning("No successful univariable models were fit")
+    return(NULL)
+  }
+  
+  if (urine_component == "volume") {
+    results <- results %>%
+      filter(term == "intercept") %>%  
+      slice_head(n = 1) %>%
+      mutate(
+        urine_component = urine_component,
+        sex_group = sex_group_name,
+        age_band = "Meta-Regression",
+        total_participants = sum(ma_result$n),
+        pooled_estimate = estimate,  
+        pooled_sd = case_when(
+            first_model$tau2 > 0 ~ sqrt(first_model$tau2),
+            TRUE ~ sqrt(mean(data1$sd^2) + model$tau2)),   
+        n_studies = k,
+        I2 = first_model$I2 / 100,
+        Q = first_model$QE,
+        Q_pval = first_model$QEp,
+        model_utilised = "Univariable",
+        lower_95 = exp(pooled_estimate - (1.96 * pooled_sd)) / 1000,  
+        upper_95 = exp(pooled_estimate + (1.96 * pooled_sd)) / 1000,
+        pooled_estimate = exp(estimate) / 1000   
+      ) %>%
+      select(urine_component,
+             sex_group,
+             age_band,
+             total_participants,
+             n_studies,
+             pooled_estimate,
+             pooled_sd,
+             I2,
+             Q,
+             Q_pval,
+             model_utilised,
+             lower_95,
+             upper_95)
+  } else {
+    results <- results %>%
+      filter(term == "intercept") %>%  
+      slice_head(n = 1) %>%
+      mutate(
+        urine_component = urine_component,
+        sex_group = sex_group_name,
+        age_band = "Meta-Regression",
+        total_participants = sum(ma_result$n),
+        pooled_estimate = estimate,
+        pooled_sd = case_when(
+            first_model$tau2 > 0 ~ sqrt(first_model$tau2),
+            TRUE ~ sqrt(mean(data1$sd^2) + first_model$tau2)),  
+        n_studies = k,
+        I2 = first_model$I2 / 100,
+        Q = first_model$QE,
+        Q_pval = first_model$QEp,
+        model_utilised = "Univariable",
+        lower_95 = pooled_estimate - (1.96 * pooled_sd),
+        upper_95 = pooled_estimate + (1.96 * pooled_sd)
+      ) %>%
+      select(urine_component,
+             sex_group,
+             age_band,
+             total_participants,
+             n_studies,
+             pooled_estimate,
+             pooled_sd,
+             I2,
+             Q,
+             Q_pval,
+             model_utilised,
+             lower_95,
+             upper_95)
+  }
+  
+  return(results)
+}
+```
+
+
+### Reduce I² in Main MA by removing outlying studies
+```{r}
+main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
+
+  # --- 1. Identify mean and SD columns -----------
+  mean_colname <- dplyr::case_when(
+    urine_component == "volume" ~ "volume_mean_m_l",
+    urine_component == "ph"     ~ "ph_mean",
+    urine_component == "creat"  ~ "creatinine_mean_mmol_24h",
+    TRUE                        ~ paste0(urine_component, "_mean_mmol_24h")
+  )
+  sd_colname <- dplyr::case_when(
+    urine_component == "volume" ~ "volume_sd_m_l",
+    urine_component == "ph"     ~ "ph_sd",
+    urine_component == "creat"  ~ "creatinine_sd_mmol_24h",
+    TRUE                        ~ paste0(urine_component, "_sd_mmol_24h")
+  )
+
+  urine_component_for_title <- dplyr::case_when(
+    urine_component == "volume" ~ "Volume (L/24h)",
+    urine_component == "ph" ~ "pH",
+    urine_component == "creat" ~ "Creatinine (mmol/24h)",
+    TRUE ~ paste0(str_to_title(urine_component), " (mmol/24h)")
+  )
+
+  # --- 2. Prepare data -----------
+  data_iter <- data %>%
+    dplyr::select(study_name, total_n,
+                  mean_col = all_of(mean_colname),
+                  sd_col = all_of(sd_colname)) %>%
+    tidyr::drop_na(mean_col, sd_col) %>%
+    dplyr::arrange(mean_col)
+
+  # Convert volume to log-normal
+  if (urine_component == "volume") {
+    data_iter <- data_iter %>%
+      dplyr::mutate(
+        mean_raw = mean_col,
+        sd_raw = sd_col,
+        mean_col = log(mean_raw^2 / sqrt(sd_raw^2 + mean_raw^2)),
+        sd_col = sqrt(log(1 + (sd_raw^2 / mean_raw^2)))
+      ) %>%
+      dplyr::select(-mean_raw, -sd_raw)
+  }
+
+  # --- 3. Identify clusters -----------
+  clusters <- list()
+  cluster_data_list <- list()
+  cluster_id <- 1
+
+  while(nrow(data_iter) >= 3) {
+    cluster_data <- data_iter
+    repeat {
+      if(nrow(cluster_data) < 3) break
+      ma_result <- tryCatch(
+        metamean(n = cluster_data$total_n,
+                 mean = cluster_data$mean_col,
+                 sd = cluster_data$sd_col,
+                 studlab = cluster_data$study_name),
+        error = function(e) NULL
+      )
+      if(is.null(ma_result)) break
+      if(ma_result$I2 < 0.5) break
+      cluster_data <- cluster_data %>% dplyr::slice(-c(1, nrow(.)))
+    }
+    if(nrow(cluster_data) < 3) break
+
+    ma_test <- tryCatch(
+      metamean(n = cluster_data$total_n,
+               mean = cluster_data$mean_col,
+               sd = cluster_data$sd_col,
+               studlab = cluster_data$study_name),
+      error = function(e) NULL
+    )
+    if(is.null(ma_test)) {
+      data_iter <- data_iter %>% dplyr::slice(-(1:nrow(cluster_data)))
+      next
+    }
+
+    clusters[[cluster_id]] <- cluster_data
+    cluster_data_list[[cluster_id]] <- cluster_data
+    cluster_id <- cluster_id + 1
+    data_iter <- dplyr::anti_join(data_iter, cluster_data, by = "study_name")
+  }
+
+  if(length(clusters) == 0) {
+    warning("No clusters with I² < 0.5 identified.")
+    return(list(summary = NULL, table = NULL, plot = NULL, cluster_data = NULL))
+  }
+
+  # --- 4. Summarize clusters -----------
+  cluster_summaries <- purrr::map_dfr(seq_along(clusters), function(i) {
+    d <- clusters[[i]]
+    ma <- tryCatch(
+      metamean(n = d$total_n,
+               mean = d$mean_col,
+               sd = d$sd_col,
+               studlab = d$study_name),
+      error = function(e) NULL
+    )
+    if(is.null(ma)) return(NULL)
+
+    est <- ifelse(ma$I2 > 0.2, ma$TE.random, ma$TE.common)
+    sd_val <- ifelse(ma$I2 > 0.2, ma$tau, ma$seTE.common * sqrt(sum(d$total_n)))
+
+    if(urine_component == "volume") {
+      est_bt <- exp(est)/1000
+      lower_95 <- exp(est - 1.96*sd_val)/1000
+      upper_95 <- exp(est + 1.96*sd_val)/1000
+    } else {
+      est_bt <- est
+      lower_95 <- est - 1.96*sd_val
+      upper_95 <- est + 1.96*sd_val
+    }
+
+    tibble::tibble(
+      cluster = i,
+      n_studies = nrow(d),
+      total_participants = sum(d$total_n),
+      pooled_estimate = est_bt,
+      pooled_sd = sd_val,
+      I2 = ma$I2 / 100,
+      Q = ma$Q,
+      Q_pval = ma$pval.Q,
+      Model = "Fixed",
+      lower_95 = lower_95,
+      upper_95 = upper_95,
+      studies_in_cluster = paste(d$study_name, collapse = ", "),
+      cluster_data = list(d)
+    )
+  }) %>% 
+    arrange(cluster) %>%
+    mutate(cluster_factor = factor(cluster))
+
+  # --- 5. Assign consistent colors -----------
+  cluster_colors <- scales::hue_pal()(length(unique(cluster_summaries$cluster)))
+
+  # --- 6. Create GT table -----------
+  table_gt <- cluster_summaries %>%
+    mutate(
+      range = sprintf("%.2f – %.2f", lower_95, upper_95),
+      I2_text = ifelse(is.na(I2), "—", paste0(round(I2*100, 1), "%")),
+      Q_text = ifelse(is.na(Q), "—", round(Q, 1)),
+      Q_pval_text = ifelse(is.na(Q_pval), "—", signif(Q_pval, 1))
+    ) %>%
+    select(cluster, range, n_studies, total_participants, I2_text, Q_text, Q_pval_text, Model) %>%
+    gt() %>%
+    cols_label(
+      cluster = "Cluster",
+      n_studies = "Studies",
+      total_participants = "Participants",
+      range = "95% Range",
+      I2_text = "I²",
+      Q_text = "Cochran's Q",
+      Q_pval_text = "Q p-value",
+      Model = "Model"
+    ) %>%
+    tab_header(title = md("**MA Results for Clusters with I² < 50%**"),
+               subtitle = md(urine_component_for_title)) %>%
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels(everything())
+    )
+
+  for(i in seq_along(unique(cluster_summaries$cluster))) {
+    table_gt <- table_gt %>%
+      tab_style(
+        style = cell_fill(color = cluster_colors[i]),
+        locations = cells_body(
+          rows = cluster == unique(cluster_summaries$cluster)[i]
+        )
+      )
+  }
+
+  # --- 7. Forest plot with consistent colors -----------
+  forest_plot <- ggplot2::ggplot(cluster_summaries, ggplot2::aes(y = cluster_factor)) +
+    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower_95, xmax = upper_95, color = cluster_factor), height = 0.3) +
+    ggplot2::geom_point(ggplot2::aes(x = pooled_estimate, color = cluster_factor), size = 3) +
+    ggplot2::scale_color_manual(values = cluster_colors) +
+    ggplot2::labs(
+      title = paste0("Clusters with I² < 50% for ", urine_component_for_title),
+      x = paste0("Estimated 95% CI for ", urine_component_for_title),
+      y = "Cluster"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(legend.position = "none")
+
+  # --- 8. Combine with patchwork -----------
+  combined_plot <- forest_plot / table_gt
+
+  # --- 9. Return results -----------
+  list(
+    summary = cluster_summaries,
+    table = table_gt,
+    plot = combined_plot,
+    cluster_data = purrr::map(cluster_summaries$cluster_data, ~ .x)
+  )
+}
+
+
+```
+
+
+### Comparison to Sex subdivisions
+```{r}
+sex_subdivision_ma <- function(urine_component,
+                               data = urine_ma2) {
+  
+  # --- 1. Get main meta-analysis result ----------------------------
+  main_result <- main_ma(urine_component, data = data) %>%
+    mutate(subgroup = "main meta-analysis")
+  
+  # --- 2. Identify the correct columns -------------------------------
+  mean_colname <- case_when(
+    urine_component == "volume" ~ "volume_mean_m_l",
+    urine_component == "ph" ~ "ph_mean",
+    urine_component == "creat" ~ "creatinine_mean_mmol_24h",
+    TRUE ~ paste0(urine_component, "_mean_mmol_24h")
+  )
+  
+  sd_colname <- case_when(
+    urine_component == "volume" ~ "volume_sd_m_l",
+    urine_component == "ph" ~ "ph_sd",
+    urine_component == "creat" ~ "creatinine_sd_mmol_24h",
+    TRUE ~ paste0(urine_component, "_sd_mmol_24h")
+  )
+  
+  urine_component_for_title <- case_when(
+    urine_component == "volume" ~ "Volume (L/24h)",
+    urine_component == "ph" ~ "pH",
+    urine_component == "creat" ~ "Creatinine (mmol/24h)",
+    TRUE ~ paste0(str_to_title(urine_component), " (mmol/24h)")
+  )
+  
+  # --- 3. Iterate through both sexes --------------------------------
+  sex_results <- purrr::map_dfr(c("male", "female"), function(sex) {
+    
+    # Extract and clean dataset for this sex
+    data1 <- data %>% 
+      filter(male_female == sex) %>%
+      select(
+        study_name,
+        total_n,
+        mean_col = all_of(mean_colname),
+        sd_col   = all_of(sd_colname)
+      ) %>%
+      drop_na(mean_col, sd_col)
+    
+    # Check if we have data for this sex
+    if (nrow(data1) == 0) {
+      return(tibble(
+        urine_component = urine_component,
+        subgroup = sex,
+        total_participants = 0,
+        n_studies = 0,
+        pooled_estimate = NA,
+        pooled_sd = NA,
+        I2 = NA,
+        Q = NA,
+        Q_pval = NA,
+        lower_95 = NA,
+        upper_95 = NA
+      ))
+    }
+    
+    # Volume → convert to log-normal parameters
+    if (urine_component == "volume") {
+      data1 <- data1 %>%
+        mutate(
+          mean_raw = mean_col,
+          sd_raw   = sd_col,
+          mean_col = log(mean_raw^2 / sqrt(sd_raw^2 + mean_raw^2)),
+          sd_col   = sqrt(log(1 + (sd_raw^2 / mean_raw^2)))
+        ) %>%
+        select(-mean_raw, -sd_raw)
+    }
+    
+    # Run single meta-analysis for this sex
+    ma_result <- metamean(
+      n = data1$total_n,
+      mean = data1$mean_col,
+      sd   = data1$sd_col,
+      studlab = data1$study_name
+    )
+    
+    # Extract pooled results
+    k <- ma_result$k
+    
+    if (k == 1) {
+      # Only one study
+      model_utilised <- "Single study"
+      pooled_estimate <- ma_result$TE
+      pooled_sd <- ma_result$seTE * sqrt(sum(data1$total_n))
+      I2_value <- NA
+      Q_value <- NA
+      Q_pval <- NA
+    } else {
+      # Multiple studies - use random effects if heterogeneity exists
+      model_utilised <- if (ma_result$I2 > 0.2) "Random" else "Fixed"
+      pooled_estimate <- if (ma_result$I2 > 0.2) ma_result$TE.random else ma_result$TE.common
+      pooled_sd <- if (ma_result$I2 > 0.2) ma_result$tau else ma_result$seTE.common * sqrt(sum(data1$total_n))
+      I2_value <- ma_result$I2
+      Q_value <- ma_result$Q
+      Q_pval <- ma_result$pval.Q
+    }
+    
+    # Create summary tibble
+    summary <- tibble(
+      urine_component = urine_component,
+      subgroup = sex,
+      total_participants = sum(data1$total_n),
+      n_studies = k,
+      pooled_estimate = pooled_estimate,
+      pooled_sd = pooled_sd,
+      I2 = I2_value,
+      Q = Q_value,
+      Q_pval = Q_pval,
+      model_utilised = model_utilised
+    )
+    
+    # Back-transform volume results if needed
+    if (urine_component == "volume") {
+      summary <- summary %>%
+        mutate(
+          lower_95 = exp(pooled_estimate - 1.96 * pooled_sd) / 1000,
+          upper_95 = exp(pooled_estimate + 1.96 * pooled_sd) / 1000,
+          pooled_estimate = exp(pooled_estimate) / 1000,  
+        )
+    } else {
+      summary <- summary %>%
+        mutate(
+          lower_95 = pooled_estimate - 1.96 * pooled_sd,
+          upper_95 = pooled_estimate + 1.96 * pooled_sd
+        )
+    }
+    
+    return(summary)
+  })
+  
+  # --- 4. Combine main and sex-specific results --------------------
+  combined_results <- bind_rows(main_result, sex_results) %>%
+    mutate(
+      subgroup = factor(subgroup,
+                        levels = c("main meta-analysis",
+                        "male", "female"))
+    ) %>%
+    arrange(
+      subgroup
+    )
+  
+  
+  # --- 5.Results table --------------------
+
+table_input <- combined_results %>%
+  select(-urine_component) %>%          
+  mutate(
+    Group = subgroup,
+    `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
+    Studies = n_studies,
+    Participants = total_participants,
+    I2 = I2 * 100,
+    `I²` = ifelse(is.na(I2), "—", paste0(round(I2, 1), "%")),
+    `Cochran's Q` = ifelse(is.na(Q), "—", round(Q, 1)),
+    `Q (p-value)` = case_when(
+      is.na(Q_pval) ~ "—",
+      Q_pval < 0.005 ~ "<0.005",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE ~ sprintf("%.2f", Q_pval)
+    ),
+    "Model" = model_utilised
+  ) %>%
+  select(
+    Group,
+    `95% Range`,
+    Studies,
+    Participants,
+    `I²`,
+    `Cochran's Q`,
+    `Q (p-value)`,
+    Model
+  )
+
+table_df <- table_input %>%
+  gt() %>%
+  tab_header(
+    title = md("**Meta-Analysis Results by Sex**"),
+    subtitle = paste0("24-Hour Urine ", urine_component_for_title)
+  ) %>%
+  cols_align(align = "center") %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  # Highlight rows by group
+  tab_style(
+    style = cell_fill(color = "#e8f4f8"),
+    locations = cells_body(rows = Group == "main meta-analysis")
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#f0f8ff"),
+    locations = cells_body(rows = Group == "male")
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#fff0f5"),
+    locations = cells_body(rows = Group == "female")
+  ) %>%
+  tab_options(
+    table.font.size = px(12),
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(13),
+    column_labels.font.weight = "bold",
+    data_row.padding = px(4)
+  ) %>%
+  tab_source_note(
+    source_note = md("*Note: I² represents heterogeneity; Q test assesses between-study variation*")
+  )
+
+
+  
+  # --- 6.Comparisons table --------------------
+  main_ma_mean <- (combined_results %>% filter(subgroup == "main meta-analysis"))$pooled_estimate
+  main_ma_sd <- (combined_results %>% filter(subgroup == "main meta-analysis"))$pooled_sd
+  
+  male_ma_mean <- (combined_results %>% filter(subgroup == "male"))$pooled_estimate
+  male_ma_sd <- (combined_results %>% filter(subgroup == "male"))$pooled_sd
+  
+  female_ma_mean <- (combined_results %>% filter(subgroup == "female"))$pooled_estimate
+  female_ma_sd <- (combined_results %>% filter(subgroup == "female"))$pooled_sd
+
+  wald_test <- function(mean1, mean2, sd1, sd2) {
+  wald_result <- (mean1 - mean2) / sqrt(sd1^2 + sd2^2)  
+  p <- 2 * (1 - pnorm(abs(wald_result)))  
+  
+  return(p)
+}
+  
+  main_ma_vs_male <- wald_test(main_ma_mean, male_ma_mean, main_ma_sd, male_ma_sd) %>% round(digits = 2)
+  main_ma_vs_female <- wald_test(main_ma_mean, female_ma_mean, main_ma_sd, female_ma_sd) %>% round(digits = 2)
+  male_vs_female <- wald_test(male_ma_mean, female_ma_mean, male_ma_sd, female_ma_sd) %>% round(digits = 2)
+  
+  comparison_table <- cbind(
+    "Comparison" = c("Main vs Male",
+                     "Main vs Female",
+                     "Male vs Female"),
+    "P (Wald Test)" = c(main_ma_vs_male,
+                        main_ma_vs_female,
+                        male_vs_female)
+  ) %>% as_tibble()
+  
+  comparison_table_input <- comparison_table %>%
+  mutate(`P (Wald Test)` = as.numeric(`P (Wald Test)`)) %>%
+  mutate(
+    `P (Wald Test)` = case_when(
+      `P (Wald Test)` < 0.001 ~ "<0.001",
+      `P (Wald Test)` < 0.01  ~ "<0.01",
+      `P (Wald Test)` < 0.05  ~ "<0.05",
+      TRUE ~ sprintf("%.2f", `P (Wald Test)`)
+    )
+  )
+
+comparison_gt <- comparison_table_input %>%
+  gt() %>%
+  tab_header(
+    title = md("**Between-Group Wald Test Comparisons**")
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = everything()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#f7f7f7"),
+    locations = cells_body(
+      rows = seq(1, nrow(comparison_table_input), by = 2)
+    )
+  ) %>%
+  tab_options(
+    table.font.size = px(12),
+    heading.title.font.size = px(14),
+    column_labels.font.weight = "bold",
+    data_row.padding = px(4)
+  )
+
+  
+  # --- 7.Plot --------------------
+
+  colours <- cbind(
+    "subgroup" = c("main meta-analysis", "male", "female"),
+    "colour" = c("#5DADE2", "#3498DB", "#AF7AC5")
+  ) 
+col_vector <- setNames(colours[, "colour"], colours[, "subgroup"])
+
+  plot <- combined_results %>%
+    ggplot(aes(y = subgroup, colour = subgroup)) +
+    geom_errorbarh(aes(xmin = lower_95, xmax = upper_95), height = 0.25) +
+    geom_point(aes(x = pooled_estimate), size = 3) +
+    scale_color_manual(values = col_vector) +
+    labs(
+      title = paste0("Comparisons for: ", urine_component_for_title),
+      x = paste0("Estimated 95% CI for ", urine_component_for_title),
+      y = ""
+    ) +
+    theme_minimal() +
+    ggplot2::theme(legend.position = "none")
+  
+  combined_plot <- (plot +
+    (plot_spacer() / comparison_gt / plot_spacer())) +  
+    table_df +
+    plot_layout(
+      heights = c(2, 1),
+      guides = "collect"
+    )  
+  
+  # --- 8.Return results --------------------
+  return(list(
+    ma_results = combined_results,
+    summary_table = table_df,
+    comparison_results = comparison_gt,
+    plot = combined_plot
+  ))
+}
+```
+\newpage
+
+### Comparison to Age-Band subdivisions
+```{r}
+sex_age_subdivision_ma <- function(urine_component,
+                                   data = urine_ma2,
+                                   overall_bias = NULL) {
+  
+  # --- 1. Identify the correct columns -------------------------------
+  mean_colname <- case_when(
+    urine_component == "volume" ~ "volume_mean_m_l",
+    urine_component == "ph" ~ "ph_mean",
+    urine_component == "creat" ~ "creatinine_mean_mmol_24h",
+    TRUE ~ paste0(urine_component, "_mean_mmol_24h")
+  )
+  
+  sd_colname <- case_when(
+    urine_component == "volume" ~ "volume_sd_m_l",
+    urine_component == "ph" ~ "ph_sd",
+    urine_component == "creat" ~ "creatinine_sd_mmol_24h",
+    TRUE ~ paste0(urine_component, "_sd_mmol_24h")
+  )
+  
+  urine_component_for_title <- case_when(
+    urine_component == "volume" ~ "Volume (L/24h)",
+    urine_component == "ph" ~ "pH",
+    urine_component == "creat" ~ "Creatinine (mmol/24h)",
+    TRUE ~ paste0(str_to_title(urine_component), " (mmol/24h)")
+  )
+  
+  # --- 2. Prepare data with overall_bias for meta-regression --------
+  if (!is.null(overall_bias)) {
+    data_with_bias <- data %>%
+      left_join(overall_bias, by = c("study_name" = "study"))
+  } else {
+    data_with_bias <- data
+  }
+  
+  # --- 3. Get main meta-analysis result ----------------------------
+  # Overall main result (all sexes, all ages)
+  main_overall <- main_ma(urine_component, data = data) %>%
+    mutate(sex_group = "main meta-analysis",
+           age_band = "Overall")
+  
+  # Main meta-analysis by age band (all sexes combined)
+  data_main <- data %>%
+    select(
+      study_name,
+      total_n,
+      age_band,
+      mean_col = all_of(mean_colname),
+      sd_col   = all_of(sd_colname)
+    ) %>%
+    drop_na(mean_col, sd_col)
+  
+  age_bands_main <- data_main %>% 
+    filter(!is.na(age_band)) %>% 
+    pull(age_band) %>% 
+    unique() %>% 
+    sort()
+  
+  main_age_results <- purrr::map_dfr(age_bands_main, function(age) {
+    data_age <- data_main %>% 
+      filter(age_band == age)
+    
+    if (nrow(data_age) == 0) {
+      return(tibble())
+    }
+    
+    run_single_ma(data_age, urine_component, "main meta-analysis", age)
+  })
+  
+  # Add meta-regression for main analysis
+  main_meta_reg_results <- tryCatch({
+    meta_regression("none", urine_component = urine_component)
+  }, error = function(e) {
+    message("Meta-regression failed for main analysis: ", e$message)
+    NULL
+  })
+  
+  main_result <- bind_rows(main_overall, main_age_results, main_meta_reg_results)
+  
+  # --- 4. Iterate through sexes and age bands --------------------------------
+  sex_age_results <- purrr::map_dfr(c("male", "female"), function(sex) {
+    
+    # First get overall result for this sex (all age bands)
+    data_sex <- data %>% 
+      filter(male_female == sex) %>%
+      select(
+        study_name,
+        total_n,
+        age_band,
+        mean_col = all_of(mean_colname),
+        sd_col   = all_of(sd_colname)
+      ) %>%
+      drop_na(mean_col, sd_col)
+    
+    if (nrow(data_sex) == 0) {
+      return(tibble())
+    }
+    
+    # Get overall result for this sex
+    overall_result <- run_single_ma(data_sex, urine_component, sex, "Overall")
+    
+    # Get meta-regression result for this sex
+    meta_reg_result <- tryCatch({
+      meta_regression(data_subset = sex, urine_component = urine_component)
+    }, error = function(e) {
+      message("Meta-regression failed for ", sex, ": ", e$message)
+      NULL
+    })
+    
+    # Get unique age bands
+    age_bands <- data_sex %>% 
+      filter(!is.na(age_band)) %>% 
+      pull(age_band) %>% 
+      unique() %>% 
+      sort()
+    
+    # Get results for each age band
+    age_band_results <- purrr::map_dfr(age_bands, function(age) {
+      data_age <- data_sex %>% 
+        filter(age_band == age)
+      
+      if (nrow(data_age) == 0) {
+        return(tibble())
+      }
+      
+      run_single_ma(data_age, urine_component, sex, age)
+    })
+    
+    # Combine overall and age band results
+    bind_rows(overall_result, age_band_results, meta_reg_result)
+  })
+  
+  # --- 5. Combine all results --------------------
+  combined_results <- bind_rows(main_result, sex_age_results) %>%
+    mutate(
+      sex_group = factor(sex_group,
+                        levels = c("main meta-analysis", "male", "female"))
+    ) %>%
+    arrange(sex_group, age_band)
+  
+  # --- 6. Create plots and tables for each sex group --------------------
+  sex_groups <- c("main meta-analysis", "male", "female")
+  
+  output_list <- purrr::map(sex_groups, function(sex) {
+    
+    # Filter data for this sex group
+    sex_data <- combined_results %>%
+      filter(sex_group == sex)
+    
+    # Create forest plot (no table)
+    colour <- case_when(
+      sex == "main meta-analysis" ~ "springgreen3",
+      sex == "male" ~ "skyblue2",
+      sex == "female" ~ "indianred1"
+    )
+    
+    plot <- sex_data %>%
+      mutate(age_band = fct_rev(age_band)) %>%
+      ggplot(aes(y = age_band)) +
+      geom_errorbarh(aes(xmin = lower_95, xmax = upper_95), 
+                     height = 0.25, colour = colour) +
+      geom_point(aes(x = pooled_estimate), size = 3, colour = colour) +
+      labs(
+        title = paste0(str_to_title(sex)),
+        x = "Estimated 95% CI",
+        y = "Age Band"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10)
+      )
+    
+    list(
+      plot = plot,
+      data = sex_data
+    )
+  })
+  
+  names(output_list) <- sex_groups
+  
+  # --- 7. Wald tests for comparisons --------------------
+  
+  # Helper function for Wald test
+  wald_test <- function(mean1, mean2, sd1, sd2) {
+    wald_result <- (mean1 - mean2) / sqrt(sd1^2 + sd2^2)  
+    p <- 2 * (1 - pnorm(abs(wald_result)))  
+    return(p)
+  }
+  
+  # Sex comparisons (Overall estimates)
+  male_overall <- combined_results %>% 
+    filter(sex_group == "male", as.character(age_band) == "Overall")
+  female_overall <- combined_results %>% 
+    filter(sex_group == "female", as.character(age_band) == "Overall")
+  
+  sex_comparison <- tibble(
+    Comparison = "Male vs Female (Overall)",
+    `P (Wald Test)` = wald_test(
+      male_overall$pooled_estimate,
+      female_overall$pooled_estimate,
+      male_overall$pooled_sd,
+      female_overall$pooled_sd
+    )
+  )
+  
+  # Age band comparisons within each sex group
+  age_band_comparisons <- purrr::map_dfr(sex_groups, function(sex) {
+    sex_data <- combined_results %>%
+      filter(sex_group == sex, 
+             as.character(age_band) != "Overall",
+             as.character(age_band) != "Meta-Regression") %>%
+      arrange(age_band)
+    
+    if (nrow(sex_data) < 2) {
+      return(tibble())
+    }
+    
+    # Pairwise comparisons between age bands
+    age_bands <- unique(as.character(sex_data$age_band))
+    comparisons <- combn(age_bands, 2, simplify = FALSE)
+    
+    purrr::map_dfr(comparisons, function(pair) {
+      data1 <- sex_data %>% filter(as.character(age_band) == pair[1])
+      data2 <- sex_data %>% filter(as.character(age_band) == pair[2])
+      
+      tibble(
+        `Sex Group` = sex,
+        Comparison = paste0(pair[1], " vs ", pair[2]),
+        `P (Wald Test)` = wald_test(
+          data1$pooled_estimate,
+          data2$pooled_estimate,
+          data1$pooled_sd,
+          data2$pooled_sd
+        )
+      )
+    })
+  })
+  
+  # Sex comparison within each age band
+  age_band_sex_comparisons <- purrr::map_dfr(age_bands_main, function(age) {
+    male_data <- combined_results %>%
+      filter(sex_group == "male", as.character(age_band) == as.character(age))
+    female_data <- combined_results %>%
+      filter(sex_group == "female", as.character(age_band) == as.character(age))
+    
+    if (nrow(male_data) == 0 || nrow(female_data) == 0) {
+      return(tibble())
+    }
+    
+    tibble(
+      `Age Band` = as.character(age),
+      `P (Wald Test)` = wald_test(
+        male_data$pooled_estimate,
+        female_data$pooled_estimate,
+        male_data$pooled_sd,
+        female_data$pooled_sd
+      )
+    )
+  })
+  
+  # Format all comparison tables
+  format_wald_table <- function(df) {
+    n_rows <- nrow(df)
+    df %>%
+      mutate(
+        `P (Wald Test)` = case_when(
+          `P (Wald Test)` < 0.001 ~ "<0.001",
+          `P (Wald Test)` < 0.01  ~ "<0.01",
+          `P (Wald Test)` < 0.05  ~ "<0.05",
+          TRUE ~ sprintf("%.3f", `P (Wald Test)`)
+        )
+      ) %>%
+      gt() %>%
+      cols_align(align = "center", columns = everything()) %>%
+      tab_style(
+        style = cell_text(weight = "bold"),
+        locations = cells_column_labels()
+      ) %>%
+      tab_style(
+        style = cell_fill(color = "#f7f7f7"),
+        locations = cells_body(rows = seq(1, n_rows, by = 2))
+      ) %>%
+      tab_options(
+        table.font.size = px(11),
+        column_labels.font.weight = "bold",
+        data_row.padding = px(3)
+      )
+  }
+  
+  sex_comparison_gt <- sex_comparison %>%
+    format_wald_table() %>%
+    tab_header(title = md("**Sex Comparison (Overall)**"))
+  
+  age_band_comparisons_gt <- if (nrow(age_band_comparisons) > 0) {
+    age_band_comparisons %>%
+      format_wald_table() %>%
+      tab_header(title = md("**Age Band Comparisons Within Sex Groups**"))
+  } else {
+    NULL
+  }
+  
+  age_band_sex_comparisons_gt <- if (nrow(age_band_sex_comparisons) > 0) {
+    age_band_sex_comparisons %>%
+      format_wald_table() %>%
+      tab_header(title = md("**Sex Comparisons Within Age Bands**"))
+  } else {
+    NULL
+  }
+  
+  # --- 8. Create combined summary table --------------------
+  combined_summary_table <- combined_results %>%
+    select(-urine_component) %>%
+    mutate(
+      `Sex Group` = as.character(sex_group),
+      `Age Band` = as.character(age_band),
+      `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
+      Studies = n_studies,
+      Participants = total_participants,
+      I2 = I2 * 100,
+      `I²` = ifelse(is.na(I2), "—", paste0(round(I2, 1), "%")),
+      `Cochran's Q` = ifelse(is.na(Q), "—", round(Q, 1)),
+      `Q (p-value)` = case_when(
+        is.na(Q_pval) ~ "—",
+        Q_pval < 0.005 ~ "<0.005",
+        Q_pval < 0.01  ~ "<0.01",
+        Q_pval < 0.05  ~ "<0.05",
+        TRUE ~ sprintf("%.2f", Q_pval)
+      ),
+      "Model" = model_utilised
+    ) %>%
+    select(
+      `Sex Group`,
+      `Age Band`,
+      `95% Range`,
+      Studies,
+      Participants,
+      `I²`,
+      `Cochran's Q`,
+      `Q (p-value)`,
+      Model
+    )
+  
+  combined_summary_gt <- combined_summary_table %>%
+    gt() %>%
+    tab_header(
+      title = md("**Combined Meta-Analysis Results**"),
+      subtitle = paste0("24-Hour Urine ", urine_component_for_title)
+    ) %>%
+    cols_align(align = "center") %>%
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels()
+    ) %>%
+    # Highlight by sex group
+    tab_style(
+      style = cell_fill(color = "springgreen3"),
+      locations = cells_body(rows = `Sex Group` == "main meta-analysis")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "skyblue2"),
+      locations = cells_body(rows = `Sex Group` == "male")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "indianred1"),
+      locations = cells_body(rows = `Sex Group` == "female")
+    ) %>%
+    # Bold the Overall rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Age Band` == "Overall"
+      )
+    ) %>%
+    # Bold and highlight Meta-Regression rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Age Band` == "Meta-Regression"
+      )
+    ) %>%
+    tab_options(
+      table.font.size = px(11),
+      heading.title.font.size = px(14),
+      heading.subtitle.font.size = px(12),
+      column_labels.font.weight = "bold",
+      data_row.padding = px(3)
+    ) %>%
+    tab_source_note(
+      source_note = md("*I² represents heterogeneity; Q test assesses between-study variation; Meta-Regression shows covariate-adjusted estimates*")
+    )
+  
+  # --- 9. Create overall comparison plot --------------------
+  
+  design <- "ABC
+             EEE"
+  
+  # Row 1: Three forest plots 
+  row1 <- (
+      output_list[["main meta-analysis"]]$plot |
+        output_list[["male"]]$plot |
+        output_list[["female"]]$plot 
+    )
+  
+  # Row 2: Combined summary table
+  row2 <- wrap_elements(full = combined_summary_gt) 
+  
+  # Combine rows
+  final_layout <- row1 + row2 + 
+    plot_layout(design = design,
+                axis_titles = "collect",
+                axes = "collect") + 
+    plot_annotation(
+      title = urine_component_for_title,
+      tag_levels = "A",
+      theme = theme(plot.title = element_text(face = "bold", size = 14))
+    )
+  
+  # --- 10. Return results --------------------
+  return(list(
+    ma_results = combined_results,
+    main_meta_analysis = output_list[["main meta-analysis"]],
+    male = output_list[["male"]],
+    female = output_list[["female"]],
+    combined_plot = final_layout,
+    combined_summary_table = combined_summary_gt,
+    wald_tests = list(
+      sex_comparison = sex_comparison_gt,
+      age_band_comparisons = age_band_comparisons_gt,
+      sex_within_age_bands = age_band_sex_comparisons_gt
+    )
+  ))
+}
+```
+\newpage
+
+### Comparison of Sex, Age and Race
+```{r}
+sex_age_race_subdivision_ma <- function(urine_component,
+                                        data,
+                                        overall_bias = NULL) {
+  
+  # --- 1. Identify the correct columns -------------------------------
+  mean_colname <- case_when(
+    urine_component == "volume" ~ "volume_mean_m_l",
+    urine_component == "ph" ~ "ph_mean",
+    urine_component == "creat" ~ "creatinine_mean_mmol_24h",
+    TRUE ~ paste0(urine_component, "_mean_mmol_24h")
+  )
+  
+  sd_colname <- case_when(
+    urine_component == "volume" ~ "volume_sd_m_l",
+    urine_component == "ph" ~ "ph_sd",
+    urine_component == "creat" ~ "creatinine_sd_mmol_24h",
+    TRUE ~ paste0(urine_component, "_sd_mmol_24h")
+  )
+  
+  urine_component_for_title <- case_when(
+    urine_component == "volume" ~ "Volume (L/24h)",
+    urine_component == "ph" ~ "pH",
+    urine_component == "creat" ~ "Creatinine (mmol/24h)",
+    TRUE ~ paste0(str_to_title(urine_component), " (mmol/24h)")
+  )
+  
+  # --- 2. Prepare data with overall_bias for meta-regression --------
+  if (!is.null(overall_bias)) {
+    data_with_bias <- data %>%
+      left_join(overall_bias, by = c("study_name" = "study"))
+  } else {
+    data_with_bias <- data
+  }
+  
+  # --- 3. Get main meta-analysis result ----------------------------
+  # Overall main result (all sexes, all ages, all races)
+  main_overall <- main_ma(urine_component, data = data) %>%
+    mutate(sex_group = "main meta-analysis",
+           age_band = "Overall",
+           race_group = "All")
+  
+  # Main meta-analysis by age band (all sexes combined, all races)
+  data_main <- data %>%
+    select(
+      study_name,
+      total_n,
+      age_band,
+      mean_col = all_of(mean_colname),
+      sd_col   = all_of(sd_colname)
+    ) %>%
+    drop_na(mean_col, sd_col)
+  
+  age_bands_main <- data_main %>% 
+    filter(!is.na(age_band)) %>% 
+    pull(age_band) %>% 
+    unique() %>% 
+    sort()
+  
+  main_age_results <- purrr::map_dfr(age_bands_main, function(age) {
+    data_age <- data_main %>% 
+      filter(age_band == age)
+    
+    if (nrow(data_age) == 0) {
+      return(tibble())
+    }
+    
+    result <- run_single_ma(data_age, urine_component, "main meta-analysis", age)
+    result %>% mutate(race_group = "All")
+  })
+  
+  # Add meta-regression for main analysis
+  main_meta_reg_results <- tryCatch({
+    result <- meta_regression("none", urine_component = urine_component)
+    if (!is.null(result)) {
+      result %>% mutate(race_group = "All")
+    } else {
+      NULL
+    }
+  }, error = function(e) {
+    message("Meta-regression failed for main analysis: ", e$message)
+    NULL
+  })
+  
+  main_result <- bind_rows(main_overall, main_age_results, main_meta_reg_results)
+  
+  # --- 4. Iterate through sexes, age bands, and races ----------------------
+  sex_age_race_results <- purrr::map_dfr(c("main meta-analysis", "male", "female"), function(sex) {
+    
+    # Filter data for this sex
+    if (sex == "main meta-analysis") {
+      data_sex <- data %>%
+        select(
+          study_name,
+          total_n,
+          age_band,
+          race,
+          mean_col = all_of(mean_colname),
+          sd_col   = all_of(sd_colname)
+        ) %>%
+        drop_na(mean_col, sd_col)
+    } else {
+      data_sex <- data %>% 
+        filter(male_female == sex) %>%
+        select(
+          study_name,
+          total_n,
+          age_band,
+          race,
+          mean_col = all_of(mean_colname),
+          sd_col   = all_of(sd_colname)
+        ) %>%
+        drop_na(mean_col, sd_col)
+    }
+    
+    if (nrow(data_sex) == 0) {
+      return(tibble())
+    }
+    
+    # Get overall result for this sex (all races)
+    overall_result <- run_single_ma(data_sex, urine_component, sex, "Overall") %>%
+      mutate(race_group = "All")
+    
+    # Get meta-regression result for this sex
+    if (sex == "main meta-analysis") {
+      meta_reg_result <- tryCatch({
+        result <- meta_regression("none", urine_component = urine_component)
+        if (!is.null(result)) {
+          result %>% mutate(race_group = "All")
+        } else {
+          NULL
+        }
+      }, error = function(e) {
+        message("Meta-regression failed for ", sex, ": ", e$message)
+        NULL
+      })
+    } else {
+      meta_reg_result <- tryCatch({
+        result <- meta_regression(data_subset = sex, urine_component = urine_component)
+        if (!is.null(result)) {
+          result %>% mutate(race_group = "All")
+        } else {
+          NULL
+        }
+      }, error = function(e) {
+        message("Meta-regression failed for ", sex, ": ", e$message)
+        NULL
+      })
+    }
+    
+    # Get unique age bands
+    age_bands <- data_sex %>% 
+      filter(!is.na(age_band)) %>% 
+      pull(age_band) %>% 
+      unique() %>% 
+      sort()
+    
+    # Get results for each age band (all races)
+    age_band_results <- purrr::map_dfr(age_bands, function(age) {
+      data_age <- data_sex %>% 
+        filter(age_band == age)
+      
+      if (nrow(data_age) == 0) {
+        return(tibble())
+      }
+      
+      result <- run_single_ma(data_age, urine_component, sex, age)
+      result %>% mutate(race_group = "All")
+    })
+    
+    # --- NEW: Race-specific analyses ---
+    # Get unique race groups for this sex
+    race_groups <- data_sex %>%
+      filter(!is.na(race), race %in% c("white", "mixed", "black")) %>%
+      pull(race) %>%
+      unique() %>%
+      sort()
+    
+    race_results <- purrr::map_dfr(race_groups, function(race) {
+      data_race <- data_sex %>%
+        filter(race == !!race)
+      
+      if (nrow(data_race) == 0) {
+        return(tibble())
+      }
+      
+      # Overall for this sex-race combination
+      race_overall <- run_single_ma(data_race, urine_component, sex, "Overall") %>%
+        mutate(race_group = race)
+      
+      # Age bands within this sex-race combination
+      race_age_results <- purrr::map_dfr(age_bands, function(age) {
+        data_race_age <- data_race %>%
+          filter(age_band == age)
+        
+        if (nrow(data_race_age) == 0) {
+          return(tibble())
+        }
+        
+        result <- run_single_ma(data_race_age, urine_component, sex, age)
+        result %>% mutate(race_group = race)
+      })
+      
+      bind_rows(race_overall, race_age_results)
+    })
+    
+    # Combine all results for this sex
+    bind_rows(overall_result, age_band_results, meta_reg_result, race_results)
+  })
+  
+  # --- 5. Combine all results --------------------
+  combined_results <- bind_rows(main_result, sex_age_race_results) %>%
+    mutate(
+      sex_group = factor(sex_group,
+                        levels = c("main meta-analysis", "male", "female")),
+      race_group = ifelse(is.na(race_group), "All", race_group)
+    ) %>%
+    arrange(sex_group, race_group, age_band)
+  
+  # Create complete grid to ensure all combinations are represented
+  all_sex_groups <- c("main meta-analysis", "male", "female")
+  all_race_groups <- c("All", "white", "mixed", "black")
+  all_age_bands <- c("Overall", "Meta-Regression", sort(unique(combined_results$age_band[
+    !combined_results$age_band %in% c("Overall", "Meta-Regression")
+  ])))
+  
+  complete_grid <- expand.grid(
+    sex_group = all_sex_groups,
+    race_group = all_race_groups,
+    age_band = all_age_bands,
+    stringsAsFactors = FALSE
+  ) %>%
+    as_tibble()
+  
+  combined_results <- complete_grid %>%
+    left_join(combined_results, by = c("sex_group", "race_group", "age_band")) %>%
+    mutate(
+      sex_group = factor(sex_group, levels = c("main meta-analysis", "male", "female"))
+    ) %>%
+    arrange(sex_group, race_group, age_band)
+  
+  # --- 6. Create plots for each sex group (All races) --------------------
+  sex_groups <- c("main meta-analysis", "male", "female")
+  
+  output_list <- purrr::map(sex_groups, function(sex) {
+    
+    # Filter data for this sex group (All races only)
+    sex_data <- combined_results %>%
+      filter(sex_group == sex, race_group == "All")
+    
+    # Create forest plot
+    colour <- case_when(
+      sex == "main meta-analysis" ~ "springgreen3",
+      sex == "male" ~ "skyblue2",
+      sex == "female" ~ "indianred1"
+    )
+    
+    plot <- sex_data %>%
+      mutate(age_band = fct_rev(age_band)) %>%
+      ggplot(aes(y = age_band)) +
+      geom_errorbarh(aes(xmin = lower_95, xmax = upper_95), 
+                     height = 0.25, colour = colour) +
+      geom_point(aes(x = pooled_estimate), size = 3, colour = colour) +
+      labs(
+        title = paste0(str_to_title(sex)),
+        x = "Estimated 95% CI",
+        y = "Age Band"
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10)
+      )
+    
+    list(
+      plot = plot,
+      data = sex_data
+    )
+  })
+  
+  names(output_list) <- sex_groups
+  
+  # --- 7. Create race-specific plots for each sex --------------------
+  # (Removed - now handled in section 11)
+  
+  # --- 8. Wald tests for comparisons --------------------
+  
+  # Helper function for Wald test
+  wald_test <- function(mean1, mean2, sd1, sd2) {
+    wald_result <- (mean1 - mean2) / sqrt(sd1^2 + sd2^2)  
+    p <- 2 * (1 - pnorm(abs(wald_result)))  
+    return(p)
+  }
+  
+  # Sex comparisons (Overall estimates, All races)
+  male_overall <- combined_results %>% 
+    filter(sex_group == "male", as.character(age_band) == "Overall", race_group == "All")
+  female_overall <- combined_results %>% 
+    filter(sex_group == "female", as.character(age_band) == "Overall", race_group == "All")
+  
+  sex_comparison <- tibble(
+    Comparison = "Male vs Female (Overall)",
+    `P (Wald Test)` = wald_test(
+      male_overall$pooled_estimate,
+      female_overall$pooled_estimate,
+      male_overall$pooled_sd,
+      female_overall$pooled_sd
+    )
+  )
+  
+  # Race comparisons within each sex (Overall age band)
+  race_comparisons <- purrr::map_dfr(c("male", "female"), function(sex) {
+    race_data <- combined_results %>%
+      filter(sex_group == sex, 
+             as.character(age_band) == "Overall",
+             race_group != "All") %>%
+      arrange(race_group)
+    
+    if (nrow(race_data) < 2) {
+      return(tibble())
+    }
+    
+    races <- unique(as.character(race_data$race_group))
+    comparisons <- combn(races, 2, simplify = FALSE)
+    
+    purrr::map_dfr(comparisons, function(pair) {
+      data1 <- race_data %>% filter(race_group == pair[1])
+      data2 <- race_data %>% filter(race_group == pair[2])
+      
+      tibble(
+        `Sex Group` = sex,
+        Comparison = paste0(pair[1], " vs ", pair[2]),
+        `P (Wald Test)` = wald_test(
+          data1$pooled_estimate,
+          data2$pooled_estimate,
+          data1$pooled_sd,
+          data2$pooled_sd
+        )
+      )
+    })
+  })
+  
+  # Age band comparisons within each sex group (All races)
+  age_band_comparisons <- purrr::map_dfr(sex_groups, function(sex) {
+    sex_data <- combined_results %>%
+      filter(sex_group == sex, 
+             race_group == "All",
+             as.character(age_band) != "Overall",
+             as.character(age_band) != "Meta-Regression") %>%
+      arrange(age_band)
+    
+    if (nrow(sex_data) < 2) {
+      return(tibble())
+    }
+    
+    age_bands <- unique(as.character(sex_data$age_band))
+    comparisons <- combn(age_bands, 2, simplify = FALSE)
+    
+    purrr::map_dfr(comparisons, function(pair) {
+      data1 <- sex_data %>% filter(as.character(age_band) == pair[1])
+      data2 <- sex_data %>% filter(as.character(age_band) == pair[2])
+      
+      tibble(
+        `Sex Group` = sex,
+        Comparison = paste0(pair[1], " vs ", pair[2]),
+        `P (Wald Test)` = wald_test(
+          data1$pooled_estimate,
+          data2$pooled_estimate,
+          data1$pooled_sd,
+          data2$pooled_sd
+        )
+      )
+    })
+  })
+  
+  # Sex comparison within each age band (All races)
+  age_band_sex_comparisons <- purrr::map_dfr(age_bands_main, function(age) {
+    male_data <- combined_results %>%
+      filter(sex_group == "male", race_group == "All", as.character(age_band) == as.character(age))
+    female_data <- combined_results %>%
+      filter(sex_group == "female", race_group == "All", as.character(age_band) == as.character(age))
+    
+    if (nrow(male_data) == 0 || nrow(female_data) == 0) {
+      return(tibble())
+    }
+    
+    tibble(
+      `Age Band` = as.character(age),
+      `P (Wald Test)` = wald_test(
+        male_data$pooled_estimate,
+        female_data$pooled_estimate,
+        male_data$pooled_sd,
+        female_data$pooled_sd
+      )
+    )
+  })
+  
+  # Format all comparison tables
+  format_wald_table <- function(df) {
+    if (nrow(df) == 0) return(NULL)
+    
+    n_rows <- nrow(df)
+    df %>%
+      mutate(
+        `P (Wald Test)` = case_when(
+          `P (Wald Test)` < 0.001 ~ "<0.001",
+          `P (Wald Test)` < 0.01  ~ "<0.01",
+          `P (Wald Test)` < 0.05  ~ "<0.05",
+          TRUE ~ sprintf("%.3f", `P (Wald Test)`)
+        )
+      ) %>%
+      gt() %>%
+      cols_align(align = "center", columns = everything()) %>%
+      tab_style(
+        style = cell_text(weight = "bold"),
+        locations = cells_column_labels()
+      ) %>%
+      tab_style(
+        style = cell_fill(color = "#f7f7f7"),
+        locations = cells_body(rows = seq(1, n_rows, by = 2))
+      ) %>%
+      tab_options(
+        table.font.size = px(11),
+        column_labels.font.weight = "bold",
+        data_row.padding = px(3)
+      )
+  }
+  
+  sex_comparison_gt <- sex_comparison %>%
+    format_wald_table() %>%
+    tab_header(title = md("**Sex Comparison (Overall)**"))
+  
+  race_comparisons_gt <- if (nrow(race_comparisons) > 0) {
+    race_comparisons %>%
+      format_wald_table() %>%
+      tab_header(title = md("**Race Comparisons Within Sex Groups**"))
+  } else {
+    NULL
+  }
+  
+  age_band_comparisons_gt <- if (nrow(age_band_comparisons) > 0) {
+    age_band_comparisons %>%
+      format_wald_table() %>%
+      tab_header(title = md("**Age Band Comparisons Within Sex Groups**"))
+  } else {
+    NULL
+  }
+  
+  age_band_sex_comparisons_gt <- if (nrow(age_band_sex_comparisons) > 0) {
+    age_band_sex_comparisons %>%
+      format_wald_table() %>%
+      tab_header(title = md("**Sex Comparisons Within Age Bands**"))
+  } else {
+    NULL
+  }
+  
+  # --- 9. Create combined summary table --------------------
+  combined_summary_table <- combined_results %>%
+    select(-urine_component) %>%
+    mutate(
+      `Sex Group` = as.character(sex_group),
+      `Race` = race_group,
+      `Age Band` = as.character(age_band),
+      `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
+      Studies = n_studies,
+      Participants = total_participants,
+      I2 = I2 * 100,
+      `I²` = ifelse(is.na(I2), "—", paste0(round(I2, 1), "%")),
+      `Cochran's Q` = ifelse(is.na(Q), "—", round(Q, 1)),
+      `Q (p-value)` = case_when(
+        is.na(Q_pval) ~ "—",
+        Q_pval < 0.005 ~ "<0.005",
+        Q_pval < 0.01  ~ "<0.01",
+        Q_pval < 0.05  ~ "<0.05",
+        TRUE ~ sprintf("%.2f", Q_pval)
+      ),
+      "Model" = model_utilised
+    ) %>%
+    select(
+      `Sex Group`,
+      `Race`,
+      `Age Band`,
+      `95% Range`,
+      Studies,
+      Participants,
+      `I²`,
+      `Cochran's Q`,
+      `Q (p-value)`,
+      Model
+    )
+  
+  combined_summary_gt <- combined_summary_table %>%
+    gt() %>%
+    tab_header(
+      title = md("**Combined Meta-Analysis Results**"),
+      subtitle = paste0("24-Hour Urine ", urine_component_for_title)
+    ) %>%
+    cols_align(align = "center") %>%
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels()
+    ) %>%
+    # Highlight by sex group
+    tab_style(
+      style = cell_fill(color = "springgreen3"),
+      locations = cells_body(rows = `Sex Group` == "main meta-analysis")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "skyblue2"),
+      locations = cells_body(rows = `Sex Group` == "male")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "indianred1"),
+      locations = cells_body(rows = `Sex Group` == "female")
+    ) %>%
+    # Bold the Overall rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Age Band` == "Overall"
+      )
+    ) %>%
+    # Bold and highlight Meta-Regression rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Age Band` == "Meta-Regression"
+      )
+    ) %>%
+    tab_options(
+      table.font.size = px(11),
+      heading.title.font.size = px(14),
+      heading.subtitle.font.size = px(12),
+      column_labels.font.weight = "bold",
+      data_row.padding = px(3)
+    ) %>%
+    tab_source_note(
+      source_note = md("*I² represents heterogeneity; Q test assesses between-study variation; Meta-Regression shows covariate-adjusted estimates*")
+    )
+  
+  # --- 10. Create overall comparison plot (Age-stratified) --------------------
+  
+  design <- "ABC
+             EEE"
+  
+  # Row 1: Three forest plots 
+  row1 <- (
+      output_list[["main meta-analysis"]]$plot |
+        output_list[["male"]]$plot |
+        output_list[["female"]]$plot 
+    )
+  
+  # Row 2: Combined summary table
+  row2 <- wrap_elements(full = combined_summary_gt) 
+  
+  # Combine rows
+  final_layout <- row1 + row2 + 
+    plot_layout(design = design,
+                axis_titles = "collect",
+                axes = "collect") + 
+    plot_annotation(
+      title = urine_component_for_title,
+      tag_levels = "A",
+      theme = theme(plot.title = element_text(face = "bold", size = 14))
+    )
+  
+  # --- 11. Create race-stratified plot and table --------------------
+  
+  # Filter for white, mixed, and black races (including All)
+  race_results <- combined_results %>%
+    filter(race_group %in% c("All", "white", "mixed", "black"))
+  
+  # Create race-only summary table (separate from combined table)
+  race_only_summary_table <- race_results %>%
+    filter(race_group != "All") %>%  # Exclude "All" for race-specific table
+    select(-urine_component) %>%
+    mutate(
+      `Sex Group` = as.character(sex_group),
+      `Race` = str_to_title(race_group),
+      `Age Band` = as.character(age_band),
+      `95% Range` = ifelse(
+        is.na(lower_95) | is.na(upper_95),
+        "—",
+        sprintf("%.2f – %.2f", lower_95, upper_95)
+      ),
+      Studies = ifelse(is.na(n_studies), "—", as.character(n_studies)),
+      Participants = ifelse(is.na(total_participants), "—", as.character(total_participants)),
+      I2_val = I2 * 100,
+      `I²` = ifelse(is.na(I2_val), "—", paste0(round(I2_val, 1), "%")),
+      `Cochran's Q` = ifelse(is.na(Q), "—", as.character(round(Q, 1))),
+      `Q (p-value)` = case_when(
+        is.na(Q_pval) ~ "—",
+        Q_pval < 0.005 ~ "<0.005",
+        Q_pval < 0.01  ~ "<0.01",
+        Q_pval < 0.05  ~ "<0.05",
+        TRUE ~ sprintf("%.2f", Q_pval)
+      ),
+      "Model" = ifelse(is.na(model_utilised), "—", model_utilised)
+    ) %>%
+    select(
+      `Sex Group`,
+      `Race`,
+      `Age Band`,
+      `95% Range`,
+      Studies,
+      Participants,
+      `I²`,
+      `Cochran's Q`,
+      `Q (p-value)`,
+      Model
+    )
+  
+  race_only_summary_gt <- race_only_summary_table %>%
+    gt() %>%
+    tab_header(
+      title = md("**Race-Specific Meta-Analysis Results**"),
+      subtitle = paste0("24-Hour Urine ", urine_component_for_title)
+    ) %>%
+    cols_align(align = "center") %>%
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels()
+    ) %>%
+    # Highlight by sex group
+    tab_style(
+      style = cell_fill(color = "springgreen3"),
+      locations = cells_body(rows = `Sex Group` == "main meta-analysis")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "skyblue2"),
+      locations = cells_body(rows = `Sex Group` == "male")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "indianred1"),
+      locations = cells_body(rows = `Sex Group` == "female")
+    ) %>%
+    # Bold the Overall rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Age Band` == "Overall"
+      )
+    ) %>%
+    tab_options(
+      table.font.size = px(11),
+      heading.title.font.size = px(14),
+      heading.subtitle.font.size = px(12),
+      column_labels.font.weight = "bold",
+      data_row.padding = px(3)
+    ) %>%
+    tab_source_note(
+      source_note = md("*I² represents heterogeneity; Q test assesses between-study variation; — indicates insufficient data*")
+    )
+  
+  # Create forest plots by sex for race stratification
+  race_output_list <- purrr::map(sex_groups, function(sex) {
+    
+    # Filter data for this sex group
+    sex_race_data <- race_results %>%
+      filter(sex_group == sex) %>%
+      mutate(
+        # Create a combined label for plotting
+        plot_label = case_when(
+          race_group == "All" & age_band == "Overall" ~ "Overall (All Races)",
+          race_group == "All" & age_band == "Meta-Regression" ~ "Meta-Regression (All Races)",
+          race_group == "All" ~ paste0(age_band, " (All Races)"),
+          age_band == "Overall" ~ str_to_title(race_group),
+          age_band == "Meta-Regression" ~ paste0(str_to_title(race_group), " - Meta-Regression"),
+          TRUE ~ paste0(str_to_title(race_group), " - ", age_band)
+        ),
+        # Order for plotting
+        plot_order = case_when(
+          race_group == "All" & age_band == "Overall" ~ 1,
+          race_group == "All" & age_band == "Meta-Regression" ~ 2,
+          race_group == "white" & age_band == "Overall" ~ 3,
+          race_group == "mixed" & age_band == "Overall" ~ 4,
+          race_group == "black" & age_band == "Overall" ~ 5,
+          TRUE ~ 6 + row_number()
+        )
+      ) %>%
+      arrange(plot_order)
+    
+    if (nrow(sex_race_data) == 0) {
+      return(NULL)
+    }
+    
+    # Create forest plot
+    colour <- case_when(
+      sex == "main meta-analysis" ~ "springgreen3",
+      sex == "male" ~ "skyblue2",
+      sex == "female" ~ "indianred1"
+    )
+    
+    # Only plot rows with non-NA estimates
+    sex_race_data_plot <- sex_race_data %>%
+      filter(!is.na(pooled_estimate))
+    
+    plot <- sex_race_data_plot %>%
+      mutate(plot_label = fct_reorder(plot_label, -plot_order)) %>%
+      ggplot(aes(y = plot_label)) +
+      geom_errorbarh(aes(xmin = lower_95, xmax = upper_95), 
+                     height = 0.25, colour = colour) +
+      geom_point(aes(x = pooled_estimate), size = 3, colour = colour) +
+      labs(
+        title = paste0(str_to_title(sex)),
+        x = "Estimated 95% CI",
+        y = NULL
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 12, face = "bold"),
+        axis.title = element_text(size = 10),
+        axis.text.y = element_text(size = 9)
+      )
+    
+    list(
+      plot = plot,
+      data = sex_race_data
+    )
+  })
+  
+  names(race_output_list) <- sex_groups
+  
+  # Create race summary table (with All races for the plot)
+  race_summary_table <- race_results %>%
+    select(-urine_component) %>%
+    mutate(
+      `Sex Group` = as.character(sex_group),
+      `Race` = case_when(
+        race_group == "All" ~ "All Races",
+        TRUE ~ str_to_title(race_group)
+      ),
+      `Age Band` = as.character(age_band),
+      `95% Range` = ifelse(
+        is.na(lower_95) | is.na(upper_95),
+        "—",
+        sprintf("%.2f – %.2f", lower_95, upper_95)
+      ),
+      Studies = ifelse(is.na(n_studies), "—", as.character(n_studies)),
+      Participants = ifelse(is.na(total_participants), "—", as.character(total_participants)),
+      I2_val = I2 * 100,
+      `I²` = ifelse(is.na(I2_val), "—", paste0(round(I2_val, 1), "%")),
+      `Cochran's Q` = ifelse(is.na(Q), "—", as.character(round(Q, 1))),
+      `Q (p-value)` = case_when(
+        is.na(Q_pval) ~ "—",
+        Q_pval < 0.005 ~ "<0.005",
+        Q_pval < 0.01  ~ "<0.01",
+        Q_pval < 0.05  ~ "<0.05",
+        TRUE ~ sprintf("%.2f", Q_pval)
+      ),
+      "Model" = ifelse(is.na(model_utilised), "—", model_utilised)
+    ) %>%
+    select(
+      `Sex Group`,
+      `Race`,
+      `Age Band`,
+      `95% Range`,
+      Studies,
+      Participants,
+      `I²`,
+      `Cochran's Q`,
+      `Q (p-value)`,
+      Model
+    )
+  
+  race_summary_gt <- race_summary_table %>%
+    gt() %>%
+    tab_header(
+      title = md("**Race-Stratified Meta-Analysis Results**"),
+      subtitle = paste0("24-Hour Urine ", urine_component_for_title)
+    ) %>%
+    cols_align(align = "center") %>%
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels()
+    ) %>%
+    # Highlight by sex group
+    tab_style(
+      style = cell_fill(color = "springgreen3"),
+      locations = cells_body(rows = `Sex Group` == "main meta-analysis")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "skyblue2"),
+      locations = cells_body(rows = `Sex Group` == "male")
+    ) %>%
+    tab_style(
+      style = cell_fill(color = "indianred1"),
+      locations = cells_body(rows = `Sex Group` == "female")
+    ) %>%
+    # Bold the Overall rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Age Band` == "Overall"
+      )
+    ) %>%
+    # Bold the "All Races" rows
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_body(
+        columns = everything(),
+        rows = `Race` == "All Races"
+      )
+    ) %>%
+    tab_options(
+      table.font.size = px(11),
+      heading.title.font.size = px(14),
+      heading.subtitle.font.size = px(12),
+      column_labels.font.weight = "bold",
+      data_row.padding = px(3)
+    ) %>%
+    tab_source_note(
+      source_note = md("*I² represents heterogeneity; Q test assesses between-study variation; — indicates insufficient data*")
+    )
+  
+  # Create race comparison plot layout
+  race_row1 <- (
+      race_output_list[["main meta-analysis"]]$plot |
+        race_output_list[["male"]]$plot |
+        race_output_list[["female"]]$plot 
+    )
+  
+  race_row2 <- wrap_elements(full = race_summary_gt)
+  
+  race_layout <- race_row1 + race_row2 + 
+    plot_layout(design = design,
+                axis_titles = "collect",
+                axes = "collect") + 
+    plot_annotation(
+      title = paste0(urine_component_for_title, " - Race Stratification"),
+      tag_levels = "A",
+      theme = theme(plot.title = element_text(face = "bold", size = 14))
+    )
+  
+  # --- 12. Return results --------------------
+  return(list(
+    ma_results = combined_results,
+    main_meta_analysis = output_list[["main meta-analysis"]],
+    male = output_list[["male"]],
+    female = output_list[["female"]],
+    combined_plot = final_layout,
+    combined_summary_table = combined_summary_gt,
+    race_plot = race_layout,
+    race_summary_table = race_summary_gt,
+    race_only_table = race_only_summary_gt,
+    wald_tests = list(
+      sex_comparison = sex_comparison_gt,
+      race_comparisons = race_comparisons_gt,
+      age_band_comparisons = age_band_comparisons_gt,
+      sex_within_age_bands = age_band_sex_comparisons_gt
+    )
+  ))
+}
+```
+\newpage
+
+# Meta-analysis by Urine Component {.tabset .tabset-pills}
+## Volume
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+volume_ma_2nd_analysis <- sex_age_subdivision_ma("volume")
+volume_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+volume_ma_2nd_analysis$wald_tests$sex_comparison
+volume_ma_2nd_analysis$wald_tests$age_band_comparisons
+volume_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+volume_ma_3rd_analysis <- sex_age_race_subdivision_ma("volume", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+volume_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+volume_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+volume_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+volume_ma_3rd_analysis$wald_tests$sex_comparison
+volume_ma_3rd_analysis$wald_tests$race_comparisons
+volume_ma_3rd_analysis$wald_tests$age_band_comparisons
+volume_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+
+## Calcium
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+calcium_ma_2nd_analysis <- sex_age_subdivision_ma("calcium")
+calcium_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+calcium_ma_2nd_analysis$wald_tests$sex_comparison
+calcium_ma_2nd_analysis$wald_tests$age_band_comparisons
+calcium_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+calcium_ma_3rd_analysis <- sex_age_race_subdivision_ma("calcium", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+calcium_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+calcium_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+calcium_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+calcium_ma_3rd_analysis$wald_tests$sex_comparison
+calcium_ma_3rd_analysis$wald_tests$race_comparisons
+calcium_ma_3rd_analysis$wald_tests$age_band_comparisons
+calcium_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Urate
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+urate_ma_2nd_analysis <- sex_age_subdivision_ma("urate")
+urate_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+urate_ma_2nd_analysis$wald_tests$sex_comparison
+urate_ma_2nd_analysis$wald_tests$age_band_comparisons
+urate_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+urate_ma_3rd_analysis <- sex_age_race_subdivision_ma("urate", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+urate_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+urate_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+urate_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+urate_ma_3rd_analysis$wald_tests$sex_comparison
+urate_ma_3rd_analysis$wald_tests$race_comparisons
+urate_ma_3rd_analysis$wald_tests$age_band_comparisons
+urate_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Creatinine
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+creat_ma_2nd_analysis <- sex_age_subdivision_ma("creat")
+creat_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+creat_ma_2nd_analysis$wald_tests$sex_comparison
+creat_ma_2nd_analysis$wald_tests$age_band_comparisons
+creat_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+creat_ma_3rd_analysis <- sex_age_race_subdivision_ma("creat", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+creat_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+creat_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+creat_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+creat_ma_3rd_analysis$wald_tests$sex_comparison
+creat_ma_3rd_analysis$wald_tests$race_comparisons
+creat_ma_3rd_analysis$wald_tests$age_band_comparisons
+creat_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Oxalate
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+oxalate_ma_2nd_analysis <- sex_age_subdivision_ma("oxalate")
+oxalate_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+oxalate_ma_2nd_analysis$wald_tests$sex_comparison
+oxalate_ma_2nd_analysis$wald_tests$age_band_comparisons
+oxalate_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+oxalate_ma_3rd_analysis <- sex_age_race_subdivision_ma("oxalate", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+oxalate_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+oxalate_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+oxalate_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+oxalate_ma_3rd_analysis$wald_tests$sex_comparison
+oxalate_ma_3rd_analysis$wald_tests$race_comparisons
+oxalate_ma_3rd_analysis$wald_tests$age_band_comparisons
+oxalate_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## pH
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+ph_ma_2nd_analysis <- sex_age_subdivision_ma("ph")
+ph_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+ph_ma_2nd_analysis$wald_tests$sex_comparison
+ph_ma_2nd_analysis$wald_tests$age_band_comparisons
+ph_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+ph_ma_3rd_analysis <- sex_age_race_subdivision_ma("ph", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+ph_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+ph_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+ph_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+ph_ma_3rd_analysis$wald_tests$sex_comparison
+ph_ma_3rd_analysis$wald_tests$race_comparisons
+ph_ma_3rd_analysis$wald_tests$age_band_comparisons
+ph_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Citrate
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+citrate_ma_2nd_analysis <- sex_age_subdivision_ma("citrate")
+citrate_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+citrate_ma_2nd_analysis$wald_tests$sex_comparison
+citrate_ma_2nd_analysis$wald_tests$age_band_comparisons
+citrate_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+citrate_ma_3rd_analysis <- sex_age_race_subdivision_ma("citrate", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+citrate_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+citrate_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+citrate_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+citrate_ma_3rd_analysis$wald_tests$sex_comparison
+citrate_ma_3rd_analysis$wald_tests$race_comparisons
+citrate_ma_3rd_analysis$wald_tests$age_band_comparisons
+citrate_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Phosphate
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+phosphate_ma_2nd_analysis <- sex_age_subdivision_ma("phosphate")
+phosphate_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+phosphate_ma_2nd_analysis$wald_tests$sex_comparison
+phosphate_ma_2nd_analysis$wald_tests$age_band_comparisons
+phosphate_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+phosphate_ma_3rd_analysis <- sex_age_race_subdivision_ma("phosphate", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+phosphate_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+phosphate_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+phosphate_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+phosphate_ma_3rd_analysis$wald_tests$sex_comparison
+phosphate_ma_3rd_analysis$wald_tests$race_comparisons
+phosphate_ma_3rd_analysis$wald_tests$age_band_comparisons
+phosphate_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Phosphorous
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+phosphorus_ma_2nd_analysis <- sex_age_subdivision_ma("phosphorus")
+phosphorus_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+phosphorus_ma_2nd_analysis$wald_tests$sex_comparison
+phosphorus_ma_2nd_analysis$wald_tests$age_band_comparisons
+phosphorus_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+phosphorus_ma_3rd_analysis <- sex_age_race_subdivision_ma("phosphorus", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+phosphorus_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+phosphorus_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+phosphorus_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+phosphorus_ma_3rd_analysis$wald_tests$sex_comparison
+phosphorus_ma_3rd_analysis$wald_tests$race_comparisons
+phosphorus_ma_3rd_analysis$wald_tests$age_band_comparisons
+phosphorus_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Sodium
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+sodium_ma_2nd_analysis <- sex_age_subdivision_ma("sodium")
+sodium_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+sodium_ma_2nd_analysis$wald_tests$sex_comparison
+sodium_ma_2nd_analysis$wald_tests$age_band_comparisons
+sodium_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+sodium_ma_3rd_analysis <- sex_age_race_subdivision_ma("sodium", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+sodium_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+sodium_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+sodium_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+sodium_ma_3rd_analysis$wald_tests$sex_comparison
+sodium_ma_3rd_analysis$wald_tests$race_comparisons
+sodium_ma_3rd_analysis$wald_tests$age_band_comparisons
+sodium_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Potassium
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+potassium_ma_2nd_analysis <- sex_age_subdivision_ma("potassium")
+potassium_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+potassium_ma_2nd_analysis$wald_tests$sex_comparison
+potassium_ma_2nd_analysis$wald_tests$age_band_comparisons
+potassium_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+potassium_ma_3rd_analysis <- sex_age_race_subdivision_ma("potassium", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+potassium_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+potassium_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+potassium_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+potassium_ma_3rd_analysis$wald_tests$sex_comparison
+potassium_ma_3rd_analysis$wald_tests$race_comparisons
+potassium_ma_3rd_analysis$wald_tests$age_band_comparisons
+potassium_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Magnesium
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+magnesium_ma_2nd_analysis <- sex_age_subdivision_ma("magnesium")
+magnesium_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+magnesium_ma_2nd_analysis$wald_tests$sex_comparison
+magnesium_ma_2nd_analysis$wald_tests$age_band_comparisons
+magnesium_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+magnesium_ma_3rd_analysis <- sex_age_race_subdivision_ma("magnesium", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+magnesium_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+magnesium_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+magnesium_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+magnesium_ma_3rd_analysis$wald_tests$sex_comparison
+magnesium_ma_3rd_analysis$wald_tests$race_comparisons
+magnesium_ma_3rd_analysis$wald_tests$age_band_comparisons
+magnesium_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Ammonium
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+ammonium_ma_2nd_analysis <- sex_age_subdivision_ma("ammonium")
+ammonium_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+ammonium_ma_2nd_analysis$wald_tests$sex_comparison
+ammonium_ma_2nd_analysis$wald_tests$age_band_comparisons
+ammonium_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+ammonium_ma_3rd_analysis <- sex_age_race_subdivision_ma("ammonium", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+ammonium_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+ammonium_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+ammonium_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+ammonium_ma_3rd_analysis$wald_tests$sex_comparison
+ammonium_ma_3rd_analysis$wald_tests$race_comparisons
+ammonium_ma_3rd_analysis$wald_tests$age_band_comparisons
+ammonium_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Chloride
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+chloride_ma_2nd_analysis <- sex_age_subdivision_ma("chloride")
+chloride_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+chloride_ma_2nd_analysis$wald_tests$sex_comparison
+chloride_ma_2nd_analysis$wald_tests$age_band_comparisons
+chloride_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+chloride_ma_3rd_analysis <- sex_age_race_subdivision_ma("chloride", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+chloride_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+chloride_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+chloride_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+chloride_ma_3rd_analysis$wald_tests$sex_comparison
+chloride_ma_3rd_analysis$wald_tests$race_comparisons
+chloride_ma_3rd_analysis$wald_tests$age_band_comparisons
+chloride_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Sulphate
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+sulphate_ma_2nd_analysis <- sex_age_subdivision_ma("sulphate")
+sulphate_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+sulphate_ma_2nd_analysis$wald_tests$sex_comparison
+sulphate_ma_2nd_analysis$wald_tests$age_band_comparisons
+sulphate_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+sulphate_ma_3rd_analysis <- sex_age_race_subdivision_ma("sulphate", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+sulphate_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+sulphate_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+sulphate_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+sulphate_ma_3rd_analysis$wald_tests$sex_comparison
+sulphate_ma_3rd_analysis$wald_tests$race_comparisons
+sulphate_ma_3rd_analysis$wald_tests$age_band_comparisons
+sulphate_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+## Urea
+### Comparison by Age Band
+#### Plot
+```{r warning=FALSE}
+urea_ma_2nd_analysis <- sex_age_subdivision_ma("urea")
+urea_ma_2nd_analysis$combined_plot
+```
+\newpage
+
+#### Wald Tests
+```{r}
+urea_ma_2nd_analysis$wald_tests$sex_comparison
+urea_ma_2nd_analysis$wald_tests$age_band_comparisons
+urea_ma_2nd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+### Comparison by Age / Sex / Race
+#### Plot
+```{r}
+urea_ma_3rd_analysis <- sex_age_race_subdivision_ma("urea", 
+                                                      urine_ma2, 
+                                                      overall_bias)
+urea_ma_3rd_analysis$race_plot
+```
+\newpage
+
+#### Combined MA Results
+```{r}
+urea_ma_3rd_analysis$combined_summary_table
+```
+
+
+#### Table of Results subdivided by Race / Sex / Age
+```{r}
+urea_ma_3rd_analysis$race_summary_table
+```
+\newpage
+
+#### Wald Tests
+```{r}
+urea_ma_3rd_analysis$wald_tests$sex_comparison
+urea_ma_3rd_analysis$wald_tests$race_comparisons
+urea_ma_3rd_analysis$wald_tests$age_band_comparisons
+urea_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
