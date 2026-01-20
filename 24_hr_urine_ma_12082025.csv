@@ -1,0 +1,700 @@
+study,year,journal,title,first_author,and,ascertainment_of_measurements,OK_measurement,mean_age,age_sd,restricted_diet,child_adult,race,male_female,other_demographic_variant,age_band,underlying_cause,stone_vs_no_stone,total_n,male_n,female_n,reference_range_vol,volume_mean (mL),volume_sd (mL),ph_mean,ph_sd,creatinine_mean (mmol/24h),creatinine_sd (mmol/24h),calcium_mean (mmol/24h),calcium_sd (mmol/24h),oxalate_mean (mmol/24h),oxalate_sd (mmol/24h),urate_mean (mmol/24h),urate_sd (mmol/24h),citrate_mean (mmol/24h),citrate_sd (mmol/24h),phosphate_mean (mmol/24h),phosphate_sd (mmol/24h),sodium_mean (mmol/24h),sodium_sd (mmol/24h),potassium_mean (mmol/24h),potassium_sd (mmol/24h),magnesium_mean (mmol/24h),magnesium_sd (mmol/24h),ammonium_mean (mmol/24h),ammonium_sd (mmol/24h),chloride_mean (mmol/24h),chloride_sd (mmol/24h),sulphate_mean (mmol/24h),sulphate_sd (mmol/24h),urea_mean (mmol/24h),urea_sd (mmol/24h),COMMENTS
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+12,2022,"Journal of the American Society of Nephrology 33(11), pp. 2071–2086",Nuclear Magnetic Resonance Metabolomic Profiling and Urine Chemistries in Incident Kidney Stone Formers Compared with Controls.,Thongprayoon,no,NMR,,45.33,18.59,no,adult,mixed,mixed,no,18+,no,no_stone,440,215,225,-,1760,880,6.28,0.68,8.530763791,3.695102546,3.472478667,1.939218524,0.255288691,0.10145652,2.428945333,1.097198263,2.783649721,1.474968082,6.268545135,3.132535195,116.33,61.73,48.4,23.06,3.468422135,1.689364328,,,,,,,,,"Values not in mean + SD.
+Convert meq values to mmol
+Uric acid not urate
+Mean and SD calc from median Q1 Q3"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+32,2017,"Inflammatory Bowel Diseases 23(5), pp. 840–846",Etiopathogenesis of Nephrolithiasis in Ulcerative Colitis Patients with the Ileal Pouch Anal Anastomosis.,Arora,no,"""standard clinical assay""",,49.4,14.9,no,adult,mixed,mixed,no,18+,uc,no_stone,20,10,10,-,1440,940,5.4,0.56,,,2.732172264,1.682219672,0.304824013,0.11781681,2.974243055,0.594848611,1.581081647,1.43609117,8.739509956,2.737677817,91.5,71.01,64.1,22.8,2.797778235,1.209627649,42.4,19.1,124.5,33.11,15.55,6.05,,,"Adult patients diagnosed with UC who had previously undergone restorative proctocolectomy with IPAA
+Urate is uric acid
+Convert mmol to mM
+Mean and SD calc from median Q1 Q3"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+33,2017,"PLoS ONE [Electronic Resource] 12(9), pp. e0184655",Influence of weight status on 24-hour urine composition in adults without urolithiasis: A nationwide study based on a Chinese Han population.,Deng,no,"Oxalate and citrate - ion exchange chromatography
+sodium, potassium, calcium, phosphate and creatinine - Unicel DxC 600 synchronic biochemical detecting system
+uric acid, magnesium - Beckman coulter AU680 automatic biochemistry analyser","Ox, ICP; Cit, ICP",48.86,16.25,no,adult,mixed,mixed,no,18+,no,no_stone,376,188,188,-,1445.09,611.1,5.97,0.71,9.93,3.41,4.15,2.14,0.26,0.15,3.11,1.13,1.98,1.28,16.84,6.69,180.53,164.17,40.91,16.46,3.5,1.55,,,177.36,167.6,,,,,"From a study in China between May 2013 and July 2014. 584 Chinese Han adults
+Contains standard, under and overweight adults. Some have hyperuricemia.
+Urate is uric acid
+weight categories by BMI WHO guidelines
+Standard weight"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2017,,,Deng,no,,,53.96,19.28,no,adult,mixed,mixed,no,18+,underweight,no_stone,24,12,12,-,1296.25,425.93,5.94,0.54,9.46,2.71,3.97,2.03,0.22,0.09,3.03,0.85,1.78,1.14,16.17,5.11,207.93,259.52,41.41,13.83,3.34,1.42,,,205.68,269.19,,,,,Underweight
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2017,,,Deng,no,,,52.14,14.25,no,adult,mixed,mixed,no,18+,overweight,no_stone,149,64,85,-,1522.89,672.94,5.88,0.62,9.95,2.79,4.25,2.36,0.27,0.15,3.19,1.12,2.49,1.46,17.31,6.23,194.79,82.34,47.54,23.09,3.89,1.75,,,189.25,83.73,,,,,Overweight
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2017,,,Deng,no,,,50.03,12.84,no,adult,mixed,mixed,no,18+,obese,no_stone,35,14,21,-,1450.86,675.57,6,0.76,10.46,2.66,4.2,2.39,0.27,0.14,3.31,1.15,2.83,1.74,19.12,6.35,192.66,70.77,45.66,19.62,4.19,1.83,,,186.95,74.3,,,,,Obese
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+51,2015,"Nephron 130(1), pp. 35–40",Daily sodium and potassium excretion can be estimated by scheduled spot urine collections.,Doenyas-Barak,no,"Sodium, potassium, chloride - ISE module of Hitachi systems using ion selective electrodes
+creatinine - Jaffe method","Na, ICP; K, ICP; Cl, ICP",48.7,12.5,no,adult,mixed,male,no,18+,no,no_stone,22,22,0,-,,,,,12.56188119,1.865275813,,,,,,,,,,,163.6953631,61.54945651,83.67719988,31.82813738,,,,,118.3325227,60.01553784,,,,,men
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2015,,,Doenyas-Barak,no,,,44.7,15.3,no,adult,mixed,female,no,18+,no,no_stone,26,0,26,-,,,,,8.619165488,1.821074965,,,,,,,,,,,138.3771469,48.0173065,71.09995205,28.234638,,,,,35.20719289,18.28266693,,,,,women
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+52,2015,"Urology 86(3), pp. 587–592",Factors Associated With the Lower Prevalence of Nephrolithiasis in Children Compared With Adults.,Grases,no,"lithogenic biochemical parameters were measured on a Modular Autoanalyzer (Roche Diagnostics)
+Phosphorus - ammonium molybdate reduction
+magnesium - colourimetric reaction with xylidyl blue
+calcium - colourimetric reaction with o-cresolphthalein
+uric acid - uricase method
+creatinine - Jaffe method
+citrate - spectrophotometrically by citrate lyase using test kit (R-Biopharm)
+oxalate - oxidase/peroxidase method (LTA)",,,,no,adult,mixed,mixed,no,18+,no,no_stone,75,42,33,,1216.67,415.74,,,,,4.766135785,2.202744029,0.294843908,0.146247002,3.466688061,1.301998293,3.433446865,1.838221093,26.74041876,12.29398482,,,,,3.220258428,0.718838971,,,,,,,,,"Phosphate is phosphorus
+Uric acid not urate
+Mean and SD calc from median Q1 Q3"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+56,2014,"Urology 84(1), pp. 22–26",Determinants of urolithiasis before and after parathyroidectomy in patients with primary hyperparathyroidism.,Elkoushy,no,-,,,,no,adult,mixed,mixed,no,18+,hyperparathyroid,no_stone,204,57,147,"Hypercalciuria - >300, >250 mg/24h men, women
+hypocitraturia <320 mg/24h
+hyperuricosuria >800 mg/24h
+hyperoxaluria >45 mg/24h",1625,500.5,,,,,7.959479016,0.517690504,0.299938649,0.035356404,,,2.511563658,0.237123004,6.938960314,1.329963884,,,,,,,,,,,,,,,"Patients have hyperparathyroidism (PHPT) and are about to undergo parathyroidectomy (PTX)
+Unsure if sd is range or Q1 Q3
+Does not have post op non-stone formers - only pre-op"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+62,2014,"Urology 84(4), pp. 779–781",Fish oil supplementation and urinary oxalate excretion in normal subjects on a low-oxalate diet.,Lange,no,"All except oxalate - Beckman C5E analyser (Beckman Coulter)
+oxalate - a kit provided by Trinity Biotech",,25.3,2.7,no,adult,mixed,mixed,no,18+,no,no_stone,15,8,7,-,2268,826,,,13.56082037,4.137199434,3.568042317,1.447178003,0.374923311,0.113613125,3.259770388,0.916066861,2.338893656,1.674375772,9.39234082,3.285213381,137.7555459,45.84602001,76.21873242,32.94286153,3.661797984,1.275457725,,,,,,,,,"Diet controlled
+Only self selected diet used as same individuals used for consecutive diet changes
+Uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+63,2014,"Clinical Journal of the American Society of Nephrology: CJASN 9(1), pp. 159–165",Body fat content and distribution and urinary risk factors for nephrolithiasis.,Pigna,no,"Calcium - atomic absorption
+oxalate- chromatography carbonate-bicarbonate eluent and an anion column
+phosphorus - ammonium molybdate-based reaction
+uric acid - urate oxidase
+sodium and potassium - flame emission photometry 
+chloride - Labconco Buchler chloridometer
+sulphate - ion chromatography
+ammonium - glutamate dihydrogenase method
+citrate - citrate lyase","Ca, AAS",52.1,13.6,no,adult,mixed,male,no,18+,t2dm,no_stone,21,21,0,-,2600,600,5.92,0.47,15.22277228,3.695190948,3.817555766,1.397275313,0.306755436,0.04544525,3.075367319,1.17780025,3.558048515,1.61158668,21.92444301,7.200516629,94,43,41,12,,,34.7,8.9,,,18.7,5.9,,,"Participants with type 2 diabetes mellitus (T2DM) participated in the study if they were not receiving insulin or thiazolidinediones. 
+Phosphorus not phosphate
+Uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+72,2013,"Journal of Translational Medicine 11, pp. 248",Influence of lean and fat mass on bone mineral density and on urinary stone risk factors in healthy women.,Nouvenne,no,-,,46,6,no,adult,mixed,female,no,18+,low lean mass (index of lean mass (ILM) <1296,no_stone,39,0,39,-,1603,698,5.95,0.51,8.760608204,1.714992928,3.892409801,1.546983382,0.238587562,0.079529187,2.712509666,0.808994111,3.244103058,0.931371523,16.79044236,5.618340329,124,49,47,13,2.71549064,0.822875951,27,11,131,50,16,4,0.366300366,0.0999001,"Phosphate is phosphorus
+Urate is uric acid
+low lean mass (index of lean mass (ILM) <1296"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2013,,,Nouvenne,no,,,46,6,no,adult,mixed,female,no,18+,no,no_stone,39,0,39,-,1640,835,5.96,0.45,10.06011315,1.688472419,4.690852837,2.270572384,0.306755436,0.124974437,3.021830944,0.690024389,4.222566399,1.690073045,21.47239264,6.005812076,143,45,60,18,3.497222794,1.069738737,30,9,151,49,18,5,0.382950383,0.0999001,ILM >1296
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+73,2012,"Urology 79(1), pp. 48–54",Biochemical determinants of severe lithogenic activity in patients with idiopathic calcium nephrolithiasis.,Arrabal-Polo,no,-,,49.53,10.14,no,adult,mixed,mixed,no,18+,no,no_stone,60,unknown,unknown,,1932.08,745.57,6.24,0.76,,,5.669260143,1.237097784,0.395117362,0.206339067,4.25029388,2.488202511,,,11.18710756,5.419613482,204.2788184,98.1689848,85.3399736,47.0847896,4.705992018,2.480184983,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+76,2012,"Saudi Journal of Kidney Diseases & Transplantation 23(6), pp. 1227–1231",Comparison of 24-hour urinary citrate excretion in stone formers and healthy volunteers.,Goodarzi,no,"Citrate - enzymatic method (colourimetric kit, LTA)
+Creatinine - Jaffe method
+Uric acid - uricase method",,39.9,12.6,no,adult,mixed,mixed,no,18+,no,no_stone,27,18,9,-,1198,401,5.93,0.67,15.91230552,6.188118812,,,,,4.050919041,0.874427458,4.714414282,2.166223655,,,,,,,,,,,,,,,,,urate is uric acid
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+77,2012,"Urology 80(5), pp. 990–994",Urinary stone risk and cola consumption.,Herrel,no,"Analysed by Mission Pharmacal (Boerne, TX)",,38.7,range 23-62,no,adult,mixed,mixed,no,18+,no,no_stone,10,unknown,unknown,-,2441.8,964,5.9,0.4,16.79455446,9.909830269,3.420829383,2.153301063,0.33743098,0.182917131,3.489381952,1.502587591,3.61298897,2.752255175,22.25702293,8.588957055,138,39.6,43.3,18,4.299526846,1.773297675,,,,,,,,,"water and cola diet controlled. Only water taken to avoid duplication
+phosphate may be phosphorus?
+Urate is uric acid"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+78,2012,"Urology 80(3), pp. 529–534",Urinary metabolic evaluation of stone formers-a Malaysian perspective.,Hong,no,"Creatinine, sodium, potassium, urate - Clinical diagnostic laboratory UMMC Dimension Clinical Chemistry System and QuikLYTE Integrated Multisensor",,50.2,10.8,no,adult,mixed,mixed,no,18+,no,no_stone,30,12,18,,1215,575,5.87,0.67,,,4.09,2.37,0.386,0.111,2.428945333,1.097198263,1.278,1.082,19.33,5.32,147.18,71.45,33.24,11.56,2.83,1.02,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+83,2012,"Surgery 151(3), pp. 477–483",Differences in metabolic urinary abnormalities in stone forming and nonstone forming patients with primary hyperparathyroidism.,Sorensen,no,analysed by Litholink Corp,,58,12,no,adult,mixed,mixed,no,18+,hyperparathyroid,no_stone,50,13,37,"low urine volume (<500 ml/day), hypercalciuria (>250 mg/day for men, >200 mg/day for women), hyperoxaluria (>40 mg/day), hypocitraturia (<450 mg/day for men, <550 mg/day for women), hyperuricosuria (>800 mg/day for men, >750 mg/day for women), pH greater than 6.2",2100,800,6.17,0.55,,,7.136084635,4.341534009,0.443091186,0.181780999,3.664267444,1.374100291,3.892923669,2.181920928,11.61957053,4.397893293,155,71,,,,,,,,,,,,,urate is uric acid
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+86,2011,"Urology 78(3), pp. 531–534",Oxalobacter colonization in the morbidly obese and correlation with urinary stone risk.,Duffey,no,analysed by Litholink Corp,,46,10.4,no,adult,mixed,mixed,no,18+,obese,no_stone,51,16,35,-,2070,101,5.85,0.5,,,4.466290733,2.894356006,0.409007249,0.147697062,,,4.049896398,2.354590929,,,185,91,,,4.114379757,2.057189879,,,,,,,,,"Patients either Oxalobacter formigenes pos or neg… both included
+All patients scheduled for Roux-en-Y gastric bypass (RYGB) "
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+91,2011,"Urology Journal 8(2), pp. 99–106",The most important metabolic risk factors in recurrent urinary stone formers.,Parvin,no,"sodium, potassium  - flame photometrychloride, calcium, magnesium - colourimetriccreatinine - Jaffoxalate, uric acid - enzymaticcitrate - enzymatic colourimetricurea - urease","Na, FES; K, FES",38.36,6.907,no,adult,mixed,male,no,18+,no,no_stone,109,109,0,-,1338.2,448.67,5.9817,0.47957,14.58628006,4.862093352,3.898897151,1.82893358,0.3366,0.1284,2.094461959,1.224555351,2.413194081,0.121905021,19.05069422,7.426541815,211.73,69.53,53.9,21.59,3.745319893,1.793458136,,,167.96,52.04,,,0.315684316,0.104062604,"pH is first morning only. Rest is 24h
+Phosphorus not phosphate
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+98,2010,"Clinical Journal of the American Society of Nephrology: CJASN 5(7), pp. 1277–1281",Metabolic basis for low urine pH in type 2 diabetes.,Maalouf,no,multichannel analyser,,52,10,no,adult,mixed,mixed,no,18+,obese without type 2 diabetes,no_stone,16,8,8,-,2700,400,5.9,0.42,13.28677511,3.62446959,3.917361146,1.497080693,0.261310187,0.04544525,3.081315805,0.808994111,3.987107307,1.234852132,16.72586374,5.134000646,97,38,36,12,3.908660769,0.822875951,34.7,8.9,93,29,19,3.5,,,"Patients with and without type 2 diabetes, both included. Patients without were recruited as overweight or obese
+Phosphate is phosphorus
+uric acid not urate
+patients without diabetes (and obese)"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2010,,,Maalouf,no,,,54,11,no,adult,mixed,mixed,no,18+,obese with type 2 diabetes,no_stone,9,5,4,,2500,600,5.45,0.27,13.61386139,4.862093352,3.99221518,2.170767004,0.284032811,0.056806562,3.182440069,0.874427458,2.610979719,1.653446075,16.79044236,6.102680013,75,30,32,10,2.921209628,0.946307344,39,5,78,18,18.5,3.5,,,with diabetes
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+102,2009,"Archivio Italiano Di Urologia, Andrologia 81(3), pp. 171–174",Risk factors for renal calcium stone formation in South African and European young adults.,Rodgers,no,"sodium, potassium - atomic absorption or flame ohotometry
+calcium - atomic absorption or Corning 940 calcimeter
+magnesium - atomic absorption",,50,10,no,adult,white,mixed,no,18+,no,no_stone,18,16,2,-,,,6.09,0.3,,,4.65,2.44,0.29,0.05,3.72,1.12,3.09,1.45,,,216,189,55,38,3.41,1.29,,,,,,,,,"""south African whites"""
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2009,,,Rodgers,no,,,50,10,no,adult,black,mixed,no,18+,no,no_stone,17,10,7,,,,6.2,0.37,,,3.07,1.68,0.28,0.06,3.35,1.04,3.36,1.4,,,237,130,50,28,3.47,1.52,,,,,,,,,"""south African blacks"""
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2009,,,Rodgers,no,,,50,10,no,adult,white,mixed,no,18+,no,no_stone,37,19,18,,,,6.01,0.37,,,4.51,1.89,0.28,0.07,3.3,1.35,2.36,0.98,,,181,69,51,18,3.44,2.16,,,,,,,,,"""european"""
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+105,2009,"Journal of Urology 182(3), pp. 992–997",Effect of carbohydrate-electrolyte sports beverages on urinary stone risk factors.,Sweeney,no,-,,36.3,10.6,yes,adult,mixed,mixed,no,18+,no,no_stone,14,unknown,unknown,,1640,1000,6.17,0.33,12.90664781,4.066478076,4.144418384,2.21817456,0.177236474,0.057942694,2.954482891,0.907230314,3.168756148,1.577575922,8.944835792,3.398932306,120.9,54.5,52.4,20.5,3.402592059,1.324830282,33.34703464,9.453904874,108.2,50.2,18.4,7.9,,,"Diet controlled. Baseline only used
+Ammonia not ammonium
+sulphide not sulphate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+108,2008,"Journal of Urology 180(3), pp. 974–979","Urinary stone disease in adults with celiac disease: prevalence, incidence and urinary determinants.",Ciacci,no,-,,35.8,,no,adult,mixed,mixed,no,18+,no,no_stone,45,9,36,-,1246,,,,,,4.366485354,,0.289713468,,2.049047887,0,2.978819146,0,23.66806587,,,,,,,,,,,,,,,,"healthy volunteers only used
+Phosphorus not phosphate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+113,2007,"Journal of Endourology 21(2), pp. 232–235", Effect of dietary control of urinary uric acid excretion in calcium oxalate stone formers and non-stone-forming controls.,Pais,no,spectrum analyser with assay kits (Abbott),,43,10,yes,adult,mixed,mixed,no,18+,no,no_stone,61,12,49,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"On standardised formula diet for 3 days by Ohio weight loss planner
+Uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+114,2007,"Journal of the Medical Association of Thailand 90(4), pp. 688–698",Urinary risk factors for recurrent calcium stone formation in Thai stone formers.,Stitchantrakul,no,"Urinary magnesium (Mg) was determined by atomic 690 J Med Assoc Thai Vol. 90 No. 4 2007 absorption spectrophotometry, urinary citrate (Cit) by citrate lyase technique(10), and urinary oxalate (Ox) by high performance liquid chromatography (HPLC)",,42.6,1.9,no,adult,mixed,mixed,no,40-50,no,no_stone,34,14,20,,1870,150,,,10.25,0.56,4.06,0.35,0.12,0.01,3.29,0.17,1.86,0.18,18.08,1.1,160.6,9.8,36.1,2.3,3.54,0.22,,,164.3,9.5,,,267.6,15.4,Uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+116,2006,"Journal of the American Society of Nephrology 17(5), pp. 1422–1428",Urine composition in type 2 diabetes: predisposition to uric acid nephrolithiasis.,Cameron,no,"Potassium - ion-specific electrode
+uric acid - uricase
+creatinine - picric method
+ammonium - glutamate dehydrogenase
+sulphate - ion chromatography
+citrate - enzymatically","K, Electrode",49,8,no,adult,mixed,mixed,no,18+,no,no_stone,59,24,35,,2100,1100,6.05,0.42,,,,,,,2.974243055,0.922015347,3.666666667,1.333333333,,,,,60,22,,,29,14,,,18.5,6.5,,,"Normal volunteers 
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Cameron,no,,,52,8,no,adult,mixed,mixed,no,18+,t2dm,no_stone,24,10,14,,2200,1200,5.66,0.42,,,,,,,3.450121944,1.332460889,3.666666667,1.666666667,,,,,63,19,,,36,17,,,22.5,9,,,Type 2 diabetes and no stones
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+117,2006,"Journal of Urology 176(1), pp. 132–136",Effect of high and low calcium diets on stone forming risk during liberal oxalate intake.,Matsumoto,no,,,,,yes,adult,mixed,mixed,no,18+,no,no_stone,10,5,5,,2610,475,6.015,0.335,14.92220651,3.748231966,3.680323369,1.409750986,0.295394124,0.051125906,3.179465826,0.71084409,3.387994726,1.056949706,25.75072651,7.684856313,99,34.5,48,9.5,3.929232668,0.946307344,,,,,19.45,5.05,,,"high and low calcium diets… both used and averaged as same participants used 
+phosphorus not phosphate
+uric acid not urate
+units for ammonium not given - excluded"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+122,2005,"Journal of Urology 174(4 Pt 2), pp. 1708–1710",Results of a prospective trial to compare normal urine supersaturation in children and adults.,Defoor,no,Litholink Corporation,,,,no,adult,mixed,mixed,no,18+,no,no_stone,168,97,71,,,,6.05,0.41,,,,,,,,,,,,,,,,,,,,,,,,,,,Uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+123,2005,"Journal of Urology 174(2), pp. 590–594",Effect of cranberry juice consumption on urinary stone risk factors.,Gettman,no,,,34.8,9.6,no,adult,mixed,mixed,no,18+,no,no_stone,12,6,6,,2270,300,5.97,0.37,15.14321075,3.226661952,3.243674834,1.472129348,0.29198573,0.057942694,3.158646125,0.695972875,2.537725779,0.84242031,19.59961253,6.651598321,74,28,,,,,,,,,,,,,"water vs cranberry juice - only water used
+phosphorus not phosphate
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+129,2005,"Journal of Endourology 19(2), pp. 177–182",Genetic and dietary factors in urinary citrate excretion.,Shah,no,,,30,,no,adult,mixed,mixed,no,18+,no,no_stone,101,54,47,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+133,2004,"Kidney International 65(2), pp. 386–392",The metabolic syndrome and uric acid nephrolithiasis: novel features of renal manifestation of insulin resistance.,Abate,no,"sodium, potassium - flame photometry
+chloride - silver precipitation
+uric acid - uricase
+creatinine - picric acid method
+citrate - enzymatically
+ammonium - glutamate dehydrogenase
+sulphate - ion chromatography","Na, FES; K, FES",31,11,no,adult,mixed,mixed,no,18+,no,no_stone,55,33,22,,2335,851,6.2,0.4,14.05586987,3.712871287,,,,,,,3.338286695,1.491240922,,,103,48,55,21,,,34,11,100,49,5.7,1.8,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+134,2004,"Journal of Urology 172(3), pp. 953–957",Assessment of oxalate absorption from almonds and black beans with and without the use of an extrinsic label.,Chai,no,"oxalate- oxalate oxidase method
+creatinine - picric acid methid
+calcium - atomic absorption spectroscopy",,,,yes,adult,mixed,mixed,no,18+,no,no_stone,9,5,4,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,diet controlled …pre diet load for the four tests averaged
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+136,2004,"Journal of Renal Nutrition 14(3), pp. 170–179",Renal response to lithogenic and anti-lithogenic supplement challenges in a stone-free population group.,Lewandowski,no,"sodium, potassium, calcium, magnesium - atomic absorption spectroscopy
+citrate, phosphate, urate, chlloride, creatinine 0 commercially available kits (Boehringer Mannheim)
+oxalate - enzymatic oxalate decarboxylase","Na, AAS; K, AAS; Ca, AAS; Mg, AAS",23.5,2.7,no,adult,black,male,black,20-30,no,no_stone,10,10,0,,1688,110.8,6.45,0.1,12.3,0.8,2.4,0.4,0.13,0.01,2.4,0.2,2.8,0.3,18.6,2.3,135.5,27.4,47,9.2,3.3,0.47,,,133.6,17.6,16.6,1.7,,,"Diet controlled - baseline results only used
+black"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2004,,,Lewandowski,no,,,21.6,1.6,no,adult,white,male,white,20-30,no,no_stone,10,10,0,,1538,110.8,6.4,0.1,14.5,0.8,3.9,0.4,0.15,0.01,3.4,0.2,1.8,0.3,28.9,2.9,112.6,27.4,47.1,9.2,4.1,0.4,,,138.2,17.6,20.8,1.7,,,white
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+140,2004,"Southeast Asian Journal of Tropical Medicine & Public Health 35(4), pp. 1028–1033",Effects of calcium supplements on the risk of renal stone formation in a population with low oxalate intake.,Stitchantrakul,no,"creatinine, sodium, potassium, chloride, urea, uric acid, calcium, phosphate - autoanalyser
+magnesium - atomic absorption
+citrate - citrate lyase
+oxalate - HPLC",,22.7,1.9,no,adult,mixed,male,no,20-30,no,no_stone,38,38,0,,1660,1070,,,16.85,6.15,3.48,2.13,0.17,0.07,3.06,0.97,0.64,0.39,19.64,8.08,147.3,67.5,21,7.1,3.6,1.2,,,178.4,73,,,223.06,58.22,"Diet controlled - baseline results only used
+Uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+142,2003,"Clinical Chemistry & Laboratory Medicine 41(1), pp. 39–45","Effects of calcium carbonate, magnesium oxide and sodium citrate bicarbonate health supplements on the urinary risk factors for kidney stone formation.",Allie,no,"sodium, potassium, calcium, magnesium - flame atomic absorption
+oxalate - oxalate decarboxylase
+citrate - citrate lyase
+phosphorus - ammonium molybdate
+creatinine - picric acid 
+uric acid - uricase
+chloride - ion selective chloride electrode","Na, AAS; K, AAS; Ca, AAS; Mg, AAS",,22-30,no,adult,mixed,male,no,20-30,no,no_stone,8,8,0,,,,6.38,0.05,15,0.43,2.94,0.21,0.18,0.02,3.52,0.168,2.61,0.24,33.1,1.84,193,19.21,65.5,5.03,4.7,0.34,,,128,7,,,,,"Diet controlled - baseline results only used
+Uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+143,2003,"Kidney International 63(3), pp. 1066–1071",Effect of vitamin C supplements on urinary oxalate and pH in calcium stone-forming patients.,Baxmann,no,"calcium - atomic absorption
+oxalate - enzymatic
+sodium, potassium - flame photometry
+urea - enzymatic ultraviolet
+creatinine - Jaffe's
+uric acid - colourimetric enzymatic
+citrate - enzymatic citrate lyase","Ca, AAS",37,16,no,adult,mixed,mixed,no,18+,no,no_stone,20,8,12,,1250,669,,,11.1562942,4.738330976,3.867458456,2.470183143,0.284032811,0.147697062,2.766046041,0.826839569,2.260407292,1.187760313,,,172,57,56,18,2.88006583,1.275457725,,,,,,,0.333000333,0.133200133,"Diet controlled - baseline results only used
+Urea is in g/24h - probably mistake and should be mg/24h
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+144,2003,"Urology 62(6), pp. 1123–1128","Lipid peroxidation and its correlations with urinary levels of oxalate, citric acid, and osteopontin in patients with renal calcium oxalate stones.",Huang,no,"sent to ""the central laboratory""",,50.8,1.8,no,adult,mixed,mixed,no,50-60,no,no_stone,32,27,5,,1846.75,,6.12,0.63,,,,,,,,,,,4.226813262,0.528351658,,,,,1.9,0.3,,,,,,,,,Citric acid not citrate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+145,2003,"Kidney International 64(6), pp. 2150–2154",Urine calcium and volume predict coverage of renal papilla by Randall's plaque.,Kuo,no,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,4,unknown,unknown,,2070.5,318.8819008,5.834,0.526004436,,,2.538911622,1.891943296,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+149,2003,"Frontiers in Bioscience 8, pp. 167",Urinary saturation and risk factors for calcium oxalate stone disease based on spot and 24-hour urine specimens.,Ogawa,no,"calcium, magnesium - ICP spectrophotometry
+oxalate, citrate - capillary electrophoresis
+creatinine - enzymatic","Ca, ICP; Mg, ICP",54.1,16.2,no,adult,mixed,mixed,no,18+,no,no_stone,22,6,16,,,,,,,,2.942,1.373,0.196,0.105,,,2.205,1.133,,,,,,,3.414,1.078,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+154,2003,"Journal of Urology 170(2 Pt 1), pp. 397–401",Effect of ascorbic acid consumption on urinary stone risk factors.,Traxer,no,"calcium, magnesium - atomic absorption
+oxalate - ion chromatography
+sodium, potassium, creatinine, phosphorus, uric acid, ammonium, citrate, sulphate - autoanalyser","Ca, AAS; Mg, AAS",38.1,11.3,no,adult,mixed,mixed,no,18+,no,no_stone,12,6,6,,2252.5,316,6.02,0.47,13.8437058,2.782885431,2.552522581,1.102849444,,,2.695853905,0.53536375,2.984051571,1.43263777,18.54698095,3.832741363,72,27.9,40,7.4,3.793458136,1.065624357,36.9,8.8,69.8,19.5,17.3,2.6,,,"Diet controlled - baseline results only used
+phosphorus not phosphate
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+161,2002,"Journal of Urology 168(3), pp. 931–936",Effects of 5 different diets on urinary risk factors for calcium oxalate kidney stone formation: evidence of different renal handling mechanisms in different race groups,Rodgers,no,commercially available kits,,,,no,adult,black,male,no,18+,no,no_stone,10,10,0,,1178,,6.22,,11.91,,2,,0.17,,2.57,,1.94,,19.69,,165.3,,35.2,,3.05,,,,129.18,,,,,,"Comparison between race and diet controlled. 
+Phosphorus not phosphate
+Uric acid not urate - no units - excluded
+south african black"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2002,,,Rodgers,no,,,,,no,adult,white,male,no,18+,no,no_stone,10,10,0,,1092,,6.24,,13.71,,3.11,,0.17,,3.37,,2.01,,28.89,,201.62,,40.01,,4.37,,,,144,,,,,,south african white
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+163,2001,"Kidney International 59(1), pp. 270–276",Contribution of dietary oxalate to urinary oxalate excretion.,Holmes,no,"oxalate, citrate, chloride, sulphate - capollary electrophoresis
+creatinine, urea, uric acid, citrate - MultiStat centrifugal analyser
+calcium - atomic absorption spectrophotometry",,29,4,yes,adult,mixed,mixed,no,20-30,no,no_stone,12,6,6,,2070,766,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Various oxalate diets. Only 'regular oxalate diet' used
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+164,2001,"Urology 58(3), pp. 493–497",Strong inhibition of crystal-cell attachment by pediatric urinary macromolecules: a close relationship with high urinary citrate secretion.,Miyake,no,,,31.5,4.4,no,adult,mixed,male,no,30-40,no,no_stone,11,11,0,,1505,590,6.08,0.46,17.57518564,6.931621287,5.595214332,0.38275363,0.598457134,0.239382854,4.48518827,1.002676819,2.535685134,1.393839344,11.25132935,3.961735688,,,,,3.331372146,1.300349722,,,,,,,,,Uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+166,2001,"Urology 57(1), pp. 26–29",Dietary supplementation with cranberry concentrate tablets may increase the risk of nephrolithiasis.,Terris,no,,,30.2,26-37,no,adult,mixed,mixed,no,20-30,no,no_stone,5,3,2,"pH - 5.5-6.5
+Vol - 2-4L/24h
+oxalate - <45mg/24h
+calcium - <300 mg/24h
+phosphate - <1100 mg/24h
+uric acid - <700 mg/24h
+sodium - <200mg/24h
+citrate - >320mg/24h
+magnesium - >60mg/24h
+potassium - 40-70 mEq/24h",2480,,5.82,,,,7.21093867,,0.329478061,,3.578609244,,1.343686557,,12.38272736,,7.316224445,,40.2,,4.299526846,0,,,,,,,,,"Diet controlled - baseline results only used
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+173,1999,"European Urology 36(2), pp. 136–143",Effects of a 'common sense diet' on urinary composition and supersaturation in patients with idiopathic calcium urolithiasis.,Hess,no,"calcium, phosphate, magnesium, sodium, potassium, chloride, uric acid, urea, creatinine - autoanalyser
+oxalate - oxalate oxidase
+citrate - citrate lyase
+sulphate - high pressure liquid chromatography",,39,1.3,no,adult,mixed,male,no,30-40,no,no_stone,107,107,0,"Upper normal levels (95th percentile) are 9.00 mmol/day for Ca, 440 Ìmol/day for Ox, and 5.00 mmol/day for UA [21]. The lower level of normal (5th percentile) for Cit is 1.70 mmol/day (320 mg/day), and ‘low citraturia’ is defined as UCit!V between 1.70 and 2.11 mmol/day (400 mg/day), whereas low urine volume is defined as ! 1,200 ml/day [21]",1480,72,5.91,0.06,,,5.34,0.26,0.287,0.015,3.37,0.13,3.65,0.19,31.2,1,179,9,,,4.87,0.15,,,,,23,0.7,418,15,Uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+181,1997,"Urologia Internationalis 58(2), pp. 93–99",Effect of mineral water containing calcium and magnesium on calcium oxalate urolithiasis risk factors.,Rodgers,no,"sodium, potassium, calcium, magnesium - Varian 1275 Model flame atomic absorption spectrometer
+oxalate - oxalate decarboxylase
+citrate - citrate lyase
+phosphorus - ammonium molybdate
+creatinine - picric acid
+uric acid - uricase","Na, AAS; K, AAS; Ca, AAS; Mg, AAS",,,no,adult,mixed,mixed,no,18+,no,no_stone,40,20,20,,1343.5,69,,,,,3.92,0.22,0.255,0.02,,,2.3,0.11,,,,,,,4.025,0.185,,,,,,,,,Diet controlled - baseline results only used
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+183,1996,"Scanning Microscopy 10(2), pp. 435–442",Calcium oxalate crystallization in urine of healthy men and women: a comparative study.,Buchholz,no,"calcium - atomic absorption spectroscopy
+ocalate - technique of Mazzachi et al 
+urate - autoanalyser","Ca, AAS",34,10.8,no,adult,mixed,male,no,18+,no,no_stone,37,37,0,,,,6.213,0.299,,,7.268784226,3.117296324,0.588863532,0.224504222,5.863440089,1.782116437,,,,,,,,,,,,,,,,,,,"Only men used - some women under 18
+Different number of participents in each component. pH=13, Ca=29, Ox=26, urate=34"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+184,1996,"Diseases of the Colon & Rectum 39(1), pp. 50–54",Comparison of relative risks of urinary stone formation after surgery for ulcerative colitis: conventional ileostomy vs. J-pouch. A comparative study.,Christie,no,"calcium, uric acid, sodium, potassium - automated analyser (BM/Hitachi System 704)
+uric acid - uricase
+oxalate - enzymatic method",,39,3,no,adult,mixed,mixed,no,30-40,no,no_stone,17,7,10,,1390,90,6.1,0.09,,,3.6,0.4,0.18,0.02,2.9,0.6,,,,,131,13,56,4,,,,,,,,,,,Uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+185,1996,"Kidney International 49(1), pp. 200–208",Urinary oxalate excretion increases with body size and decreases with increasing dietary calcium intake among healthy adults.,Lemann,no,"creatinine, phosphate, ammonium, urea - autoanalyser
+oxalate - immobilised oxalate oxidase
+calcium, magnesium - atomic absorption spectrophotometry
+sodium, potassium - flame emission spectrophotometry
+sulphate - turbidometrically
+citrate - citrate lyase",,43.9,10.2,no,adult,mixed,mixed,no,18+,no,no_stone,94,44,50,,1645,1031.008,6.06,0.168,,,4.5,1.915,0.198,0.051,,,4.12,1.79,29.8,7.898,156,55.55,67,20.402,5.85,1.711,32.1,12.807,,,20,5.676,,,"Healthy of various body weights
+12 women and 1 man taking calcium supplement. 4 women and 3 men taking vitamin C"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+189,1994,"American Journal of Kidney Diseases 24(6), pp. 893–900",Calcium oxalate stone agglomeration reflects stone-forming activity: citrate inhibition depends on macromolecules larger than 30 kilodalton.,Erwin,no,"oxalate - enzymatically
+citrate - citrate lyase
+calcium, phosphate, urate, creatinine - routine clinical procedures in the Department of Pathology",,40,1.5,no,adult,mixed,mixed,no,40-50,no,no_stone,22,16,6,,1700,90,6.07,0.08,,,4,0.5,0.37,0.02,3.230027958,0.241508536,2.72,0.24,,,,,,,,,,,,,,,,,Uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+196,1992,"Journal of the American College of Nutrition 11(5), pp. 548–552",Modification by food of the calcium absorbability and physicochemical effects of calcium citrate.,Wabner,no,"calcium, magnesium - atomic absorptionoxalate - ion chromatographysodium, potassium - flame photometrycreatinine - Jaffe methodphosphorus - micro colourimetric method of Fiske and Subbarowuric acid - uricaseammonium - enzymaticcitrate - citrate lyase","Na, FES; K, FES; Ca, AAS; Mg, AAS",38,8.6,no,adult,mixed,female,no,18+,no,no_stone,12,0,12,,2810,370,6.01,0.36,,,4.166874595,1.097859175,0.249948874,0.056806562,3.337100708,0.588900125,3.265032755,1.182527889,17.33936067,2.647723603,90,22,36,5,3.126928616,0.658300761,37,11,,,,,,,"Diet controlled - baseline results only used
+phosphorus not phosphate
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+197,1991,"Kidney International 39(6), pp. 1193–1205","Diet, vitamin D and vertebral mineral density in hypercalciuric calcium stone formers.",Bataille,no,"creatinine, calcium, phosphate, urea - autoanalyser",,35,5,no,adult,mixed,mixed,no,30-40,no,no_stone,62,41,21,,,,,,,,,,,,,,,,1.9,0.08,,,,,,,,,,,,,,,"Diet controlled by calcium: free diet only used
+values look very low!"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+204,1989,"Kidney International 36(6), pp. 1022–1028",Urinary excretion of glycosaminoglycans in normal and stone forming subjects.,Michelacci,no,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,23,11,12,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+215,1980,"Diseases of the Colon & Rectum 23(8), pp. 556–558",Urolithiasis risk factors in continent reservoir ileostomy patients.,Stern,no,"sodium, potassium - flame photometry
+creatinine - picric acid method
+uric acid - phosphotungstate method 
+oxalate - colourimetric procedure
+calcium - atomic absorption spectroscopy","Na, FES; K, FES; Ca, AAS",,,no,adult,mixed,mixed,no,18+,no,no_stone,9,unknown,unknown,,1221,350,5.94,0.47,,,,,,,4.895632608,1.439462125,,,,,,,,,,,33.59,9.83,,,,,,,"control grop only used. Others were various ileostomy patients
+uric acid not urate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+217,1979,"Urologia Internationalis 34(5), pp. 363–368",Renal excretion of hydrogen ions in stone formers.,Marya,no,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,50,unknown,unknown,,,,5.82,0.31,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+222,1976,"British Journal of Urology 48(1), pp. 7–11",Urinary citrate excretion in stone-formers and normal controls.,Welshman,no,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,158,73,85,,,,,,,,,,,,,,1.767546894,0.157694669,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+223,1975,"Journal of the American Geriatrics Society 23(4), pp. 155–160",Urinary calcium excretion in relation to kidney function in the adult.,Goldschmied,no,calcium - direct complexometric method with ethylenediaminetetraacetic acid,,,,no,adult,mixed,mixed,no,18+,no,no_stone,55,28,27,,,,,,,,3.426209265,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+224,1975,"British Journal of Urology 47(3), pp. 237–242","The relationship of the urinary cations, Calcium, Magnesium, Sodium and Potassium, in patients with Renal Calculi.",Welshman,no,"calcium - autoanalyser
+magnesium - colourimetric assay
+and rechecked by atomic absorption spectrophotometric method
+creatinine - alkaline picrate reaction (autoanalyser)",,,,no,adult,mixed,male,no,18+,no,no_stone,89,89,0,,,,,,,,4.566096113,0.222066969,,,,,,,,,131.4665835,5.820657894,54.19233211,2.007123412,3.592259552,0.152774257,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2,2024,American Journal of Kidney Diseases,24-Hour Urinary Chemistries and Kidney Stone Risk,Ferraro,no,System provided by Mission Pharmacal/Litholink (Labcorp),,55,7,no,adult,mixed,mixed,no,50-60,no,no_stone,3640,410,3230,,2050,820,6.14,0.51,,,4.840560906,2.320475074,0.3522,0.124974437,3.24192493,1.783726056,4.065593671,1.512170619,8.855334786,2.779795938,143,59,66,22,4.484673935,1.604608105,,,,,,,,,"uric acid not urate
+phosphorus not phosphate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+9,2023,Clinical Journal of the American Society of Nephrology,"Associations between Net Gastrointestinal Alkali Absorption, 24-Hour Urine Lithogenic Factors, and Kidney Stones - HPFS",Ferraro,no,System provided by Mission Pharmacal/Litholink (Labcorp),,64,6,no,adult,mixed,mixed,no,60-70,no,no_stone,404,,,,,,5.91,0.47,,,4.241728629,2.245621039,,,,,3.715021244,1.57495971,10.82435691,3.16938855,,,79,26,5.019543304,1.728039498,34.7,13.1,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2023,,NHS I,Ferraro,no,,,65,6,no,adult,mixed,mixed,no,60-70,no,no_stone,399,,,,,,6.07,0.48,,,4.541144768,2.345426418,,,,,3.505724272,1.564494862,7.81291131,2.548146276,,,63,21,4.361242543,1.604608105,27.5,11,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2023,,NHS II,Ferraro,no,,,53,4,no,adult,mixed,mixed,no,50-60,no,no_stone,2762,,,,,,6.19,0.5,,,4.965317631,2.295523729,,,,,4.191171854,1.470311225,8.707921365,2.611323457,,,64,20,4.40238634,1.563464308,29.2,9.7,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+62,2019,PLOS One,Comparison of metabolic changes for stone risks in 24-hour urine between non- and postmenopausal women,Mai,no,"oxalate, citrate - ion exchange chromatography
+sodium, potassium, chloride, calcium, phosphate, creatinine - Unicel DxC 600 synchronic biochemical detecting system
+uric acid, magnesium - Beckman coulter AU680 automatic biochemistry analyser","Ox, ICP; Cit, ICP",39.98,8.43,no,adult,mixed,female,pre_menopausal,18+,no,no_stone,160,0,160,,1373.75,630.26,6.31,0.66,8.7,2.24,3.61,1.83,0.26,0.14,2.96,1.05,2.51,1.56,15.76,6.22,190.17,113.36,44.79,18.31,3.8,1.59,,,185.58,113.46,,,,,"Non-menopausal females
+phosphorus not phosphate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2019,,,Mai,no,,,62.51,8.44,no,adult,mixed,female,post_menopausal,18+,no,no_stone,194,0,194,,1270.82,623.99,6.23,0.79,7.95,1.8,3.69,2.05,0.24,0.15,2.75,1.02,2.18,1.49,16.34,5.97,175.27,197.73,43.41,21.4,3,1.42,,,175.66,203.06,,,,,menopausal females
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+78,2018,The Journal of Urology,Relative Supersaturation of 24-Hour Urine and Likelihood of Kidney Stones - NHS I,Prochaska,no,"calcium, magnesium - atomic absorption spectrophotometer
+creatine, uric acid, citrate, phosphorus - Cobas centrifugal analyser
+oxalate - ion chromatography
+sodium, potassium - flame emission photometry","Na, FES; K, FES; Ca, AAS; Mg, AAS",65.5,5.7,no,adult,mixed,female,no,18+,no,no_stone,407,0,407,,2000,800,6.07,0.48,,,4.566096113,2.345426418,0.314708355,0.113613125,2.653024805,0.916066861,3.505724272,1.559262437,23.89409106,7.749434937,136,56,62.9,21.2,4.361242543,1.604608105,,,,,,,,,"Same study  no.9
+uric acid not urate
+Phosphorus not phosphate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2018,,NHS II,Prochaska,no,,,51,5.1,no,adult,mixed,female,no,18+,no,no_stone,443,0,443,,1900,700,6.07,0.46,,,4.665901492,2.220669694,0.323797405,0.096571156,3.009933972,0.939860805,4.138847611,1.517403043,26.67097191,8.976428802,151,64,58.6,20.3,4.23781115,1.604608105,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2018,,HPFS,Prochaska,no,,,64.6,6.3,no,adult,mixed,male,no,18+,no,no_stone,417,417,0,,1800,700,5.9,0.47,,,4.241728629,2.270572384,0.444227317,0.167011293,3.795134138,1.272976028,3.735950941,1.57495971,33.09654504,9.686793671,177,71,78.8,26,5.019543304,1.728039498,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+98,2016,The Journal of Urology,Assessment of Urinary Inhibitor or Promoter Activity in Uric Acid Nephrolithiasis - Obese,Doizi,no,"calcium - atomic absorption spectroscopy
+sodium, potassium - flame photometry
+chloride - coulometrically by silver precipitation
+uric acid- uricase
+creatinine - picric acid method
+phosphorus - colourimetric technique
+citrate - enzymatically
+ammonium - glutamate dehydrogenase
+sulphate - ion chromatography","Na, FES; K, FES; Ca, AAS; Mg, AAS",57.6,9.7,no,adult,mixed,mixed,no,18+,obesity,no_stone,9,5,4,,2500,700,6.06,0.72,,,2.594939867,1.397275313,0.329478061,0.0908905,3.783237166,1.344357861,2.443542142,1.061815861,18.63093316,5.747497578,92,30,42,14,4.196667352,1.933758486,33,12,95.67,34.11,,,,,"Obase
+phosphorus not phosphate"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2016,,Lean,Doizi,no,,,54.3,9.5,no,adult,mixed,mixed,no,18+,no,no_stone,12,6,6,,2600,500,6.16,0.58,,,3.318528869,2.04601028,0.284032811,0.04544525,2.89096425,0.725715305,2.877833358,1.487525901,16.8873103,5.134000646,92,37,40,9,3.990948365,1.110882534,28,5,90.67,31.03,,,,,Non-Obase
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+103,2015,Urology,Retrospective Review of Serum and Urinary Lithogenic Risk Factors in Patients With Osteoporosis and Osteopenia,Arrabal-Polo,no,,,51.81,10.32,no,adult,mixed,mixed,no,18+,no,no_stone,61,31,30,,,,,,,,4.414364906,2.336203557,0.255974732,0.144772594,4.026142974,4.576072874,4.910733611,1.974149698,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+106,2015,Urology,Effect of Demographics on Excretion of Key Urinary Factors Related to Kidney Stone Risk,Perinpam,no,Mayo Clinic Renal Testing Laboratory,,65.4,9,no,adult,mixed,mixed,no,18+,no,no_stone,709,293,416,,,,,,,,11.25305654,4.291631319,0.29,0.097,2.682767236,1.023139611,,,,,,,,,4.484673935,1.6868957,,,,,,,,,uric acid not urate
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+113,2014,Urology,Erythrocyte Oxidative Stress in Patients With Calcium Oxalate Stones Correlates With Stone Size and Renal Tubular Damage,Ma,no,"""commercial kits""",,54.2,2.4,no,adult,mixed,mixed,no,18+,no,no_stone,29,,,,,,6.1,0.5,,,,,0.253357268,0.028403281,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+160,2010,Urology,The Effect of Restrictive Bariatric Surgery on Urinary Stone Risk Factors - need to look at this data - looks like NR has been collected rather than raw data - normal raw data not included remove?,Semins,no,,,,,no,adult,mixed,male,no,18+,no,no_stone,96,96,0,,,,5.8-6.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,Provided Range
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2010,,,Semins,no,,,,,no,adult,mixed,female,no,18+,no,no_stone,72,0,72,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+178,2006,American Journal of Kidney Diseases,Body Size and 24-Hour Urine Composition - TO DISCUSS - ?SEPARATED BY QUINTILE AND STUDY,Taylor and Curhan,yes,"calcium, magnesium - atomic absorption spectrophotometer
+creatinine, uric acid, citrate, phosphorus - Cobas centrifugal analyser
+oxalate - ion chromatography
+sodium, potassium - flame emission photometry","Na, FES; K, FES; Ca, AAS; Mg, AAS",,,no,adult,mixed,male,no,18+,no,no_stone,76,76,,,1610,,5.97,,,,3.742701732,,0.431729873,,3.491761347,,3.563280939,,9.46604753,,150,,77,,4.978399506,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,male,no,18+,no,no_stone,80,80,,,1830,,6,,,,3.642896352,,0.431729873,,3.699958361,,3.819669729,,10.16099651,,163,,83,,5.019543304,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,male,no,18+,no,no_stone,84,84,,,1800,,5.86,,,,4.341534009,,0.420368561,,3.908155374,,3.746415789,,11.00335892,,173,,78,,5.142974697,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,male,no,18+,no,no_stone,90,90,,,1950,,5.89,,,,4.441339388,,0.431729873,,4.110403902,,3.877226397,,11.31924482,,188,,78,,4.813824316,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,male,no,18+,no,no_stone,74,74,,,1910,,5.82,,,,4.990268975,,0.488536436,,4.467313069,,3.861529124,,12.40378642,,208,,81,,5.43098128,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,111,,111,,1970,,6.25,,,,4.865512251,,0.306755436,,2.474570222,,3.615605182,,7.002137495,,129,,64,,4.566961531,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,90,,90,,1990,,6.15,,,,4.591047457,,0.284032811,,2.516209625,,3.516189121,,7.560202588,,124,,64,,4.23781115,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,75,,75,,1970,,5.95,,,,4.566096113,,0.295394124,,2.724406639,,3.646999728,,7.581261648,,129,,60,,4.278954948,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,68,,68,,2110,,5.97,,,,4.416388043,,0.352200686,,2.92070668,,3.490026999,,9.013277737,,154,,64,,4.608105328,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,54,,54,,2040,,5.88,,,,4.391436698,,0.363561999,,2.968294569,,3.448167605,,9.065925388,,170,,65,,4.196667352,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,62,,62,,1700,,6.12,,,,4.715804182,,0.261310187,,2.736303611,,3.793507608,,7.78132272,,137,,56,,4.032092162,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,60,,60,,1730,,6.18,,,,4.416388043,,0.284032811,,2.849324847,,4.384771552,,8.213033452,,128,,60,,3.949804567,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,74,,74,,2080,,6.06,,,,4.640950147,,0.295394124,,2.902861222,,3.960945185,,8.528919354,,147,,60,,3.867516972,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,55,,55,,1990,,5.96,,,,4.740755527,,0.306755436,,3.420379513,,4.165009732,,9.255456929,,165,,61,,4.772680518,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2006,,,Taylor and Curhan,yes,,,,,no,adult,mixed,female,no,18+,no,no_stone,44,,44,,1890,,5.93,,,,5.414441838,,0.340839374,,3.711855333,,4.295820339,,10.35052806,,209,,59,,4.813824316,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+190,2005,Journal of Endourology,Genetic and Dietary Factors in Urinary Citrate Excretion ,Shah,yes,citrate - citrate lyase,,30,5,no,adult,mixed,mixed,no,30-40,no,no_stone,61,12,49,,,,,,,,,,,,,,2.809811842,0.967998493,,,,,,,,,,,,,,,,,SELF-SELECTED DIETS
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+212,2002,Journal of Urology,Urinary Stone Risk Factors in the Siblings of Patients With Calcium Renal Stones,Kinder,no,,,,,no,adult,mixed,female,no,18+,no,no_stone,111,,111,,,,5.98,0.48,,,4.216690632,1.996155084,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2002,,,Kinder,no,,,,,no,adult,mixed,male,no,18+,no,no_stone,66,66,,,,,,,,,5.788646601,0.324367537,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+222,2001,Kidney International,Twenty-four–hour urine chemistries and the risk of kidney stones among women and men - NHS I,Curhan,no,"calcium, magnesium - atomic absorption spectrophotometer
+creatinine, uric acid, citrate, phosphorus - obas centrifugal analyser
+oxalate - ion chromatography
+sodium, potassium - flame emission photometry","Na, FES; K, FES; Ca, AAS; Mg, AAS",61.9,6.2,no,adult,mixed,mixed,no,18+,no,no_stone,99,,,,2150,910,6,0.5,,,4.790658216,2.819501971,0.386284624,0.13633575,3.063470347,1.029088097,3.735950941,1.805186379,8.665803245,2.979857009,149,57,71,24,4.525817733,1.645751903,,,,,0.208203206,0.072871122,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2001,,NHS II,Curhan,no,,,42.9,3.7,no,adult,mixed,mixed,no,40-50,no,no_stone,30,,,,1750,790,5.9,0.3,,,4.640950147,2.994161385,0.352200686,0.0908905,3.384688597,1.005294153,3.751648214,1.590656983,9.002748207,3.295742911,151,70,56,22,4.731536721,1.481176713,,,,,0.197793046,0.062460962,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2001,,HPFS,Curhan,no,,,60.8,6.6,no,adult,mixed,mixed,no,18+,no,no_stone,110,,,,1870,760,5.8,0.4,,,4.940366286,2.520085833,0.499897748,0.13633575,4.425673666,1.165903278,3.568513364,1.31857092,11.9404871,2.600793927,195,75,85,26,5.307549887,1.481176713,,,,,0.260254008,0.072871122,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+238,2000,Journal of Urology,Metabolic Risk Factors In Patients with Ureteropelvic Junction Obstruction and Renal Calculi,Matin and Streem,yes,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,26,,,,,,,,,,,,0.692532294,,,,,,63.71297105,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2000,,,Matin and Streem,yes,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,,,,,,,,,,,6.1,,0.672218013,,,,,,60.38881604,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2000,,,Matin and Streem,yes,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,,,,,,,,,,,5.8,,0.735007608,,,,,,57.98803742,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2000,,,Matin and Streem,yes,,,,,no,adult,mixed,mixed,no,18+,no,no_stone,26,9,17,,1860,818.881,,,,,3.636409002,2.172962723,0.414687905,0.177815901,3.215156743,0.997043602,3.034806086,1.780463174,,,154.75,50.738,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ADDITIONAL STUDIES,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2019,Kidney and Blood Pressure Research,"Seven-Day Salt Loading Impairs Microvascular Endothelium-Dependent Vasodilation without Changes in Blood Pressure, Body Composition and Fluid Status in Healthy Young Humans",Baric,no,"At the Department of Clinical Laboratory Diagnostics, University Hospital Osijek",,21,2,yes,adult,mixed,mixed,no,20-30,Low salt diet,no_stone,53,25,28,,1321,116,,,,,,,,,,,,,,,107,45,45,21,,,,,,,,,296,138,"diets by same people consecutively
+low salt diet = <3.5g salt/day
+high salt diet = 3.5 g of salt per day according to the DASH eating plan and 11.7 g of salt per day supplemented in the form of a salt powder, which represents a total of about 14.7 g of salt per day"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,1468,563,,,,,,,,,,,,,,,250,95,53,26,,,,,,,,,327,185,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2019,,,Baric,,,,,,yes,adult,mixed,mixed,no,18+,high salt diet,no_stone,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1988,Annals of Clinical Biochemistry,Reference Values for Analytes of 24-H Urine Collections Known to Be Complete,Bingham,no,"urea was measured in single samples by the method of Fawcett and Scottlll which was also used for the measurement of ammonia in both (Boehringer 124788, Sigma 640)
+Urate in single samples
+was measured by the colorimetric determination of hydrogen peroxide (Sigma685) and total
+nitrogen in duplicate by the Kjeldahl technique (Tecator Kjeltec System 1002, Bristol,
+England)",,,,no,adult,mixed,mixed,no,18+,no,no_stone,8,5,3,,,,,,13.5,4.3,,,,,,,,,,,122,40,86,23,,,43,18,,,,,378,94,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2022,Scientific Reports,Deep learning body-composition analysis of clinically acquired CT-scans estimates creatinine excretion with high accuracy in patients and healthy individuals,Pieters,no,"creatinine were measured by enzymatic colorimetric assay (Beckman Coulter, Brea, CA, USA).",,54,12,no,adult,mixed,mixed,no,18+,no,no_stone,287,112,175,,,,,,12,5,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2015,Urolithiasis,Experimental determination of multiple thermodynamic and kinetic risk factors for nephrolithiasis in the urine of healthy controls and calcium oxalate stone formers: does a universal discriminator exist?,Rodgers,no,"Na, K, Ca, Mg, Phos, Urate, Cl and creatinine using standard laboratory techniques. Oxalate was determined using oxalate decarboxylase [5]. Citrate was determined by conversion to oxaloacetate using citrate lyase",,,,no,adult,mixed,male,no,18+,no,no_stone,15,15,0,,1337,125.4,6.16,0.089,13.3,0.632,2.55,0.307,0.26,0.029,2.51,0.231,2.41,0.292,28.8,2.4,86.1,14.7,72.2,10.1,4.25,0.55,,,119,12.1,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2015,Public Health Nutr.,Relationship between 24 h urinary potassium and diet quality in the adult Spanish population.,Rodríguez-Rodríguez,no,"K - indirect potentiometer with a selective solid membrane connected to an Olympus AU 5400 Autoanalyser
+creatinine - Jaffe",,35.7,11.2,no,adult,white,mixed,no,18+,no,no_stone,418,196,222,,,,,,14.2,5.2,,,,,,,,,,,,,73.5,32.3,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,Clinica Chimica Acta,Dependence of urine composition on the age and sex of healthy subjects,Hesse,no,"Ammonium - selective electrode
+sodium, potassium - flame photometer
+calcium, magnesium - atomic absorption spec
+chloride - colourimetry
+uric acid - enzymatic
+oxalate - gas chromatography
+citrate - enzymatic
+creatinine - Jaffe",,,,no,adult,mixed,female,no,20-29,no,no_stone,25,0,25,,1277,93,6.27,0.077,10.56,0.69,3.54,0.27,0.353,0.029,3.04,0.17,2.06,0.2,,,148.3,9.9,43.26,5,5.41,0.56,32.36,2.26,123.9,9.5,18.79,1.58,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,female,no,30-39,no,no_stone,25,0,25,,1354,111,6.23,0.1,11.18,2.8,3.84,0.28,0.34,0.023,2.9,0.22,2.14,0.24,,,150.2,14.1,53.66,5.45,4.47,0.98,32.42,2.32,132.6,11.9,16.43,1.16,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,female,no,40-49,no,no_stone,25,0,25,,1261,72,6.14,0.09,11.5,0.94,4.41,0.37,0.376,0.038,3.07,0.24,1.94,0.24,,,153,11.9,54.36,3.77,4.08,0.25,37.15,3.26,133.1,10.8,20.01,2.13,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,female,no,50-59,no,no_stone,25,0,25,,1232,88,5.84,0.05,9.85,1.35,4.42,0.58,0.338,0.021,3.08,0.41,2.12,0.23,,,139.2,11,49.33,4.45,3.83,0.25,38.71,3.94,124.1,9.9,17.18,1.13,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,female,no,60+,no,no_stone,25,0,25,,886,51,5.89,0.12,6.94,0.58,1.8,0.26,0.299,0.017,1.94,0.17,1.33,0.18,,,78.6,7.6,37.07,2.28,2.98,0.18,30.74,4.02,70.4,7.35,10.59,0.7,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,male,no,20-29,no,no_stone,25,25,0,,1424,94,6.07,0.09,15.19,1.1,6.01,0.6,0.404,0.026,4.15,0.18,1.69,0.2,,,188.4,10.5,45.28,4.76,6.29,0.51,41.01,2.86,156.6,9.6,25.83,1.46,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,male,no,30-39,no,no_stone,25,25,0,,1507,135,6.1,0.07,15.47,1.36,4.68,0.36,0.451,0.038,3.59,0.29,1.39,0.2,,,190.2,22,67.33,9.7,5.08,0.39,45.86,3.53,149.8,7.5,20.96,1.12,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,male,no,40-49,no,no_stone,25,25,0,,1435,100,6.07,0.07,15.27,1.51,3.98,0.39,0.498,0.042,3.86,0.34,1.68,0.2,,,161.2,13.1,60.03,5.36,4.23,0.31,40.69,3.38,151.5,11.5,22.33,1.46,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,mixed,male,no,50-59,no,no_stone,25,25,0,,1494,106,6.17,0.1,13.33,1.06,4.27,0.39,0.425,0.033,3.25,0.32,1.71,0.19,,,170.7,18.1,54.34,4.17,4.56,0.39,33.08,3.38,162.3,14,20.22,1.48,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,1986,,,Hesse,,,,,,no,adult,white,male,no,60+,no,no_stone,25,25,0,,1387,154,5.95,0.07,13.39,1.28,2.96,0.2,0.492,0.033,2.82,0.24,1.87,0.2,,,167.7,11.8,48.94,3.6,3.69,0.33,37.63,4.03,142.6,9.3,18.81,1.11,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2004,European Journal of Clinical Nutrition,"Influence of a mineral water rich in calcium, magnesium and bicarbonate on urine composition and the risk of calcium oxalate crystallization",Siener,no,"creatinine (Jaffe´ reaction; CV 2.0%), calcium and magnesium (atomic absorption spectrophotometry; CV 0.3%), chloride (coulomb metric titration; CV 2.0%), sodium and potassium (flame photometry; CV 1.3%), inorganic sulfate (nephelometry; CV o5%), inorganic phosphate (phosphate molybdate reaction; CV o5%), ammonium (ion selective electrode; CV 1.5%), citrate (enzymatically, citrate lyase; CV 1.6%), uric acid (enzymatically, uricase; CV o5%), and oxalic acid (ion chromatography; CV o2%).","Na, FES; K, FES; Ca, AAS; Mg, AAS",26.5,,yes,adult,mixed,male,male,20-30,no,no_stone,12,12,0,,2320,110,6.15,0.08,17.22,1.17,5.11,0.34,0.423,0.097,3.76,0.79,2.626,0.936,37.3,2,173,14,80,4,5.05,0.54,43.2,2.8,188,14,28.2,1.7,,,"control phase day 1 only used 1.4 l/day of a
+neutral fruit tea"
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2018,Sec. Nutrition Methodology,Sodium and Potassium Intake from Food Diaries and 24-h Urine Collections from 7 Days in a Sample of Healthy Greek Adults,Athanasatou,no,"urine creatinine, measured by the Jaffé enzymatic colorimetric method (Cobas Integra 400 plus). Sodium and potassium intakes from 7-day diaries were analyzed with Diet Analysis plus version 6.1software",,,,no,adult,white,mixed,no,18+,no,no_stone,163,,,,1250,500,,,0.584,0.23,,,,,,,,,,,66.26,29.52,29.91,12.69,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2008,Clin J Am Soc Nephrol,Influence of Muscle Mass and Physical Activity on Serum and Urinary Creatinine and Serum Cystatin C,Baxmann,no,,,36.6,13.6,no,adult,mixed,mixed,no,18+,no,no_stone,170,78,92,,,,,,5.91,2.07,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,2023,Urolithiasis,The altered composition of gut microbiota and biochemical features as well as dietary patterns in a southern Chinese population with recurrent renal calcium oxalate stones,Cao,no,,,49.08,12.7,no,adult,east asian,mixed,no,18+,no,no_stone,40,28,12,,,,,,,,3.02,1.76,,,,,,,10.69,4.03,164.8,59.13,,,2.85,1.68,,,,,,,,,
