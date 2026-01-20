@@ -47,7 +47,7 @@ All the documents identified in the original search are within the Searches Fold
 ### 3.2 Meta-analysis
 Explanation re: MA
 <br>
-[MA result flow diagram.pdf](https://github.com/user-attachments/files/24741908/MA.result.flow.diagram.pdf) <br>
+<img width="760" height="320" alt="image" src="https://github.com/user-attachments/files/24741908/MA.result.flow.diagram.pdf" /> <br>
 Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
 ### 3.3 Bias analysis
