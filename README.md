@@ -27,7 +27,7 @@ There are no additional scripts that need to be run for this markdown document<b
 <br>
 The output should be: <br>
 <br>
-.../24_hour_urine <br>
+```.../24_hour_urine``` <br>
 <br>
 Otherwise you will need to assign the working directory to where the file is stored, for example:
 <br>
