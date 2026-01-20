@@ -25,9 +25,16 @@ All the documents identified in the original search are within the Searches Fold
 Explanation re: MA
 <br>
 [MA result flow diagram.pdf](https://github.com/user-attachments/files/24741908/MA.result.flow.diagram.pdf) <br>
-Figure 1. Flow diagram of Workflow for meta-analysis
+Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
-### 2.3 Clinical Cohort Testing
+### 2.3 Bias analysis
+Explanation re: bias analysis <br>
+<br>
+### 2.4 GRADE rating
+Explanation re: GRADE <br>
+<br>
+
+### 2.4 Clinical Cohort Testing
 Explanation re: clinical testing
 <br>
 
