@@ -19,7 +19,7 @@ Repository for all data and code associated with paper exploring 24 hour urine r
 <br>
 This markdown document is designed to be knitted to html, however we understand that readers may wish to adjust the script themselves. <br>
 Prior to running the script please check all packages are installed - if not, then you can run this in the console prior to running all the markdown chunks: <br>
-```install.packages(c("tidyverse", "gt", "gtExtra", "DiagrammeR", "data.table", "janitor", "pROC", "ggplot2", "pracma", "glue", "cutpointr", "caret", "cowplot", "ggsignif", "ggpubr", "broom", "pryr", "lubridate", "sfsmisc", "patchwork", "mice", "furrr","purrr","future","boot"))``` <br>
+```install.packages(c("tidyverse", "gt", "gtExtra", "shiny", "data.table", "janitor", "pROC", "ggplot2", "janitor","DataExplorer","meta","metafor","forestplot","grid","gridExtra,"patchwork"))``` <br>
 <br>
 **File paths:**
 There are no additional scripts that need to be run for this markdown document<br>
