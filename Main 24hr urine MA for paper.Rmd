@@ -49,19 +49,12 @@ library(patchwork)
 
 ## Import data
 ```{r}
-ncl_1 <- read.csv("NCL_1.csv", header = TRUE) %>% janitor::clean_names()
-ncl_2 <- read.csv("NCL_2.csv", header = TRUE) %>% janitor::clean_names()
+urine_ma <- fread("Data/24_hr_urine_ma_12082025.csv", header = TRUE) %>% janitor::clean_names()
 
-bern <- read.csv("Bern.csv", header = TRUE) %>% janitor::clean_names()
-
-soton <- read.csv("Soton.csv", header = TRUE) %>% janitor::clean_names()
-
-urine_ma <- fread("24_hr_urine_ma_12082025.csv", header = TRUE) %>% janitor::clean_names()
-
-hpfs_nhs_I_II_summary <- fread("24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>% 
+hpfs_nhs_I_II_summary <- fread("Data/24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>% 
   janitor::clean_names()
 
-phosphate_phosphorous <- fread("phosphate_phosphorous.csv", header = TRUE) %>% janitor::clean_names()
+phosphate_phosphorous <- fread("Data/phosphate_phosphorous.csv", header = TRUE) %>% janitor::clean_names()
 ```
 \newpage
 
@@ -95,173 +88,6 @@ overall_bias$overall <- factor(overall_bias$overall,
 \newpage
 
 ## Sort data
-### Newcastle data
-```{r}
-ncl_1 <-
-  ncl_1 %>% mutate(social_security_number = str_replace_all(social_security_number, " ", "")) %>% subset(select = c(social_security_number, test_name, result_rw))
-ncl_2 <-
-  ncl_2 %>% mutate(social_security_number = str_replace_all(social_security_number, " ", "")) %>% subset(select = c(social_security_number, test_name, result_rw))
-
-ncl_pre <- rbind(ncl_1, ncl_2)
-
-ncl <- ncl_pre  %>% pivot_wider(
-  id_cols = social_security_number,
-  names_from = test_name,
-  values_from = result_rw,
-  values_fn = list(result_rw = ~ .[1])
-) %>% janitor::clean_names()
-
-ncl <- ncl %>%  rename(
-  volume = urine_volume,
-  creatinine1 = urine_creatinine,
-  calcium = urine_calcium,
-  oxalate1 = urine_oxalate_24_hour,
-  uric_acid1 = urine_uric_acid,
-  ph = urine_p_h,
-  citrate = urine_citrate_24_hour,
-  cystine = urine_cystine,
-  phosphate = urine_phosphate
-) %>% mutate(
-  oxalate = ifelse(oxalate1<1,
-    as.numeric(oxalate1) * 100,
-    as.numeric(oxalate1) / 10),
-  creatinine = as.numeric(creatinine1),
-  uric_acid = ifelse(as.numeric(uric_acid1) > 100,
-                     as.numeric(uric_acid1) / 1000,
-                     as.numeric(uric_acid1)),
-  sex = NA,
-  .keep = "unused"
-)
-
-ncl <- ncl %>% select(volume,
-                      creatinine ,
-                      calcium ,
-                      oxalate,
-                      uric_acid,
-                      ph,
-                      citrate,
-                      cystine,
-                      phosphate,
-                      sex)
-
-ncl$volume <- as.numeric(ncl$volume)
-ncl$calcium <- as.numeric(ncl$calcium)
-ncl$ph <- as.numeric(ncl$ph)
-ncl$citrate <- as.numeric(ncl$citrate)
-ncl$phosphate <- as.numeric(ncl$phosphate)
-ncl$sex <- factor(ncl$sex,
-                  levels = c("M", "F"))
-
-```
-\newpage
-
-### Bern data
-```{r}
-bern_1 <-
-  bern %>% subset(
-    select = c(
-      random_1_24_hour_urine_volume_in_ml,
-      random_2_24_hour_urine_volume_in_ml,
-      ran_1_creatinine_in_umol_l,
-      ran_2_creatinine_in_umol_l,
-      ran_1_calcium_in_mmol_24_hours,
-      ran_2_calcium_in_mmol_24_hours,
-      ran_1_oxalate_umol_mmol_creatinine,
-      ran_2_oxalate_umol_mmol_creatinine,
-      ran_1_uric_acid_in_umol_24_hours,
-      ran_2_uric_acid_in_umol_24_hours,
-      ran_1_citrate_mmol_mol_creatinine,
-      ran_2_citrate_mmol_mol_creatinine,
-      ran_1_p_h_sticks,
-      sex
-    )
-  ) %>% rename(
-    volume = random_1_24_hour_urine_volume_in_ml,
-    creatinine1 = ran_1_creatinine_in_umol_l,
-    calcium = ran_1_calcium_in_mmol_24_hours,
-    oxalate = ran_1_oxalate_umol_mmol_creatinine,
-    uric_acid1 = ran_1_uric_acid_in_umol_24_hours,
-    citrate = ran_1_citrate_mmol_mol_creatinine,
-    ph = ran_1_p_h_sticks
-  ) %>% mutate(creatinine = creatinine1 * 0.001 * (volume/1000),
-               uric_acid = uric_acid1 / 1000,
-    citrate = NA,
-               cystine = NA,
-               phosphate = NA,
-    sex = ifelse(sex == "men",
-                 "M",
-                 "F"))
-
-bern <- bern_1 %>% select(volume,
-                      creatinine ,
-                      calcium ,
-                      oxalate,
-                      uric_acid,
-                      ph,
-                      citrate,
-                      cystine,
-                      phosphate,
-                      sex)
-
-ncl <- ncl %>% rbind(bern)
-```
-\newpage
-
-### Southampton data
-```{r}
-soton <- soton %>% subset(
-  select = c(
-    urine_volume_h_cl,
-    urinary_creatinine_mmol_24h,
-    urinary_calcium_mmol_24h,
-    urinary_oxalate_mmol_24h,
-    urine_volume_thymol,
-    urinary_uric_acid_mmol_24h,
-    p_h,
-    creatinine_clearance_l_24_h,
-    male
-  )
-) %>%
-  rename(
-    volume1 = urine_volume_h_cl,
-    creatinine1 = urinary_creatinine_mmol_24h,
-    calcium = urinary_calcium_mmol_24h,
-    oxalate1 = urinary_oxalate_mmol_24h,
-    volume_thymol = urine_volume_thymol,
-    uric_acid1 = urinary_uric_acid_mmol_24h,
-    ph = p_h,
-    crcl = creatinine_clearance_l_24_h
-  ) %>% 
-  mutate(
-    volume = volume1 * 1000,
-    creatinine = creatinine1,
-    oxalate = oxalate1 * 100,
-    uric_acid = uric_acid1,
-    citrate = NA,
-    cystine = NA,
-    phosphate = NA,
-    sex = ifelse(male == TRUE,
-                 "M",
-                 "F"),
-    .keep = "unused"
-  )
-
-soton <- soton %>% select(volume,
-                      creatinine ,
-                      calcium ,
-                      oxalate,
-                      uric_acid,
-                      ph,
-                      citrate,
-                      cystine,
-                      phosphate,
-                      sex)
-
-ncl <- ncl %>% rbind(soton)
-ncl$sex <- as.factor(ncl$sex)
-```
-\newpage
-
 ### MA data
 ```{r}
 hpfs_nhs_I_II_summary1 <- hpfs_nhs_I_II_summary %>%
@@ -1167,7 +993,7 @@ knitr::include_graphics("MA result flow diagram.pdf")
 \newpage
 
 # Functions {.tabset .tabset-pills}
-### Main MA Helper Function
+## Main MA Helper Function
 ```{r}
 urine_components = c("volume",
                      "ph",
@@ -1374,7 +1200,7 @@ run_single_ma <- function(data1, urine_component, sex, age) {
 ```
 \newpage
 
-### Meta-Regression function
+## Meta-Regression function
 ```{r}
 urine_ma2_for_meta_reg <- urine_ma2_for_meta_reg <- urine_ma2 %>%
   left_join(overall_bias,
@@ -1735,7 +1561,7 @@ meta_regression <- function(data_subset = "none",
 ```
 
 
-### Reduce I² in Main MA by removing outlying studies
+## Reduce I² in Main MA by removing outlying studies
 ```{r}
 main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
 
@@ -1938,7 +1764,7 @@ main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
 ```
 
 
-### Comparison to Sex subdivisions
+## Comparison to Sex subdivisions
 ```{r}
 sex_subdivision_ma <- function(urine_component,
                                data = urine_ma2) {
@@ -2702,7 +2528,7 @@ sex_age_subdivision_ma <- function(urine_component,
 ```
 \newpage
 
-### Comparison of Sex, Age and Race
+## Comparison of Sex, Age and Race
 ```{r}
 sex_age_race_subdivision_ma <- function(urine_component,
                                         data,
