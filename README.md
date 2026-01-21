@@ -44,6 +44,8 @@ Explanation re: SR
 <br>
 All the documents identified in the original search are within the Searches Folder as .docx files ('24 hour urine and kidney stones.docx' and '24 hour urine and stones - part 2.docx')
 <br>
+Figure 1. PRISMA Flow diagram <br>
+<br>
 ### 3.2 Meta-analysis
 Explanation re: MA
 <br>
