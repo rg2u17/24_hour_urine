@@ -17,8 +17,7 @@ Repository for all data and code associated with paper exploring 24 hour urine r
 ## 2. How to Run this Analysis
 **To run this script we suggest using the rmarkdown file (Main 24hr urine MA for paper.rmd) in RStudio and either:** <br>
 1. **selecting 'run all' OR** <br>
-2. **knit the file to html** <br>
-This markdown document is designed to be knitted to html, however we understand that readers may wish to adjust the script themselves. <br>
+2. **knit the file to html** (NB: This markdown document is designed to be knitted to html, however we understand that readers may wish to adjust the script themselves) <br>
 <br>
 Prior to running the script please check all packages are installed - if not, then you can run this in the console prior to running all the markdown chunks: <br>
 ```install.packages(c("tidyverse", "gt", "gtExtra", "shiny", "data.table", "janitor", "pROC", "ggplot2", "janitor","DataExplorer","meta","metafor","forestplot","grid","gridExtra,"patchwork"))``` <br>
