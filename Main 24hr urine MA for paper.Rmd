@@ -4631,7 +4631,7 @@ volume_rob
 ### GRADE Output
 ```{r}
 grade_18plus <- calculate_grade(
-  study_design= "Observational",
+  study_design= "Mixed",
   risk_of_bias = "Moderate",
   inconsistency = "Serious",
   indirectness = "Moderate",
@@ -4750,7 +4750,11 @@ volume_ma_2nd_analysis$ma_results %>%
     Q,
     Q_pval
   ) %>%
-  gt() %>%
+  left_join(
+    volume_grade, by = "age_band") %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-grade) %>%
+  gt() %>% 
   cols_label(
     age_band       = "Age Band",
     n_studies       = "Studies, n",
@@ -4759,7 +4763,8 @@ volume_ma_2nd_analysis$ma_results %>%
     ci_95           = "95% CI",
     I2              = html("I<sup>2</sup> (%)"),
     Q               = "Q statistic",
-    Q_pval          = "Q p-value"
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
   ) %>%
   cols_align(
     align = "center",
