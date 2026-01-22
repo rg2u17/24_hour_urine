@@ -1,5 +1,5 @@
 ---
-title: "24 Hour Urine Ranges MA & Comparison to Clinical Cohort"
+title: "24 Hour Urine Ranges MA"
 author: "R Geraghty"
 date: "`r Sys.Date()`"
 output: 
@@ -49,12 +49,12 @@ library(patchwork)
 
 ## Import data
 ```{r}
-urine_ma <- fread("Data/24_hr_urine_ma_12082025.csv", header = TRUE) %>% janitor::clean_names()
+urine_ma <- fread("24_hr_urine_ma_12082025.csv", header = TRUE) %>% janitor::clean_names()
 
-hpfs_nhs_I_II_summary <- fread("Data/24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>% 
+hpfs_nhs_I_II_summary <- fread("24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>% 
   janitor::clean_names()
 
-phosphate_phosphorous <- fread("Data/phosphate_phosphorous.csv", header = TRUE) %>% janitor::clean_names()
+phosphate_phosphorous <- fread("phosphate_phosphorous.csv", header = TRUE) %>% janitor::clean_names()
 ```
 \newpage
 
@@ -194,12 +194,19 @@ urine_ma2 <- urine_ma2 %>%
       age_band == "50-59" | age_band == "50-60" ~ "50-60",
       age_band == "60-70" | age_band == "60+" | age_band == "70-80" ~ "60+",
       TRUE ~ age_band
+    ),
+    study_type = case_when(
+      study_name %in% bias_observational$study ~ "Observational Cohort",
+      study_name %in% bias_rcts$study ~ "RCT",
+      TRUE ~ "Observational Cohort"
     )
   )
 
 urine_ma2$race <- as.factor(urine_ma2$race)
 urine_ma2$male_female <- as.factor(urine_ma2$male_female)
 urine_ma2$age_band <- as.factor(urine_ma2$age_band)
+
+study_types <- urine_ma2 %>% dplyr::select(study_name, study_type)
 ```
 \newpage
 
@@ -1042,7 +1049,8 @@ main_ma <- function(urine_component,
   data1 <- data %>%
     dplyr::select(study_name, total_n,
                   mean_col = all_of(mean_colname),
-                  sd_col = all_of(sd_colname)) %>%
+                  sd_col = all_of(sd_colname),
+                  study_type) %>%
     tidyr::drop_na(mean_col, sd_col) %>%
     dplyr::arrange(mean_col)
 
@@ -1085,6 +1093,14 @@ main_ma <- function(urine_component,
     Q_pval <- ma_result$pval.Q
   }
   
+  # Make Study type column
+  data1$study_type <- as.factor(data1$study_type)
+  study_type <- if (dplyr::n_distinct(data1$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data1$study_type))
+}
+  
   # Create summary tibble
   summary <- tibble(
     urine_component = urine_component,
@@ -1097,7 +1113,8 @@ main_ma <- function(urine_component,
     I2 = I2_value,
     Q = Q_value,
     Q_pval = Q_pval,
-    model_utilised = model_utilised
+    model_utilised = model_utilised,
+    study_type = study_type
   )
   
   # Back-transform volume results if needed
@@ -1121,7 +1138,7 @@ main_ma <- function(urine_component,
 ```
 \newpage
 
-### Single MA Helper function
+## Single MA Helper function
 ```{r}
 run_single_ma <- function(data1, urine_component, sex, age) {
   
@@ -1164,6 +1181,14 @@ run_single_ma <- function(data1, urine_component, sex, age) {
     Q_pval <- ma_result$pval.Q
   }
   
+  # Make Study type column
+  data1$study_type <- as.factor(data1$study_type)
+  study_type <- if (dplyr::n_distinct(data1$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data1$study_type))
+}
+  
   # Create summary tibble
   summary <- tibble(
     urine_component = urine_component,
@@ -1176,7 +1201,8 @@ run_single_ma <- function(data1, urine_component, sex, age) {
     I2 = I2_value,
     Q = Q_value,
     Q_pval = Q_pval,
-    model_utilised = model_utilised
+    model_utilised = model_utilised,
+    study_type = study_type
   )
   
   # Back-transform volume results if needed
@@ -1316,6 +1342,14 @@ meta_regression <- function(data_subset = "none",
   predictors <- c("women_prop_c", "age_band", "race", "overall", "total_n_c")
   p <- length(predictors)
   
+  # Make Study type column
+  data1$study_type <- as.factor(data1$study_type)
+  study_type <- if (dplyr::n_distinct(data1$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data1$study_type))
+}
+  
   # --- 4. Format output helper ------------------------------------------------
   format_output <- function(tbl, model_type) {
     tbl %>%
@@ -1396,7 +1430,8 @@ meta_regression <- function(data_subset = "none",
             model$tau2 > 0 ~ sqrt(model$tau2),
             TRUE ~ sqrt(mean(data1$sd^2) + model$tau2)),
           lower_95 = pooled_estimate - 1.96 * pooled_sd,
-          upper_95 = pooled_estimate + 1.96 * pooled_sd
+          upper_95 = pooled_estimate + 1.96 * pooled_sd,
+          study_type = study_type
         ) %>%
         select(urine_component,
                sex_group,
@@ -1410,7 +1445,8 @@ meta_regression <- function(data_subset = "none",
                Q_pval,
                model_utilised,
                lower_95,
-               upper_95)
+               upper_95,
+               study_type)
     }
     
     return(tbl1)
@@ -1505,7 +1541,8 @@ meta_regression <- function(data_subset = "none",
         model_utilised = "Univariable",
         lower_95 = exp(pooled_estimate - (1.96 * pooled_sd)) / 1000,  
         upper_95 = exp(pooled_estimate + (1.96 * pooled_sd)) / 1000,
-        pooled_estimate = exp(estimate) / 1000   
+        pooled_estimate = exp(estimate) / 1000,
+        study_type = study_type
       ) %>%
       select(urine_component,
              sex_group,
@@ -1519,7 +1556,8 @@ meta_regression <- function(data_subset = "none",
              Q_pval,
              model_utilised,
              lower_95,
-             upper_95)
+             upper_95,
+             study_type)
   } else {
     results <- results %>%
       filter(term == "intercept") %>%  
@@ -1539,7 +1577,8 @@ meta_regression <- function(data_subset = "none",
         Q_pval = first_model$QEp,
         model_utilised = "Univariable",
         lower_95 = pooled_estimate - (1.96 * pooled_sd),
-        upper_95 = pooled_estimate + (1.96 * pooled_sd)
+        upper_95 = pooled_estimate + (1.96 * pooled_sd),
+        study_type = study_type
       ) %>%
       select(urine_component,
              sex_group,
@@ -1553,7 +1592,8 @@ meta_regression <- function(data_subset = "none",
              Q_pval,
              model_utilised,
              lower_95,
-             upper_95)
+             upper_95,
+             study_type)
   }
   
   return(results)
@@ -1590,7 +1630,7 @@ main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
   data_iter <- data %>%
     dplyr::select(study_name, total_n,
                   mean_col = all_of(mean_colname),
-                  sd_col = all_of(sd_colname)) %>%
+                  sd_col = all_of(sd_colname), study_type) %>%
     tidyr::drop_na(mean_col, sd_col) %>%
     dplyr::arrange(mean_col)
 
@@ -1605,6 +1645,14 @@ main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
       ) %>%
       dplyr::select(-mean_raw, -sd_raw)
   }
+  
+  # Make Study type column
+  data_iter$study_type <- as.factor(data_iter$study_type)
+  study_type <- if (dplyr::n_distinct(data_iter$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data_iter$study_type))
+}
 
   # --- 3. Identify clusters -----------
   clusters <- list()
@@ -1689,7 +1737,8 @@ main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
       lower_95 = lower_95,
       upper_95 = upper_95,
       studies_in_cluster = paste(d$study_name, collapse = ", "),
-      cluster_data = list(d)
+      cluster_data = list(d),
+      study_type = study_type
     )
   }) %>% 
     arrange(cluster) %>%
@@ -1711,6 +1760,7 @@ main_ma_reduce_I2 <- function(urine_component, data = urine_ma2) {
     cols_label(
       cluster = "Cluster",
       n_studies = "Studies",
+      study_type = "Study Type",
       total_participants = "Participants",
       range = "95% Range",
       I2_text = "I²",
@@ -1867,6 +1917,14 @@ sex_subdivision_ma <- function(urine_component,
       Q_pval <- ma_result$pval.Q
     }
     
+    # Sort Study type column
+    data1$study_type <- as.factor(data1$study_type)
+  study_type <- if (dplyr::n_distinct(data1$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data1$study_type))
+}
+    
     # Create summary tibble
     summary <- tibble(
       urine_component = urine_component,
@@ -1878,7 +1936,8 @@ sex_subdivision_ma <- function(urine_component,
       I2 = I2_value,
       Q = Q_value,
       Q_pval = Q_pval,
-      model_utilised = model_utilised
+      model_utilised = model_utilised,
+      study_type = study_type
     )
     
     # Back-transform volume results if needed
@@ -1920,6 +1979,7 @@ table_input <- combined_results %>%
     Group = subgroup,
     `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
     Studies = n_studies,
+    "Study Type" = study_type,
     Participants = total_participants,
     I2 = I2 * 100,
     `I²` = ifelse(is.na(I2), "—", paste0(round(I2, 1), "%")),
@@ -1937,6 +1997,7 @@ table_input <- combined_results %>%
     Group,
     `95% Range`,
     Studies,
+    "Study Type",
     Participants,
     `I²`,
     `Cochran's Q`,
@@ -2089,7 +2150,7 @@ col_vector <- setNames(colours[, "colour"], colours[, "subgroup"])
 ```
 \newpage
 
-### Comparison to Age-Band subdivisions
+## Comparison to Age-Band subdivisions
 ```{r}
 sex_age_subdivision_ma <- function(urine_component,
                                    data = urine_ma2,
@@ -2138,7 +2199,8 @@ sex_age_subdivision_ma <- function(urine_component,
       total_n,
       age_band,
       mean_col = all_of(mean_colname),
-      sd_col   = all_of(sd_colname)
+      sd_col   = all_of(sd_colname),
+      study_type
     ) %>%
     drop_na(mean_col, sd_col)
   
@@ -2169,6 +2231,14 @@ sex_age_subdivision_ma <- function(urine_component,
   
   main_result <- bind_rows(main_overall, main_age_results, main_meta_reg_results)
   
+   # Sort Study type column
+    data_main$study_type <- as.factor(data_main$study_type)
+  study_type_main <- if (dplyr::n_distinct(data_main$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data_main$study_type))
+}
+  
   # --- 4. Iterate through sexes and age bands --------------------------------
   sex_age_results <- purrr::map_dfr(c("male", "female"), function(sex) {
     
@@ -2180,7 +2250,8 @@ sex_age_subdivision_ma <- function(urine_component,
         total_n,
         age_band,
         mean_col = all_of(mean_colname),
-        sd_col   = all_of(sd_colname)
+        sd_col   = all_of(sd_colname),
+        study_type
       ) %>%
       drop_na(mean_col, sd_col)
     
@@ -2190,6 +2261,14 @@ sex_age_subdivision_ma <- function(urine_component,
     
     # Get overall result for this sex
     overall_result <- run_single_ma(data_sex, urine_component, sex, "Overall")
+    
+     # Sort Study type column
+    data_sex$study_type <- as.factor(data_sex$study_type)
+  study_type_sex <- if (dplyr::n_distinct(data_sex$study_type, na.rm = TRUE) > 1) {
+  "Mixed"
+} else {
+  unique(na.omit(data_sex$study_type))
+}
     
     # Get meta-regression result for this sex
     meta_reg_result <- tryCatch({
@@ -2408,6 +2487,7 @@ sex_age_subdivision_ma <- function(urine_component,
       `Age Band` = as.character(age_band),
       `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
       Studies = n_studies,
+      "Study Type" = study_type,
       Participants = total_participants,
       I2 = I2 * 100,
       `I²` = ifelse(is.na(I2), "—", paste0(round(I2, 1), "%")),
@@ -2426,6 +2506,7 @@ sex_age_subdivision_ma <- function(urine_component,
       `Age Band`,
       `95% Range`,
       Studies,
+      "Study Type",
       Participants,
       `I²`,
       `Cochran's Q`,
@@ -2627,7 +2708,8 @@ sex_age_race_subdivision_ma <- function(urine_component,
           age_band,
           race,
           mean_col = all_of(mean_colname),
-          sd_col   = all_of(sd_colname)
+          sd_col   = all_of(sd_colname),
+          study_type
         ) %>%
         drop_na(mean_col, sd_col)
     } else {
@@ -2639,7 +2721,8 @@ sex_age_race_subdivision_ma <- function(urine_component,
           age_band,
           race,
           mean_col = all_of(mean_colname),
-          sd_col   = all_of(sd_colname)
+          sd_col   = all_of(sd_colname),
+          study_type
         ) %>%
         drop_na(mean_col, sd_col)
     }
@@ -2994,6 +3077,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
       `Age Band` = as.character(age_band),
       `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
       Studies = n_studies,
+      "Study Type" = study_type,
       Participants = total_participants,
       I2 = I2 * 100,
       `I²` = ifelse(is.na(I2), "—", paste0(round(I2, 1), "%")),
@@ -3013,6 +3097,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
       `Age Band`,
       `95% Range`,
       Studies,
+      "Study Type",
       Participants,
       `I²`,
       `Cochran's Q`,
@@ -3117,6 +3202,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
         sprintf("%.2f – %.2f", lower_95, upper_95)
       ),
       Studies = ifelse(is.na(n_studies), "—", as.character(n_studies)),
+      "Study Type" = study_type,
       Participants = ifelse(is.na(total_participants), "—", as.character(total_participants)),
       I2_val = I2 * 100,
       `I²` = ifelse(is.na(I2_val), "—", paste0(round(I2_val, 1), "%")),
@@ -3136,6 +3222,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
       `Age Band`,
       `95% Range`,
       Studies,
+      "Study Type",
       Participants,
       `I²`,
       `Cochran's Q`,
@@ -3271,6 +3358,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
         sprintf("%.2f – %.2f", lower_95, upper_95)
       ),
       Studies = ifelse(is.na(n_studies), "—", as.character(n_studies)),
+      "Study Type" = study_type,
       Participants = ifelse(is.na(total_participants), "—", as.character(total_participants)),
       I2_val = I2 * 100,
       `I²` = ifelse(is.na(I2_val), "—", paste0(round(I2_val, 1), "%")),
@@ -3290,6 +3378,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
       `Age Band`,
       `95% Range`,
       Studies,
+      "Study Type",
       Participants,
       `I²`,
       `Cochran's Q`,
@@ -4156,5 +4245,534 @@ urea_ma_3rd_analysis$wald_tests$sex_comparison
 urea_ma_3rd_analysis$wald_tests$race_comparisons
 urea_ma_3rd_analysis$wald_tests$age_band_comparisons
 urea_ma_3rd_analysis$wald_tests$sex_within_age_bands
+```
+\newpage
+
+# Bias Analysis {.tabset .tabset-pills}
+## Observational Studies 
+```{r}
+bias_observational_table <- bias_observational %>%
+  rename_with(~str_remove(., "_low_moderate_high"), everything()) %>%
+  rename(
+    Study = study,
+    `Study Participation` = study_participation,
+    `Study Attrition` = study_attrition,
+    `Prognostic Factor Measurement` = prognostic_factor_measurement,
+    `Outcomes Measurement` = outcomes_measurement,
+    `Study Confounding` = study_confounding,
+    `Statistical Analysis` = statistical_analysis,
+    Overall = overall
+  )
+
+bias_observational_table %>%
+  gt() %>%
+  tab_header(
+    title = "Risk of Bias Assessment for Observational Studies"
+  ) %>%
+  # Color coding function
+  data_color(
+    columns = c(`Study Participation`, `Study Attrition`, `Prognostic Factor Measurement`,
+                `Outcomes Measurement`, `Study Confounding`, `Statistical Analysis`, Overall),
+    fn = function(x) {
+      case_when(
+        x == "Low" ~ "#90EE90",     
+        x == "Moderate" ~ "#FFD700",  
+        x == "High" ~ "#FF6B6B",      
+        TRUE ~ "#FFFFFF"              
+      )
+    }
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = Overall)
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(`Study Participation`, `Study Attrition`, `Prognostic Factor Measurement`,
+                `Outcomes Measurement`, `Study Confounding`, `Statistical Analysis`, Overall)
+  ) %>%
+  cols_align(
+    align = "left",
+    columns = Study
+  ) %>%
+  opt_row_striping()
+```
+\newpage
+
+## RCTs
+```{r}
+bias_rcts_table <- bias_rcts %>%
+  mutate(
+    risk_of_bias_in_selection_of_reported_result_low_some_concern_high = case_when(
+      risk_of_bias_in_selection_of_reported_result_low_some_concern_high == "Low" ~ "Low",
+      risk_of_bias_in_selection_of_reported_result_low_some_concern_high == "Some Concern" ~ "Moderate",
+      TRUE ~ "Low"
+    )
+  ) %>%
+  rename_with(~str_remove(., "_low_some_concern_high"), everything()) %>%
+  rename(
+    Study = study,
+    `Randomisation` = risk_of_bias_from_randomising_process,
+    `Deviations from Intended Intervention Effect - Assignment` = risk_of_bias_due_to_deviations_from_the_intended_interventions_effect_of_assingment_to_intervention,
+    `Deviations from Intended Intervention Effect - Adherence` = risk_of_bias_due_to_deviations_from_the_intended_interventions_effect_of_adhering_to_intervention,
+    
+    `Missing Outcomes` = missing_outcome_data,
+    `Measurement of Outcome` = risk_of_bias_in_measurement_of_outcome,
+    `Selection of Reported Result` = risk_of_bias_in_selection_of_reported_result,
+    Overall = overall
+  ) %>%
+  mutate(across(-Study, ~str_replace_all(., "Some concern", "Moderate")),
+         across(-Study, ~str_replace_all(., "Low ", "Low")),
+         across(-Study, ~str_replace_all(., "Some Concern", "Moderate")))
+
+bias_rcts_table %>%
+  gt() %>%
+  tab_header(
+    title = "Risk of Bias Assessment for Randomised Controlled Studies"
+  ) %>%
+  # Color coding function
+  data_color(
+    columns = c(`Randomisation`, `Deviations from Intended Intervention Effect - Assignment`, `Deviations from Intended Intervention Effect - Adherence`,
+                `Missing Outcomes`, `Measurement of Outcome`, `Selection of Reported Result`, Overall),
+    fn = function(x) {
+      case_when(
+        x == "Low" ~ "#90EE90",     
+        x == "Moderate" ~ "#FFD700",  
+        x == "High" ~ "#FF6B6B",      
+        TRUE ~ "#FFFFFF"              
+      )
+    }
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = Overall)
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(`Randomisation`, `Deviations from Intended Intervention Effect - Assignment`, `Deviations from Intended Intervention Effect - Adherence`,
+                `Missing Outcomes`, `Measurement of Outcome`, `Selection of Reported Result`, Overall)
+  ) %>%
+  cols_align(
+    align = "left",
+    columns = Study
+  ) %>%
+  opt_row_striping()
+```
+\newpage
+
+## Overall Bias
+```{r}
+overall_bias %>%
+  mutate(
+    Study = study,
+    Overall = factor(overall, levels = c("Low", "Moderate", "High"))
+  ) %>%
+  select(Study, Overall) %>%
+  arrange(Study) %>%
+  arrange(Overall) %>%
+  gt() %>%
+  tab_header(
+    title = md("**Overall Risk of Bias Assessment**"),
+    subtitle = "Summary across all studies"
+  ) %>%
+  data_color(
+    columns = Overall,
+    fn = function(x) {
+      case_when(
+        x == "Low" ~ "#90EE90",      
+        x == "Moderate" ~ "#FFD700",  
+        x == "High" ~ "#FF6B6B",      
+        TRUE ~ "#FFFFFF"              
+      )
+    }
+  ) %>%
+  # Styling
+  tab_style(
+    style = cell_text(weight = "bold", align = "center"),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold", align = "center"),
+    locations = cells_body(columns = Overall)
+  ) %>%
+  cols_align(
+    align = "left",
+    columns = Study
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = Overall
+  ) %>%
+  cols_width(
+    Study ~ px(300),
+    Overall ~ px(150)
+  ) %>%
+  opt_row_striping() %>%
+  tab_options(
+    table.font.size = 14,
+    heading.title.font.size = 18,
+    heading.subtitle.font.size = 14,
+    column_labels.font.weight = "bold",
+    table.border.top.style = "solid",
+    table.border.top.width = px(3),
+    table.border.top.color = "#323232",
+    column_labels.border.bottom.style = "solid",
+    column_labels.border.bottom.width = px(2),
+    column_labels.border.bottom.color = "#323232"
+  )
+```
+\newpage
+
+# GRADE {.tabset .tabset-pills}
+## Function to Derive GRADE rating
+```{r}
+calculate_grade <- function(study_design, 
+                           risk_of_bias, 
+                           inconsistency, 
+                           indirectness, 
+                           imprecision, 
+                           publication_bias,
+                           large_effect = FALSE,
+                           dose_response = FALSE,
+                           confounders_reduce_effect = FALSE) {
+  
+  # Starting point based on study design
+  if (study_design == "RCT") {
+    certainty <- 4  # High
+  } else if (study_design == "Observational") {
+    certainty <- 2  # Low
+  } else {
+    certainty <- 1  # Very Low
+  }
+  
+  # Downgrade for limitations
+  if (risk_of_bias == "Serious") certainty <- certainty - 1
+  if (risk_of_bias == "Very serious") certainty <- certainty - 2
+  
+  if (inconsistency == "Serious") certainty <- certainty - 1
+  if (inconsistency == "Very serious") certainty <- certainty - 2
+  
+  if (indirectness == "Serious") certainty <- certainty - 1
+  if (indirectness == "Very serious") certainty <- certainty - 2
+  
+  if (imprecision == "Serious") certainty <- certainty - 1
+  if (imprecision == "Very serious") certainty <- certainty - 2
+  
+  if (publication_bias == "Strongly suspected") certainty <- certainty - 1
+  
+  # Upgrade for observational studies
+  if (study_design == "Observational") {
+    if (large_effect) certainty <- certainty + 1
+    if (dose_response) certainty <- certainty + 1
+    if (confounders_reduce_effect) certainty <- certainty + 1
+  }
+  
+  # Ensure certainty stays within bounds
+  certainty <- max(1, min(4, certainty))
+  
+  # Convert to GRADE rating
+  grade_rating <- case_when(
+    certainty == 4 ~ "High",
+    certainty == 3 ~ "Moderate",
+    certainty == 2 ~ "Low",
+    certainty == 1 ~ "Very Low"
+  )
+  
+  return(list(
+    certainty_score = certainty,
+    grade_rating = grade_rating
+  ))
+}
+
+# Function to create GRADE quality symbols
+grade_symbol <- function(grade_rating) {
+  symbols <- case_when(
+    grade_rating == "High" | grade_rating == 4 ~ "⊕⊕⊕⊕",
+    grade_rating == "Moderate" | grade_rating == 3 ~ "⊕⊕⊕◯",
+    grade_rating == "Low" | grade_rating == 2 ~ "⊕⊕◯◯",
+    grade_rating == "Very Low" | grade_rating == 1 ~ "⊕◯◯◯",
+    TRUE ~ "◯◯◯◯"
+  )
+  return(symbols)
+}
+```
+
+
+# Finalised Results {.tabset .tabset-pills}
+## Volume
+### Comment
+There is high heterogeneity throughout the analyses. Age consistently shifts the distribution, although differences between age bands are non-significant. There seem to be some minor differences between sexes, but again these are non significant.<br>
+The race-specific estimates are underpowered and unstable – many are single studies or have implausibly wide ranges. On Wald tests: The only between group differences that were significant were black (1.40-1.75, n=304, I2=60%) vs white women (1.76-2.05, n=3260, I2=78%), and all races (0.94-2.40, n=4177, I2=99%) vs white women. In the meta-regression of women only, there is a significant decrease in the lower limit (from 0.94 in main MA to 0.55). The meta-regression for women (all races) seems robust with minimal heterogeneity and non significant Cochran’s Q, only 7/20 studies were included due to missing data (mainly standard deviations). This is in keeping with the observed instability of the race-specific sub-analyses. <br>
+Therefore, we suggest using **age stratified ranges only**, without subdivision by sex or race.
+<br>
+
+### Plot
+```{r}
+volume_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(volume_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         !age_band %in% c("Overall", "Meta-Regression"))
+```
+\newpage
+
+### Results Table
+```{r}
+volume_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    !age_band %in% c("Meta-Regression", "Overall")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 2), " – ", round(upper_95, 2)
+    )
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    age_band        = "Age Band",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "Main Meta-analysis Results by Age Band",
+    subtitle = "Random-effects meta-analysis"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+volume_rob <- urine_ma2 %>%
+  drop_na(volume_sd_m_l) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, age_band, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  group_by(age_band) %>% 
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    age_band   = "Age Band",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine Volume"
+  )
+
+volume_rob
+```
+\newpage
+
+### GRADE Output
+```{r}
+grade_18plus <- calculate_grade(
+  study_design= "Observational",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+grade_20_30 <- calculate_grade(
+  study_design= "Observational",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+grade_30_40 <- calculate_grade(
+  study_design= "Observational",
+  risk_of_bias = "Serious",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+grade_40_50 <- calculate_grade(
+  study_design= "Observational",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+grade_50_60 <- calculate_grade(
+  study_design= "Observational",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+grade_60plus<- calculate_grade(
+  study_design= "Observational",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+
+volume_grade <- cbind(
+  age_band = c("18+", "20-30", "30-40", "40-50", "50-60", "60+"),
+  grade = c(grade_18plus$grade_rating,
+            grade_20_30$grade_rating,
+            grade_30_40$grade_rating,
+            grade_40_50$grade_rating,
+            grade_50_60$grade_rating,
+            grade_60plus$grade_rating)
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+```
+\newpage
+
+### 24 Hour Urine Volume Suggested Reference Range
+```{r}
+volume_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    !age_band %in% c("Meta-Regression", "Overall")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 2), " – ", round(upper_95, 2)
+    )
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    age_band       = "Age Band",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    -age_band
+  ) %>%
+  tab_header(
+    title = "Main Meta-analysis Results by Age Band",
+    subtitle = "Random-effects meta-analysis"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
 ```
 \newpage
