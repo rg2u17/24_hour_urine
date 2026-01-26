@@ -6413,8 +6413,8 @@ gt_tbl <- summary_table_separated %>%
                    NA, # urate overall
                    NA, # urea
                    volume_final_results$ci_95, # volume
-                   (phosphate_final_results %>% filter(age_band == "Male")$ci_95),
-                   (phosphate_final_results %>% filter(age_band == "Female")$ci_95)
+                   (phosphate_final_results %>% filter(age_band == "Male"))$ci_95,
+                   (phosphate_final_results %>% filter(age_band == "Female"))$ci_95
                    ),
     "Proposed Rating" = c(NA,  #ammonium
                    calcium_final_results$grade_rating, # calcium
@@ -6436,8 +6436,8 @@ gt_tbl <- summary_table_separated %>%
                    NA, # urate overall
                    NA, # urea
                    volume_final_results$grade_rating, # volume
-                   (phosphate_final_results %>% filter(age_band == "Male")$grade_rating),
-                   (phosphate_final_results %>% filter(age_band == "Female")$grade_rating)
+                   (phosphate_final_results %>% filter(age_band == "Male"))$grade_rating,
+                   (phosphate_final_results %>% filter(age_band == "Female"))$grade_rating
                    )
   ) %>%
   group_by(urine_component) %>%
