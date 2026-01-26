@@ -6390,8 +6390,8 @@ summary_table_separated <- summary_table_data %>%
 
 gt_tbl <- summary_table_separated %>%
   select(urine_component, sex_group, everything()) %>% 
-  rbind(c("Phosphate (Mmol / 24hrs)", NA, NA, NA, NA, NA, "Men")) %>%
-  rbind(c("Phosphate (Mmol / 24hrs)", NA, NA, NA, NA, NA, "Women")) %>%
+  rbind(c("Phosphate (Mmol / 24hrs)", "Men", NA, NA, NA, NA, NA)) %>%
+  rbind(c("Phosphate (Mmol / 24hrs)", "Women", NA, NA, NA, NA, NA)) %>%
   cbind(
     "Proposed" = c(NA,  #ammonium
                    calcium_final_results$ci_95, # calcium
