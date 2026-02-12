@@ -8727,105 +8727,66 @@ summary_table_separated <- summary_table_data %>%
   ) %>% 
   arrange(urine_component)
 
+proposed_lookup <- proposed_lookup %>%
+  mutate(join_key = str_to_lower(urine_component))
+
 gt_tbl <- summary_table_separated %>%
-  select(urine_component, sex_group, everything()) %>% 
-  rbind(c("Phosphate (Mmol / 24hrs)", "Men", NA, NA, NA, NA, NA)) %>%
-  rbind(c("Phosphate (Mmol / 24hrs)", "Women", NA, NA, NA, NA, NA)) %>%
-  cbind(
-    "Proposed" = c(NA,  #ammonium
-                   calcium_final_results$ci_95, # calcium
-                   NA, # chloride
-                   (citrate_final_results %>% filter(age_band == "Male"))$ci_95, # citrate men
-                   (citrate_final_results %>% filter(age_band == "Female"))$ci_95, # citrate women
-                   NA, # citrate overall
-                   (creatinine_final_results %>% filter(age_band == "Male"))$ci_95, # creatinine men
-                   (creatinine_final_results %>% filter(age_band == "Female"))$ci_95, # creatinine women
-                   NA, # magnesium 
-                   NA, # oxalate
-                   ph_final_results$ci_95, # ph
-                   NA, # phosphate
-                   NA, # potassium
-                   NA, # sodium
-                   NA, # sulphate
-                   (urate_final_results %>% filter(age_band == "Male"))$ci_95, # urate men
-                   (urate_final_results %>% filter(age_band == "Female"))$ci_95, # urate women
-                   NA, # urate overall
-                   NA, # urea
-                   volume_final_results$ci_95, # volume
-                   (phosphate_final_results %>% filter(age_band == "Male"))$ci_95,
-                   (phosphate_final_results %>% filter(age_band == "Female"))$ci_95
-                   ),
-    "Proposed Rating" = c(NA,  #ammonium
-                   calcium_final_results$grade_rating, # calcium
-                   NA, # chloride
-                   NA, # citrate men
-                   NA, # citrate women
-                   NA, # citrate overall
-                   (creatinine_final_results %>% filter(age_band == "Male"))$grade_rating, # creatinine men
-                   (creatinine_final_results %>% filter(age_band == "Female"))$grade_rating, # creatinine women
-                   NA, # magnesium 
-                   oxalate_final_results$grade_rating, # oxalate
-                   ph_final_results$grade_rating, # ph
-                   NA, # phosphate Overall
-                   NA, # potassium
-                   NA, # sodium
-                   NA, # sulphate
-                   (urate_final_results %>% filter(age_band == "Male"))$grade_rating, # urate men
-                   (urate_final_results %>% filter(age_band == "Female"))$grade_rating, # urate women
-                   NA, # urate overall
-                   NA, # urea
-                   volume_final_results$grade_rating, # volume
-                   (phosphate_final_results %>% filter(age_band == "Male"))$grade_rating,
-                   (phosphate_final_results %>% filter(age_band == "Female"))$grade_rating
-                   )
+  mutate(join_key = str_to_lower(str_remove(urine_component, "\\s*\\(.*\\)"))) %>%
+  left_join(
+    proposed_lookup %>% select(join_key, sex_group, Proposed, `Proposed Rating`),
+    by = c("join_key", "sex_group")
   ) %>%
+  select(-join_key) %>%
+  # Add missing sex-specific rows (e.g. Phosphate Men/Women)
+  bind_rows(
+    proposed_lookup %>%
+      filter(!join_key %in% c("ph")) %>%  # pH already matches
+      anti_join(
+        summary_table_separated %>%
+          mutate(join_key = str_to_lower(str_remove(urine_component, "\\s*\\(.*\\)"))),
+        by = c("join_key", "sex_group")
+      ) %>%
+      mutate(urine_component = case_when(
+        join_key == "volume" ~ "Volume (L / 24hrs)",
+        join_key == "ph" ~ "Ph",
+        TRUE ~ paste0(str_to_title(join_key), " (Mmol / 24hrs)")
+      )) %>%
+      select(-join_key)
+  ) %>%
+  arrange(factor(sex_group, levels = c("Overall", "Men", "Women")), urine_component) %>%
   group_by(urine_component) %>%
   gt(groupname_col = "urine_component") %>%
+  cols_move_to_start(columns = sex_group) %>%
   tab_style(
-    style = list(
-      cell_fill(color = "#FFF3CD"),
-      cell_text(weight = "bold")
-    ),
+    style = list(cell_fill(color = "#FFF3CD"), cell_text(weight = "bold")),
     locations = list(
       cells_body(columns = Proposed),
       cells_column_labels(columns = Proposed)
     )
   ) %>%
-  fmt_missing(
-    columns = everything(),
-    missing_text = "-"
-  ) %>%
-  tab_style(
-    style = cell_text(weight = "bold"),
-    locations = cells_body(columns = sex_group)
-  ) %>%
-  cols_label(
-    urine_component = "Urine Component",
-    sex_group  = "Sex"
-  ) %>%
-  cols_align("center", c(EAU, NDH, NHS, Litholink, `Mayo Clinic`, Proposed, `Proposed Rating`)) %>%
-  tab_style(
-    style = list(cell_text(weight = "bold")),
-    locations = cells_column_labels(everything())
-  ) %>%
+  fmt_missing(columns = everything(), missing_text = "-") %>%
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_body(columns = sex_group)) %>%
+  cols_label(sex_group = "Sex", urine_component = "Urine Component") %>%
+  cols_align("center",
+             c(EAU, NDH, NHS, Litholink, `Mayo Clinic`, Proposed, `Proposed Rating`)) %>%
+  tab_style(style = list(cell_text(weight = "bold")),
+            locations = cells_column_labels(everything())) %>%
   opt_row_striping() %>%
   tab_options(table.font.size = 12,
-              row.striping.background_color = "lightgrey") 
+              row.striping.background_color = "lightgrey")
 
+# Apply row group colours
 row_groups <- gt_tbl[["_row_groups"]]
-
 for (comp in names(component_cols)) {
-
   matching <- row_groups[str_detect(row_groups, comp)]
-
-  gt_tbl <- gt_tbl %>%
-    tab_style(
-      style = list(
-        cell_fill(color = component_cols[comp]),
-        cell_text(weight = "bold")
-      ),
-      locations = cells_row_groups(groups = matching)
-    )
+  if (length(matching) > 0) {
+    gt_tbl <- gt_tbl %>%
+      tab_style(
+        style = list(cell_fill(color = component_cols[comp]), cell_text(weight = "bold")),
+        locations = cells_row_groups(groups = matching)
+      )
+  }
 }
 
 gt_tbl
