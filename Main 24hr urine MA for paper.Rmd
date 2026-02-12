@@ -5908,7 +5908,7 @@ creatinine_rob
 ### 24 Hour Urine Creatinine Suggested Reference Range inc. GRADE
 ```{r}
 creatinine_male_grade <- calculate_grade(
-  study_design= "Mixed",
+  study_design= "Mixed", 
   risk_of_bias = "Serious",
   inconsistency = "Serious",
   indirectness = "Moderate",
@@ -6894,7 +6894,1729 @@ phosphate_final_results <- phosphate_final_results %>%
 ```
 \newpage
 
+## Phosphorous {.tabset .tabset-pills}
+### Comment
+High heterogeneity across all analyses, with significant amount of data missing for sub-analyses. Meta-regression reduces heterogeneity in overall and female only analyses, suggesting study-level covariates partially explain observed variation. Wald tests suggest significant differences between age groups. However, there seems to be insufficient data to rely on these age-stratified results. <br>
+	We recommend sex-specific results may be used as a pooled population distribution/expected distribution across heterogenous studies. <br>
 
+
+### Plot
+```{r}
+male_plot <- phosphorus_ma_2nd_analysis$male$plot %+%
+  subset(phosphorus_ma_2nd_analysis$male$plot$data, age_band == "Overall") +
+  scale_x_continuous(limits = c(0,20))
+
+female_plot <- phosphorus_ma_2nd_analysis$female$plot %+%
+  subset(phosphorus_ma_2nd_analysis$female$plot$data, age_band == "Overall") +
+  scale_x_continuous(limits = c(0,20))
+
+phosphorus_final_plot <- (male_plot / female_plot) + plot_layout(axes = "collect")
+
+phosphorus_final_plot
+```
+\newpage
+
+### Results Table
+```{r}
+phosphorus_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>% filter(
+    sex_group != "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = str_to_title(sex_group)
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "phosphorus Meta-analysis Results by Age Band",
+    subtitle = "Random-effects meta-analysis"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+phosphorus_rob <- urine_ma2 %>%
+  drop_na(phosphorus_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type, male_female) %>%
+  filter(male_female != "mixed") %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    ),
+    sex_group = str_to_title(male_female)
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  group_by(sex_group) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine phosphorus"
+  )
+
+phosphorus_rob
+```
+\newpage
+
+### 24 Hour Urine Phosphorus Suggested Reference Range inc. GRADE
+```{r}
+phosphorus_male_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Serious",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Serious",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+phosphorus_female_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Serious",
+  publication_bias = "Suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+phosphorus_grade <- cbind(
+  sex = c("Male", "Female"),
+  grade = c(phosphorus_male_grade$grade_rating,
+            phosphorus_female_grade$grade_rating)
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+phosphorus_final_results <- phosphorus_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group != "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = str_to_title(sex_group)
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    phosphorus_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+phosphorus_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for phosphorus",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+phosphorus_final_results <- phosphorus_final_results %>% 
+  mutate(
+    urine_component = "phosphorus"
+  )
+```
+\newpage
+
+## Sodium {.tabset .tabset-pills}
+### Comment
+There is substantial variability across all analyses. There appear to be differences in sex and age bands, although only age-band 30-40 demonstrates significant differences between sexes (all other wald tests are non-significant). There are reductions in heterogeneity in specific scenarios e.g. males aged 40-50. However, this is likely an artifact of small numbers of patients/studies <br>
+  The 40–50 age band and the female 50–60 subgroup are the most promising candidates for clinically useful ranges. However, for other subgroups we suggest using the sex-stratified results for potential reference ranges. <br>
+
+
+### Plot
+```{r}
+male_plot <- sodium_ma_2nd_analysis$male$plot %+%
+  subset(sodium_ma_2nd_analysis$male$plot$data, age_band == "Overall") +
+  scale_x_continuous(limits = c(90,230))
+
+female_plot <- sodium_ma_2nd_analysis$female$plot %+%
+  subset(sodium_ma_2nd_analysis$female$plot$data, age_band == "Overall") +
+  scale_x_continuous(limits = c(90,230))
+
+sodium_final_plot <- (male_plot / female_plot) + plot_layout(axes = "collect")
+
+sodium_final_plot
+```
+\newpage
+
+### Results Table
+```{r}
+sodium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>% filter(
+    sex_group != "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = str_to_title(sex_group)
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "Sodium Meta-analysis Results by Age Band",
+    subtitle = "Random-effects meta-analysis"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+sodium_rob <- urine_ma2 %>%
+  drop_na(sodium_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type, male_female) %>%
+  filter(male_female != "mixed") %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    ),
+    sex_group = str_to_title(male_female)
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  group_by(sex_group) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine Sodium"
+  )
+
+sodium_rob
+```
+\newpage
+
+### 24 Hour Urine Sodium Suggested Reference Range inc. GRADE
+```{r}
+sodium_male_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Serious",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Serious",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+sodium_female_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Moderate",
+  imprecision = "Serious",
+  publication_bias = "Suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+sodium_grade <- cbind(
+  sex = c("Male", "Female"),
+  grade = c(sodium_male_grade$grade_rating,
+            sodium_female_grade$grade_rating)
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+sodium_final_results <- sodium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group != "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = str_to_title(sex_group)
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    sodium_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+sodium_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for Sodium",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+sodium_final_results <- sodium_final_results %>% 
+  mutate(
+    urine_component = "sodium"
+  )
+```
+\newpage
+
+
+## Potassium {.tabset .tabset-pills}
+### Comment
+High heterogeneity throughout analyses, with substantial numbers of missing strata. The strata with data seem to be mainly underpowered in the race/age-stratified sub-analyses. There were no significant differences on Wald test. Meta-regression slightly reduces the intervals and I2, but substantial heterogeneity remains suggesting study-level covariates only partially explaining variability. <br>
+	We recommend the overall meta-regression may be used as a pooled population distribution/expected distribution across heterogenous studies. <br>
+
+
+### Plot
+```{r}
+potassium_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(potassium_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Meta-Regression"))
+```
+\newpage
+
+### Results Table
+```{r}
+potassium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    age_band %in% ("Meta-Regression")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = "Meta-Regression"
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "Potassium Meta-analysis Results",
+    subtitle = "Meta-Regression"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+potassium_rob <- urine_ma2 %>%
+  drop_na(potassium_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine potassium"
+  )
+
+potassium_rob
+```
+\newpage
+
+### 24 Hour Urine Potassium Suggested Reference Range inc. GRADE
+```{r}
+potassium_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Serious",
+  inconsistency = "Moderate",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected",
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+potassium_grade <- cbind(
+  sex = c("Overall"),
+  grade = potassium_grade$grade_rating
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+potassium_final_results <- potassium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group == "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = "Meta-Regression"
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    potassium_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+potassium_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for potassium",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+potassium_final_results <- potassium_final_results %>% 
+  mutate(
+    urine_component = "potassium"
+  )
+```
+\newpage
+
+## Magnesium {.tabset .tabset-pills}
+### Comment
+High heterogeneity throughout analyses, with substantial, albeit non-significant, variation between strata. No clear consistent fluctuation between age groups. Meta-regression slightly reduces the intervals and I2, but substantial heterogeneity remains suggesting study-level covariates only partially explaining variability. <br>
+  Meta-analysis of RCTs demonstrates similar heterogeneity, however the results are broadly in line with the remainder of the analyses. <br>
+	We recommend the overall meta-regression may be used as a pooled population distribution/expected distribution across heterogenous studies. <br>
+
+
+### Plot
+```{r}
+magnesium_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(magnesium_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Meta-Regression"))
+```
+\newpage
+
+### Results Table
+```{r}
+magnesium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    age_band %in% ("Meta-Regression")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = "Meta-Regression"
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "Magnesium Meta-analysis Results",
+    subtitle = "Meta-Regression"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+magnesium_rob <- urine_ma2 %>%
+  drop_na(magnesium_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine magnesium"
+  )
+
+magnesium_rob
+```
+\newpage
+
+### 24 Hour Urine Magnesium Suggested Reference Range inc. GRADE
+```{r}
+magnesium_grade <- calculate_grade(
+  study_design= "RCT", #RCTs have similar ranges to MR result
+  risk_of_bias = "Moderate", #consistent results
+  inconsistency = "Moderate",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected", #significant Q
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+magnesium_grade <- cbind(
+  sex = c("Overall"),
+  grade = magnesium_grade$grade_rating
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+magnesium_final_results <- magnesium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group == "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = "Meta-Regression"
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    magnesium_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+magnesium_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for magnesium",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+magnesium_final_results <- magnesium_final_results %>% 
+  mutate(
+    urine_component = "magnesium"
+  )
+```
+\newpage
+
+## Ammonium {.tabset .tabset-pills}
+### Comment
+Heterogeneity remains high across analyses, however there is reasonable consistency across strata. Meta-regression reduces both interval and I2, suggesting at least partial adjustment for between study variation. Few studies in men alone and no meta-regression in this group, and therefore the 30-40 vs 60+ significant wald test result is not interpretable. Race sub-analyses are underpowered. <br>
+	We recommend the overall meta-regression may be used as a pooled population distribution/expected distribution across heterogenous studies. The female only meta-regression could also be used, however there is no male equivalent. <br>
+
+
+### Plot
+```{r}
+ammonium_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(ammonium_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Meta-Regression"))
+```
+\newpage
+
+### Results Table
+```{r}
+ammonium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    age_band %in% ("Meta-Regression")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = "Meta-Regression"
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "ammonium Meta-analysis Results",
+    subtitle = "Meta-Regression"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+ammonium_rob <- urine_ma2 %>%
+  drop_na(ammonium_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine ammonium"
+  )
+
+ammonium_rob
+```
+\newpage
+
+### 24 Hour Urine ammonium Suggested Reference Range inc. GRADE
+```{r}
+ammonium_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Moderate", #consistent results
+  inconsistency = "Moderate",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected", #significant Q
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+ammonium_grade <- cbind(
+  sex = c("Overall"),
+  grade = ammonium_grade$grade_rating
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+ammonium_final_results <- ammonium_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group == "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = "Meta-Regression"
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    ammonium_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+ammonium_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for Ammonium",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+ammonium_final_results <- ammonium_final_results %>% 
+  mutate(
+    urine_component = "ammonium"
+  )
+```
+\newpage
+
+## Chloride {.tabset .tabset-pills}
+### Comment
+Substantial heterogeneity throughout analyses. Minimal data for age and race stratifications. Meta-regression does reduce interval and I2 in both male and female analyses. <br>
+	We recommend using the overall meta-regression result given the poor amount of evidence in other strata. However, this should be interpreted as a pooled population distribution.
+ <br>
+
+
+### Plot
+```{r}
+chloride_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(chloride_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Meta-Regression"))
+```
+\newpage
+
+### Results Table
+```{r}
+chloride_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    age_band %in% ("Meta-Regression")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = "Meta-Regression"
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "chloride Meta-analysis Results",
+    subtitle = "Meta-Regression"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+chloride_rob <- urine_ma2 %>%
+  drop_na(chloride_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine chloride"
+  )
+
+chloride_rob
+```
+\newpage
+
+### 24 Hour Urine chloride Suggested Reference Range inc. GRADE
+```{r}
+chloride_grade <- calculate_grade(
+  study_design= "Mixed",
+  risk_of_bias = "Moderate", #consistent results
+  inconsistency = "Moderate",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected", #significant Q
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+chloride_grade <- cbind(
+  sex = c("Overall"),
+  grade = chloride_grade$grade_rating
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+chloride_final_results <- chloride_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group == "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = "Meta-Regression"
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    chloride_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+chloride_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for chloride",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+chloride_final_results <- chloride_final_results %>% 
+  mutate(
+    urine_component = "chloride"
+  )
+```
+\newpage
+
+## Sulphate {.tabset .tabset-pills}
+### Comment
+There are few studies in this analysis, with wide variation in results and high heterogeneity throughout the different strata. The meta-regression result is not valid. There is marked variation between men and women, although non-significant and appear due to variation within the substantially larger female cohort.<br>
+	The overall meta-analysis result has the most robust evidence given the similarity to RCT results. <br>
+
+
+### Plot
+```{r}
+sulphate_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(sulphate_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Overall"))
+```
+\newpage
+
+### Results Table
+```{r}
+sulphate_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    age_band %in% ("Overall")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = str_to_title(sex_group)
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Sex",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "Sulphate Meta-analysis Results",
+    subtitle = "Meta-Analysis"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+sulphate_rob <- urine_ma2 %>%
+  drop_na(sulphate_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine sulphate"
+  )
+
+sulphate_rob
+```
+\newpage
+
+### 24 Hour Urine sulphate Suggested Reference Range inc. GRADE
+```{r}
+sulphate_grade <- calculate_grade(
+  study_design= "RCT", #Consistent with RCT results
+  risk_of_bias = "Strongly Suspected", 
+  inconsistency = "Strongly Suspected",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected", #significant Q
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+sulphate_grade <- cbind(
+  sex = c("Overall"),
+  grade = sulphate_grade$grade_rating
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+sulphate_final_results <- sulphate_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Overall")
+  ) %>%
+  filter(
+    sex_group == "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = str_to_title(sex_group)
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    sulphate_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+sulphate_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Sex",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for Sulphate",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+sulphate_final_results <- sulphate_final_results %>% 
+  mutate(
+    urine_component = "sulphate"
+  )
+```
+\newpage
+
+## Urea {.tabset .tabset-pills}
+### Comment
+There were minimal data for urea. Given there were minimal differences between sexes, and improvement in I2 with meta-regression, we suggest utilising the overall meta-regression result as the representative pooled population distribution. <br>
+
+
+### Plot
+```{r}
+urea_ma_2nd_analysis$main_meta_analysis$plot %+% 
+  subset(urea_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Meta-Regression"))
+```
+\newpage
+
+### Results Table
+```{r}
+urea_ma_2nd_analysis$ma_results %>% 
+  filter(
+    sex_group == "main meta-analysis",
+    age_band %in% ("Meta-Regression")
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round((I2 * 100), 0),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ as.character(round(Q_pval, 2))
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    sex_group = "Meta-Regression"
+  ) %>%
+  select(
+    sex_group,
+    n_studies,
+    pooled_estimate,
+    pooled_sd,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  gt() %>%
+  cols_label(
+    sex_group       = "Analysis",
+    n_studies       = "Studies, n",
+    pooled_estimate = "Pooled Estimate",
+    pooled_sd       = "SD",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value"
+  ) %>%
+  cols_align(
+    align = "center",
+    columns = c(n_studies, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
+  ) %>%
+  tab_header(
+    title = "Urea Meta-analysis Results",
+    subtitle = "Meta-Regression"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies.*"
+    )
+  )
+```
+\newpage
+
+### Bias analysis
+```{r}
+urea_rob <- urine_ma2 %>%
+  drop_na(urea_sd_mmol_24h) %>%
+  left_join(
+    overall_bias, by = c("study_name" = "study")
+  ) %>%
+  select(study_name, overall, study_type) %>%
+  mutate(
+    overall = case_when(
+      is.na(overall) ~ "Moderate",
+      TRUE ~ overall
+    )
+  ) %>%
+  distinct(study_name, .keep_all = TRUE) %>%
+  arrange(overall) %>%
+  gt() %>%
+  cols_label(
+    study_name = "Study",
+    overall    = "Risk of Bias",
+    study_type = "Study Type"
+  ) %>%
+  data_color(
+    columns = overall,
+    fn = function(x) {
+      case_when(
+        x == "Low"      ~ "#90EE90",  
+        x == "Moderate" ~ "#FFD700",  
+        x == "High"     ~ "#FF6B6B",  
+        TRUE            ~ "#FFFFFF"
+      )
+    }
+  ) %>%
+  opt_all_caps() %>%
+  cols_align(
+    align = "center",
+    overall
+  ) %>%
+  tab_header(
+    title = "Risk of Bias by Study and Age Band for 24 Hour Urine urea"
+  )
+
+urea_rob
+```
+\newpage
+
+### 24 Hour Urine urea Suggested Reference Range inc. GRADE
+```{r}
+urea_grade <- calculate_grade(
+  study_design= "Mixed", #Consistent with RCT results
+  risk_of_bias = "Strongly Suspected", 
+  inconsistency = "Strongly Suspected",
+  indirectness = "Moderate",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected", #significant Q
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = FALSE
+)
+
+urea_grade <- cbind(
+  sex = c("Overall"),
+  grade = urea_grade$grade_rating
+) %>% as_tibble() %>%
+  mutate(
+    grade_rating = grade_symbol(grade)
+  )
+
+urea_final_results <- urea_ma_2nd_analysis$ma_results %>% 
+  filter(
+    age_band %in% c("Meta-Regression")
+  ) %>%
+  filter(
+    sex_group == "main meta-analysis"
+  ) %>%
+  mutate(
+    pooled_estimate = round(pooled_estimate, 2),
+    pooled_sd       = round(pooled_sd, 2),
+    I2              = round(I2, 2),
+    Q               = round(Q, 2),
+    Q_pval = case_when(
+      Q_pval < 0.001 ~ "<0.001",
+      Q_pval < 0.01  ~ "<0.01",
+      Q_pval < 0.05  ~ "<0.05",
+      TRUE           ~ sprintf("%.2f", Q_pval)
+    ),
+    ci_95 = paste0(
+      round(lower_95, 1), " – ", round(upper_95, 1)
+    ),
+    age_band = "Meta-Regression"
+  ) %>%
+  select(
+    age_band,
+    n_studies,
+    ci_95,
+    I2,
+    Q,
+    Q_pval
+  ) %>%
+  cbind(
+    urea_grade) %>%
+  mutate(grade_rating = paste0(grade, " ", grade_rating)) %>%
+  select(-c(sex, grade)) 
+
+urea_final_results %>%
+  gt() %>% 
+  cols_label(
+    age_band       = "Meta-Regression",
+    n_studies       = "Studies, n",
+    ci_95           = "95% CI",
+    I2              = html("I<sup>2</sup> (%)"),
+    Q               = "Q statistic",
+    Q_pval          = "Q p-value",
+    grade_rating    = "GRADE Rating"
+  ) %>%
+  cols_align(
+    align = "center"
+  ) %>%
+  tab_header(
+    title = "Finalised Meta-Analysis Results for Urea",
+    subtitle = "Subdivided by Age Band"
+  ) %>%
+  tab_source_note(
+    source_note = md(
+      "*I² quantifies heterogeneity; Q p-value tests heterogeneity across studies; All results are from Random-Effects meta-analysis.*"
+    )
+  )
+
+urea_final_results <- urea_final_results %>% 
+  mutate(
+    urine_component = "urea"
+  )
+```
+\newpage
 
 # Final Table of All Results {.tabset .tabset-pills}
 ## All MA Results
@@ -6906,7 +8628,14 @@ final_table <- rbind(volume_final_results,
                      oxalate_final_results,
                      ph_final_results,
                      citrate_final_results,
-                     phosphate_final_results
+                     phosphate_final_results,
+                     sodium_final_results,
+                     potassium_final_results,
+                     magnesium_final_results,
+                     ammonium_final_results,
+                     chloride_final_results,
+                     sulphate_final_results,
+                     urea_final_results
                      )
 
 component_cols <- c(
@@ -6936,7 +8665,7 @@ final_gt <- final_table %>%
   group_by(urine_component) %>%
   gt() %>% 
   cols_label(
-    age_band       = "Age Band",
+    age_band       = "Meta-Analysis Type",
     n_studies       = "Studies, n",
     ci_95           = "95% CI",
     I2              = html("I<sup>2</sup> (%)"),
@@ -6949,8 +8678,8 @@ final_gt <- final_table %>%
     -age_band
   ) %>%
   tab_header(
-    title = "Finalised Meta-Analysis Results for Volume",
-    subtitle = "Subdivided by Age Band"
+    title = "Finalised 24 Hour Urine Reference Range Suggestions",
+    subtitle = "Recommendations based on meta-analyses with most robust evidence"
   ) %>%
   tab_source_note(
     source_note = md(
