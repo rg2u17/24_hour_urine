@@ -8727,8 +8727,14 @@ summary_table_separated <- summary_table_data %>%
   ) %>% 
   arrange(urine_component)
 
-proposed_lookup <- proposed_lookup %>%
-  mutate(join_key = str_to_lower(urine_component))
+proposed_lookup <- final_table %>%
+  mutate(
+    urine_component = str_to_title(urine_component),
+    sex_group = age_band,
+    Proposed = ci_95,
+    "Proposed Rating" = grade_rating,
+    join_key = urine_component
+  )
 
 gt_tbl <- summary_table_separated %>%
   mutate(join_key = str_to_lower(str_remove(urine_component, "\\s*\\(.*\\)"))) %>%
