@@ -158,7 +158,7 @@ urine_ma1 <- urine_ma1 %>% mutate(
     first_author == "HPFS & NHS I/II" ~ first_author,
     and == "no" & first_author != "HPFS & NHS I/II" ~ paste0(first_author, " et al. ", year),
     and == "yes" ~ paste0(first_author, ", ", year),
-  TRUE ~ NA_character_),
+  TRUE ~ paste0(first_author, " et al. ", year)),
   underlying_cause = case_when(
         other_demographic_variant == "pre_menopausal" ~ "pre_menopausal",
         other_demographic_variant == "post_menopausal" ~ "post_menopausal",
