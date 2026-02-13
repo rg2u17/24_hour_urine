@@ -22,6 +22,7 @@ These analyses are deployed online at: https://endourology.shinyapps.io/24_hr_ra
 
 ## 2. How to Run this Analysis
 <br>
+
 **To download this model, open your terminal and use:**
 ```git clone https://github.com/rg2u17/24_hour_urine.git```
 <br>
@@ -31,6 +32,7 @@ This will clone this repository into the working directory you are currently loc
 If you haven't already done so, we would suggest downloading RStudio from: https://posit.co/products/open-source/rstudio/?sid=1
 Once RStudio is installed and you've downloaded the repository you will need to load in the rmarkdown file as below:
 <br>
+
 **To run this script we suggest using the rmarkdown file (Main 24hr urine MA for paper.rmd) in RStudio and either:** <br>
 1. **selecting 'run all' OR** <br>
 2. **knit the file to html** (NB: This markdown document is designed to be knitted to html, however we understand that readers may wish to adjust the script themselves) <br>
@@ -39,6 +41,7 @@ Once RStudio is installed and you've downloaded the repository you will need to 
 Prior to running the script please check all packages are installed - if not, then you can run this in the console prior to running all the markdown chunks: <br>
 ```install.packages(c("tidyverse", "gt", "gtExtra", "shiny", "data.table", "janitor", "pROC", "ggplot2", "janitor","DataExplorer","meta","metafor","forestplot","grid","gridExtra,"patchwork"))``` <br>
 <br>
+
 **File paths:**
 There are no additional scripts that need to be run for this markdown document<br>
 ```getwd()``` <br>
