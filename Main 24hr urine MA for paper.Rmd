@@ -6340,12 +6340,12 @@ ph_rob
 ### 24 Hour Urine pH Suggested Reference Range inc. GRADE
 ```{r}
 ph_grade <- calculate_grade(
-  study_design= "Mixed",
+  study_design= "RCT", # Correlation with RCTs
   risk_of_bias = "Serious",
-  inconsistency = "Serious",
+  inconsistency = "Moderate", # Strongly consistent throughout studies
   indirectness = "Moderate",
-  imprecision = "Serious",
-  publication_bias = "Strongly suspected",
+  imprecision = "Moderate",
+  publication_bias = "Strongly suspected", #significant cochran's Q + I2 high
   large_effect = TRUE,
   dose_response = FALSE,
   confounders_reduce_effect = FALSE
@@ -7112,7 +7112,7 @@ phosphorus_final_results %>%
     align = "center"
   ) %>%
   tab_header(
-    title = "Finalised Meta-Analysis Results for phosphorus",
+    title = "Finalised Meta-Analysis Results for Phosphorus",
     subtitle = "Subdivided by Age Band"
   ) %>%
   tab_source_note(
@@ -7123,7 +7123,7 @@ phosphorus_final_results %>%
 
 phosphorus_final_results <- phosphorus_final_results %>% 
   mutate(
-    urine_component = "phosphorus"
+    urine_component = "Phosphorus"
   )
 ```
 \newpage
@@ -8621,6 +8621,12 @@ urea_final_results <- urea_final_results %>%
 # Final Table of All Results {.tabset .tabset-pills}
 ## All MA Results
 ```{r}
+# All the other phosphate reference ranges seem to be aligned to the phosphorous reference range not the phosphate
+phosphate_final_results <- phosphorus_final_results %>%
+  mutate(
+    urine_component = "phosphate"
+  )
+
 final_table <- rbind(volume_final_results,
                      calcium_final_results,
                      urate_final_results,
@@ -8730,11 +8736,21 @@ summary_table_separated <- summary_table_data %>%
 proposed_lookup <- final_table %>%
   mutate(
     urine_component = str_to_title(urine_component),
-    sex_group = age_band,
+    sex_group = case_when(age_band == "Male" ~ "Men",
+                          age_band == "Female" ~ "Women",
+                          age_band == "Main Meta-Analysis" ~ "Overall",
+                          age_band == "Meta-Regression" ~ "Overall",
+                          TRUE ~ NA_character_),
     Proposed = ci_95,
     "Proposed Rating" = grade_rating,
-    join_key = urine_component
-  )
+    join_key = str_to_lower(urine_component),
+    .keep = "unused"
+  ) %>%
+  dplyr::select(urine_component,
+                sex_group,
+                Proposed,
+                `Proposed Rating`,
+                join_key)
 
 gt_tbl <- summary_table_separated %>%
   mutate(join_key = str_to_lower(str_remove(urine_component, "\\s*\\(.*\\)"))) %>%
@@ -8743,10 +8759,9 @@ gt_tbl <- summary_table_separated %>%
     by = c("join_key", "sex_group")
   ) %>%
   select(-join_key) %>%
-  # Add missing sex-specific rows (e.g. Phosphate Men/Women)
   bind_rows(
     proposed_lookup %>%
-      filter(!join_key %in% c("ph")) %>%  # pH already matches
+      filter(!join_key %in% c("ph")) %>% 
       anti_join(
         summary_table_separated %>%
           mutate(join_key = str_to_lower(str_remove(urine_component, "\\s*\\(.*\\)"))),
