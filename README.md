@@ -61,6 +61,7 @@ This will ensure the scripts run without having to alter the file path
 ## 3. Workflow
 We utilised the following workflow:
 <br>
+
 ### 3.1 Systematic review 
 Explanation re: SR
 <br>
@@ -68,6 +69,7 @@ All the documents identified in the original search are within the Searches Fold
 <br>
 Figure 1. PRISMA Flow diagram <br>
 <br>
+
 ### 3.2 Meta-analysis
 We generated meta-analysed expected ranges based on the assumption of normal distribution, apart from volume where we assumed a left-skew and therefore performed a log transformation. The expected range was calculated according to existing standards for reporting reference ranges (<5% / >95% for normal distribution). A random-effects model was used when substantial heterogeneity was suspected, while a fixed-effect model was applied when there was minimal heterogeneity. Heterogeneity was evaluated using I2, τ2, and Cochran’s Q statistics. Publication bias was assessed statistically with Egger’s and Begg’s tests, and visually with Funnel/Baujat plots. 
 
@@ -79,10 +81,16 @@ Where there was sufficient data, we performed meta-regression using age, sex, ra
 <img width="760" height="320" alt="image" src="https://github.com/user-attachments/files/24741908/MA.result.flow.diagram.pdf" /> <br>
 Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
+
 ### 3.3 Bias analysis
 We utilized the Cochrane risk of bias tools for both observational studies (exposures)10 and randomized trials. We summarized bias into an overall category. This was based on: any domain being high risk then overall was assigned high risk; if any two domains were moderate then overall was assigned moderate; otherwise overall was assigned to low risk. 
 <br>
-### 3.4 GRADE rating
-We utilized the GRADE methodology to determine level of evidence for each of meta-analysis derived 24-hour urine reference range.
+
+### 3.4 Derivation of Most Robust Evidence to Populate Expected Range
+We selected the most robust evidence based on the above analyses, taking into consideration heterogeneity statistics and statistical evidence of publication bias, along with evidence of differences in robustly evidenced subsets. 
+<br>
+
+### 3.5 GRADE rating
+We utilized the GRADE methodology to determine level of evidence for each urine component result from section 3.4.
 Please see: https://www.gradepro.org 
 
