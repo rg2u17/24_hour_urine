@@ -83,7 +83,7 @@ Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
 
 ### 3.3 Bias analysis
-We utilized the Cochrane risk of bias tools for both observational studies (exposures)10 and randomized trials. We summarized bias into an overall category. This was based on: any domain being high risk then overall was assigned high risk; if any two domains were moderate then overall was assigned moderate; otherwise overall was assigned to low risk. 
+We utilized the Cochrane risk of bias tools for both observational studies (exposures) and randomized trials. We summarized bias into an overall category. This was based on: any domain being high risk then overall was assigned high risk; if any two domains were moderate then overall was assigned moderate; otherwise overall was assigned to low risk. 
 <br>
 
 ### 3.4 Derivation of Most Robust Evidence to Populate Expected Range
