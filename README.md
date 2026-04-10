@@ -1,4 +1,4 @@
-# Exploration of 24 Hour Urine References Ranges Using SR/MA data
+# Exploration of 24 Hour Urine Expected Ranges in Non-Kidney Stone Formers Using SR/MA data
 ## Table of Contents
 <br>
 
@@ -12,7 +12,7 @@
 <br>
 
 ## 1. Explanation
-Repository for all data and code associated with paper exploring 24 hour urine reference ranges using data derived from systematic review and meta-analysis. 
+Repository for all data and code associated with paper entitled: **Investigating 24 Hour Urine Expected Ranges of Non-Kidney Stone Formers: an EAU Endourology Research Group Systematic Review and Meta-Analysis ** 
 <br>
 
 These analyses are deployed online at: https://endourology.shinyapps.io/24_hr_ranges/. The app has three components: <br>
