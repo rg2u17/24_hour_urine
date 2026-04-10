@@ -15,9 +15,10 @@
 Repository for all data and code associated with paper exploring 24 hour urine reference ranges using data derived from systematic review and meta-analysis. 
 <br>
 
-These analyses are deployed online at: https://endourology.shinyapps.io/24_hr_ranges/. The app has two components: <br>
-1. A patient report generation section, which the user can use to input values and generate a report comparing our systematic review/meta-analysis derived reference ranges compared to existing guidelines. 
-2. An exploratory section, where users can explore all the analyses performed within this study
+These analyses are deployed online at: https://endourology.shinyapps.io/24_hr_ranges/. The app has three components: <br>
+1. A patient report generation section, which the user can use to input values and generate a report comparing our systematic review/meta-analysis derived expected ranges compared to existing reference ranges.
+2. A Main Results section, simply showing the main results from this study.
+3. An exploratory section, where users can explore all the analyses performed within this study
 <br>
 
 ## 2. How to Run this Analysis
@@ -68,19 +69,20 @@ All the documents identified in the original search are within the Searches Fold
 Figure 1. PRISMA Flow diagram <br>
 <br>
 ### 3.2 Meta-analysis
-Explanation re: MA
+We generated meta-analysed expected ranges based on the assumption of normal distribution, apart from volume where we assumed a left-skew and therefore performed a log transformation. The expected range was calculated according to existing standards for reporting reference ranges (<5% / >95% for normal distribution). A random-effects model was used when substantial heterogeneity was suspected, while a fixed-effect model was applied when there was minimal heterogeneity. Heterogeneity was evaluated using I2, τ2, and Cochran’s Q statistics. Publication bias was assessed statistically with Egger’s and Begg’s tests, and visually with Funnel/Baujat plots. 
+
+We performed sub-analyses for age, sex, race, and sensitivity analyses for study design (RCT only) and risk of bias (low only and low/moderate only). We tested differences between sub-analyses with Wald tests.
+
+Where there was sufficient data, we performed meta-regression using age, sex, race, study size and overall risk of bias as covariates. 
+
 <br>
 <img width="760" height="320" alt="image" src="https://github.com/user-attachments/files/24741908/MA.result.flow.diagram.pdf" /> <br>
 Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
 ### 3.3 Bias analysis
-Explanation re: bias analysis <br>
+We utilized the Cochrane risk of bias tools for both observational studies (exposures)10 and randomized trials. We summarized bias into an overall category. This was based on: any domain being high risk then overall was assigned high risk; if any two domains were moderate then overall was assigned moderate; otherwise overall was assigned to low risk. 
 <br>
 ### 3.4 GRADE rating
-Explanation re: GRADE <br>
-<br>
-
-### 3.5 Clinical Cohort Testing
-Explanation re: clinical testing
-<br>
+We utilized the GRADE methodology to determine level of evidence for each of meta-analysis derived 24-hour urine reference range.
+Please see: https://www.gradepro.org 
 
