@@ -67,6 +67,7 @@ Explanation re: SR
 <br>
 All the documents identified in the original search are within the Searches Folder as .docx files ('24 hour urine and kidney stones.docx' and '24 hour urine and stones - part 2.docx')
 <br>
+<img width="1240" height="1754" alt="PRISMA" src="https://github.com/user-attachments/assets/097055f3-aac2-4072-a069-10702b3a43d7" />
 Figure 1. PRISMA Flow diagram <br>
 <br>
 
@@ -78,7 +79,7 @@ We performed sub-analyses for age, sex, race, and sensitivity analyses for study
 Where there was sufficient data, we performed meta-regression using age, sex, race, study size and overall risk of bias as covariates. 
 
 <br>
-[decision_framework.pdf](https://github.com/user-attachments/files/27523443/decision_framework.pdf) <br>
+<img width="1400" height="1515" alt="decision_framework" src="https://github.com/user-attachments/assets/14646ff1-53bf-479a-9b79-d7b32fec9bed" /> <br>
 Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
 
