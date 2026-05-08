@@ -78,7 +78,7 @@ We performed sub-analyses for age, sex, race, and sensitivity analyses for study
 Where there was sufficient data, we performed meta-regression using age, sex, race, study size and overall risk of bias as covariates. 
 
 <br>
-<img width="760" height="320" alt="image" src="https://github.com/user-attachments/files/24741908/MA.result.flow.diagram.pdf" /> <br>
+[decision_framework.pdf](https://github.com/user-attachments/files/27523443/decision_framework.pdf) <br>
 Figure 2. Flow diagram of Workflow for meta-analysis
 <br>
 
