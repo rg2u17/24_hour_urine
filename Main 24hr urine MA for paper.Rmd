@@ -3,6 +3,14 @@ title: "24 Hour Urine Ranges MA"
 author: "R Geraghty"
 date: "`r Sys.Date()`"
 output: 
+  word_document:
+    toc: true
+    number_sections: true
+  pdf_document: 
+    toc: true
+    fig_width: 15
+    fig_height: 15
+    number_sections: true
   html_document:
     toc: true
     toc_float: true
@@ -11,14 +19,6 @@ output:
     toc_depth: 2
     fig_width: 10
     fig_height: 10
-  pdf_document: 
-    toc: true
-    fig_width: 15
-    fig_height: 15
-    number_sections: true
-  word_document:
-    toc: true
-    number_sections: true
 always_allow_html: true
     
 ---
@@ -54,7 +54,7 @@ phosphorous_mw = 30.97362
 
 urine_ma <- fread("24_hr_urine_ma_12082025.csv", header = TRUE) %>% janitor::clean_names()
 
-hpfs_nhs_I_II_summary <- fread("24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>% 
+hpfs_nhs_I_II_summary <- fread("24_hr_urine_ma_nhs_hpfs_data.csv", header = TRUE) %>%
   janitor::clean_names() %>%
   mutate(
     phosphate_mean_mmol_24h = phosphorus_mean_mg_24h / phosphorous_mw,
@@ -422,6 +422,7 @@ mean_age_summary <- urine_ma2 %>%
     paste0(first_author, " et al. ", year),
     paste0(first_author, ", ", year)
   )) %>%
+  drop_na(age_sd) %>%
   metamean(
     n = total_n,
     mean = mean_age,
@@ -445,7 +446,7 @@ urine_ma2 %>%
     "Mean Age, years ± SD" = paste0(
       round(mean_age_summary$TE.random),
       " ± ",
-      round(mean_age_summary$seTE.random)
+      round(mean_age_summary$tau)
     )
   ) %>%
   gt() %>%
@@ -1248,7 +1249,7 @@ build_flow_diagram <- function() {
            shape = box, style = 'filled,rounded', fillcolor = '#0dcaf0',
            fontcolor = white, fontsize = 11, penwidth = 1.5]
 
-    o_race [label = 'OUTCOME 4\\nRace-stratified\\nmain result',
+    o_race [label = 'OUTCOME 4\\nrace-stratified\\nmain result',
             shape = box, style = 'filled,rounded', fillcolor = '#20c997',
             fontcolor = white, fontsize = 11, penwidth = 1.5]
 
@@ -1771,11 +1772,11 @@ recommend_analysis <- function(component,
     if (!res$rejected) return(res$row)
   }
 
-  # ---- BRANCH 4 : Race-stratified ----
+  # ---- BRANCH 4 : race-stratified ----
   if (isTRUE(race_res$significant) && !is.na(race_res$n_powered) &&
       race_res$n_powered >= 2) {
-    res <- try_branch("4", "Race-stratified", "4 — Robust race difference",
-                      sprintf("Race %s", race_res$evidence),
+    res <- try_branch("4", "race-stratified", "4 — Robust race difference",
+                      sprintf("race %s", race_res$evidence),
                       age_p = age_res$p_min, age_powered = age_res$n_powered,
                       race_p = race_res$p_min, race_powered = race_res$n_powered,
                       assay_p = assay_res$p_min, assay_powered = assay_res$n_powered)
@@ -2021,7 +2022,7 @@ age_check <- function(component, ma_long,
   )
 }
 
-# Q4 — Race check: Wald across powered race groups in 3rd analysis.
+# Q4 — race check: Wald across powered race groups in 3rd analysis.
 # Only pairs in which BOTH groups are powered are tested.
 race_check <- function(component, ma_race_long = NULL,
                        thresholds = THRESHOLDS) {
@@ -2695,7 +2696,7 @@ meta_regression <- function(data_subset = "none",
           term == "total_n_c"                   ~ "Sample size",
           grepl("^age_band", term)              ~ paste0("Age band: ", sub("^age_band", "", term)),
           grepl("^overall", term)               ~ paste0("RoB: ", sub("^overall", "", term)),
-          grepl("^race", term)                  ~ paste0("Race: ", sub("^race", "", term)),
+          grepl("^race", term)                  ~ paste0("race: ", sub("^race", "", term)),
           grepl("^assay_cat", term)             ~ paste0("Assay: ", sub("^assay_cat", "", term)),
           TRUE                                   ~ term
         ),
@@ -2884,7 +2885,7 @@ meta_regression <- function(data_subset = "none",
         term == "total_n_c"                   ~ "Sample size",
         grepl("^age_band", term)              ~ paste0("Age band: ", sub("^age_band", "", term)),
         grepl("^overall", term)               ~ paste0("RoB: ", sub("^overall", "", term)),
-        grepl("^race", term)                  ~ paste0("Race: ", sub("^race", "", term)),
+        grepl("^race", term)                  ~ paste0("race: ", sub("^race", "", term)),
         grepl("^assay_cat", term)             ~ paste0("Assay: ", sub("^assay_cat", "", term)),
         TRUE                                   ~ term
       ),
@@ -5089,7 +5090,7 @@ sex_age_subdivision_ma <- function(urine_component, data = urine_ma2) {
 ```
 \newpage
 
-## Comparison of Sex, Age and Race
+## Comparison of Sex, Age and race
 ```{r}
 sex_age_race_subdivision_ma <- function(urine_component,
                                         data,
@@ -5262,7 +5263,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
       result %>% mutate(race_group = "All")
     })
     
-    # --- NEW: Race-specific analyses ---
+    # --- NEW: race-specific analyses ---
     # Get unique race groups for this sex
     race_groups <- data_sex %>%
       filter(!is.na(race), race %in% c("white", "mixed", "black")) %>%
@@ -5413,7 +5414,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
     `P (Wald Test)`   = sex_w$p
   )
 
-  # Race comparisons within each sex (Overall age band)
+  # race comparisons within each sex (Overall age band)
   race_comparisons <- purrr::map_dfr(c("male", "female"), function(sex) {
     race_data <- combined_results %>%
       filter(sex_group == sex, as.character(age_band) == "Overall",
@@ -5543,7 +5544,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
   race_comparisons_gt <- if (nrow(race_comparisons) > 0) {
     race_comparisons %>%
       format_wald_table() %>%
-      tab_header(title = md("**Race Comparisons Within Sex Groups**"))
+      tab_header(title = md("**race Comparisons Within Sex Groups**"))
   } else {
     NULL
   }
@@ -5580,7 +5581,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
     select(-urine_component) %>%
     mutate(
       `Sex Group` = as.character(sex_group),
-      `Race` = race_group,
+      `race` = race_group,
       `Age Band` = as.character(age_band),
       `Pooled` = ifelse(is.na(pooled_estimate), "—", sprintf("%.2f", pooled_estimate)),
       `95% Range` = sprintf("%.2f – %.2f", lower_95, upper_95),
@@ -5611,7 +5612,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
     ) %>%
     select(
       `Sex Group`,
-      `Race`,
+      `race`,
       `Age Band`,
       `Pooled`,
       `95% Range`,
@@ -5715,7 +5716,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
     select(-urine_component) %>%
     mutate(
       `Sex Group` = as.character(sex_group),
-      `Race` = str_to_title(race_group),
+      `race` = str_to_title(race_group),
       `Age Band` = as.character(age_band),
       `95% Range` = ifelse(
         is.na(lower_95) | is.na(upper_95),
@@ -5746,7 +5747,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
     ) %>%
     select(
       `Sex Group`,
-      `Race`,
+      `race`,
       `Age Band`,
       `95% Range`,
       Studies,
@@ -5762,7 +5763,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
   race_only_summary_gt <- race_only_summary_table %>%
     gt() %>%
     tab_header(
-      title = md("**Race-Specific Meta-Analysis Results**"),
+      title = md("**race-Specific Meta-Analysis Results**"),
       subtitle = paste0("24-Hour Urine ", urine_component_for_title)
     ) %>%
     cols_align(align = "center") %>%
@@ -5811,9 +5812,9 @@ sex_age_race_subdivision_ma <- function(urine_component,
       mutate(
         # Create a combined label for plotting
         plot_label = case_when(
-          race_group == "All" & age_band == "Overall" ~ "Overall (All Races)",
-          race_group == "All" & age_band == "Meta-Regression" ~ "Meta-Regression (All Races)",
-          race_group == "All" ~ paste0(age_band, " (All Races)"),
+          race_group == "All" & age_band == "Overall" ~ "Overall (All races)",
+          race_group == "All" & age_band == "Meta-Regression" ~ "Meta-Regression (All races)",
+          race_group == "All" ~ paste0(age_band, " (All races)"),
           age_band == "Overall" ~ str_to_title(race_group),
           age_band == "Meta-Regression" ~ paste0(str_to_title(race_group), " - Meta-Regression"),
           TRUE ~ paste0(str_to_title(race_group), " - ", age_band)
@@ -5876,8 +5877,8 @@ sex_age_race_subdivision_ma <- function(urine_component,
     select(-urine_component) %>%
     mutate(
       `Sex Group` = as.character(sex_group),
-      `Race` = case_when(
-        race_group == "All" ~ "All Races",
+      `race` = case_when(
+        race_group == "All" ~ "All races",
         TRUE ~ str_to_title(race_group)
       ),
       `Age Band` = as.character(age_band),
@@ -5910,7 +5911,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
     ) %>%
     select(
       `Sex Group`,
-      `Race`,
+      `race`,
       `Age Band`,
       `95% Range`,
       Studies,
@@ -5926,7 +5927,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
   race_summary_gt <- race_summary_table %>%
     gt() %>%
     tab_header(
-      title = md("**Race-Stratified Meta-Analysis Results**"),
+      title = md("**race-Stratified Meta-Analysis Results**"),
       subtitle = paste0("24-Hour Urine ", urine_component_for_title)
     ) %>%
     cols_align(align = "center") %>%
@@ -5955,12 +5956,12 @@ sex_age_race_subdivision_ma <- function(urine_component,
         rows = `Age Band` == "Overall"
       )
     ) %>%
-    # Bold the "All Races" rows
+    # Bold the "All races" rows
     tab_style(
       style = cell_text(weight = "bold"),
       locations = cells_body(
         columns = everything(),
-        rows = `Race` == "All Races"
+        rows = `race` == "All races"
       )
     ) %>%
     tab_options(
@@ -5988,7 +5989,7 @@ sex_age_race_subdivision_ma <- function(urine_component,
                 axis_titles = "collect",
                 axes = "collect") + 
     plot_annotation(
-      title = paste0(urine_component_for_title, " - Race Stratification"),
+      title = paste0(urine_component_for_title, " - race Stratification"),
       tag_levels = "A",
       theme = theme(plot.title = element_text(face = "bold", size = 14))
     )
@@ -6059,7 +6060,7 @@ creat_completeness_table("volume")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 volume_ma_3rd_analysis <- sex_age_race_subdivision_ma("volume", 
@@ -6075,7 +6076,7 @@ volume_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 volume_ma_3rd_analysis$race_summary_table
 ```
@@ -6134,7 +6135,7 @@ creat_completeness_table("calcium")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 calcium_ma_3rd_analysis <- sex_age_race_subdivision_ma("calcium", 
@@ -6150,7 +6151,7 @@ calcium_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 calcium_ma_3rd_analysis$race_summary_table
 ```
@@ -6208,7 +6209,7 @@ creat_completeness_table("urate")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 urate_ma_3rd_analysis <- sex_age_race_subdivision_ma("urate", 
@@ -6224,7 +6225,7 @@ urate_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 urate_ma_3rd_analysis$race_summary_table
 ```
@@ -6282,7 +6283,7 @@ creat_completeness_table("creat")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 creat_ma_3rd_analysis <- sex_age_race_subdivision_ma("creat", 
@@ -6298,7 +6299,7 @@ creat_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 creat_ma_3rd_analysis$race_summary_table
 ```
@@ -6356,7 +6357,7 @@ creat_completeness_table("oxalate")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 oxalate_ma_3rd_analysis <- sex_age_race_subdivision_ma("oxalate", 
@@ -6372,7 +6373,7 @@ oxalate_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 oxalate_ma_3rd_analysis$race_summary_table
 ```
@@ -6430,7 +6431,7 @@ creat_completeness_table("ph")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 ph_ma_3rd_analysis <- sex_age_race_subdivision_ma("ph", 
@@ -6446,7 +6447,7 @@ ph_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 ph_ma_3rd_analysis$race_summary_table
 ```
@@ -6504,7 +6505,7 @@ creat_completeness_table("citrate")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 citrate_ma_3rd_analysis <- sex_age_race_subdivision_ma("citrate", 
@@ -6520,7 +6521,7 @@ citrate_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 citrate_ma_3rd_analysis$race_summary_table
 ```
@@ -6579,7 +6580,7 @@ creat_completeness_table("phosphate")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 phosphate_ma_3rd_analysis <- sex_age_race_subdivision_ma("phosphate", 
@@ -6595,7 +6596,7 @@ phosphate_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 phosphate_ma_3rd_analysis$race_summary_table
 ```
@@ -6653,7 +6654,7 @@ creat_completeness_table("sodium")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 sodium_ma_3rd_analysis <- sex_age_race_subdivision_ma("sodium", 
@@ -6669,7 +6670,7 @@ sodium_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 sodium_ma_3rd_analysis$race_summary_table
 ```
@@ -6727,7 +6728,7 @@ creat_completeness_table("potassium")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 potassium_ma_3rd_analysis <- sex_age_race_subdivision_ma("potassium", 
@@ -6743,7 +6744,7 @@ potassium_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 potassium_ma_3rd_analysis$race_summary_table
 ```
@@ -6801,7 +6802,7 @@ creat_completeness_table("magnesium")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 magnesium_ma_3rd_analysis <- sex_age_race_subdivision_ma("magnesium", 
@@ -6817,7 +6818,7 @@ magnesium_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 magnesium_ma_3rd_analysis$race_summary_table
 ```
@@ -6875,7 +6876,7 @@ creat_completeness_table("ammonium")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 ammonium_ma_3rd_analysis <- sex_age_race_subdivision_ma("ammonium", 
@@ -6891,7 +6892,7 @@ ammonium_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 ammonium_ma_3rd_analysis$race_summary_table
 ```
@@ -6949,7 +6950,7 @@ creat_completeness_table("chloride")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 chloride_ma_3rd_analysis <- sex_age_race_subdivision_ma("chloride", 
@@ -6965,7 +6966,7 @@ chloride_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 chloride_ma_3rd_analysis$race_summary_table
 ```
@@ -7023,7 +7024,7 @@ creat_completeness_table("sulphate")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 sulphate_ma_3rd_analysis <- sex_age_race_subdivision_ma("sulphate", 
@@ -7039,7 +7040,7 @@ sulphate_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 sulphate_ma_3rd_analysis$race_summary_table
 ```
@@ -7097,7 +7098,7 @@ creat_completeness_table("urea")
 ```
 
 
-### Comparison by Age / Sex / Race
+### Comparison by Age / Sex / race
 #### Plot
 ```{r}
 urea_ma_3rd_analysis <- sex_age_race_subdivision_ma("urea", 
@@ -7113,7 +7114,7 @@ urea_ma_3rd_analysis$combined_summary_table
 ```
 
 
-#### Table of Results subdivided by Race / Sex / Age
+#### Table of Results subdivided by race / Sex / Age
 ```{r}
 urea_ma_3rd_analysis$race_summary_table
 ```
@@ -7425,16 +7426,45 @@ mr_reduces_effect <- function(ma_results,
 ### Function to get final result
 ```{r}
 get_final_ma_results <- function(ma_results, sex_specific = FALSE, meta_regression = FALSE, low_rob = FALSE) {
+  # Helper: apply strict filter; if 0 rows, fall back to relaxed filter that
+  # drops the quality_filter constraint (handles cases where Meta-Regression
+  # rows lack a quality_filter value, e.g. NA from bind_rows column propagation).
+  strict_then_relaxed <- function(strict, relaxed) {
+    res <- strict
+    if (nrow(res) == 0) res <- relaxed
+    res
+  }
+
   if (sex_specific) {
-    ma_results %>% filter(age_band == "Overall", sex_group != "main meta-analysis",
-                          quality_filter == "All Studies")
+    strict_then_relaxed(
+      strict  = ma_results %>% filter(age_band == "Overall", sex_group != "main meta-analysis",
+                                      quality_filter == "All Studies"),
+      relaxed = ma_results %>% filter(age_band == "Overall", sex_group != "main meta-analysis")
+    )
   } else if (meta_regression) {
-    ma_results %>% filter(age_band == "Meta-Regression", sex_group == "main meta-analysis", quality_filter == "All Studies")
+    res <- strict_then_relaxed(
+      strict  = ma_results %>% filter(age_band == "Meta-Regression", sex_group == "main meta-analysis",
+                                      quality_filter == "All Studies"),
+      relaxed = ma_results %>% filter(age_band == "Meta-Regression", sex_group == "main meta-analysis")
+    )
+    # Final safety net: if meta-regression row genuinely missing (helper
+    # silently failed upstream), fall back to overall pooled so the chunk
+    # produces output rather than crashing on a 0-row cbind.
+    if (nrow(res) == 0) {
+      message("get_final_ma_results: no Meta-Regression row available; falling back to Overall pooled")
+      res <- ma_results %>% filter(sex_group == "main meta-analysis", age_band == "Overall",
+                                   quality_filter == "All Studies")
+    }
+    res
   } else if (low_rob) {
-    ma_results %>% filter(age_band == "Overall", sex_group == "main meta-analysis", quality_filter == "Low Risk of Bias Only")
+    ma_results %>% filter(age_band == "Overall", sex_group == "main meta-analysis",
+                          quality_filter == "Low Risk of Bias Only")
   } else {
-    ma_results %>% filter(sex_group == "main meta-analysis", age_band == "Overall",
-                          quality_filter == "All Studies")
+    strict_then_relaxed(
+      strict  = ma_results %>% filter(sex_group == "main meta-analysis", age_band == "Overall",
+                                      quality_filter == "All Studies"),
+      relaxed = ma_results %>% filter(sex_group == "main meta-analysis", age_band == "Overall")
+    )
   }
 }
 ```
@@ -7524,7 +7554,7 @@ if (nrow(all_ma_long) == 0) {
               format_p(p_sex_metareg),
               format_p(p_sex_lowrob), sep = " / "),
       `Age p (min)`   = format_p(p_age),
-      `Race p (min)`  = format_p(p_race),
+      `race p (min)`  = format_p(p_race),
       `Assay p (min)` = format_p(p_assay),
       `Egger's p`     = format_p(eggers_p %||% NA_real_),
       # Quality-gate display: Cochran's Q normalised by df, MR R² for chosen subset
@@ -7545,7 +7575,7 @@ if (nrow(all_ma_long) == 0) {
                   k, n, `R²` = R2,
                   `Sex p (women_prop / overall / MR / LRoB)`,
                   `Age p (min)`,
-                  `Race p (min)`,
+                  `race p (min)`,
                   `Assay p (min)`,
                   `Egger's p`,
                   `Q/df (chosen / overall)`,
@@ -7572,7 +7602,7 @@ if (nrow(all_ma_long) == 0) {
         dplyr::case_when(
           x == "Sex-stratified"             ~ "#cce5ff",
           x == "Age-stratified"             ~ "#cff4fc",
-          x == "Race-stratified"            ~ "#d1e7dd",
+          x == "race-stratified"            ~ "#d1e7dd",
           x == "Assay/country-stratified"   ~ "#cfe2ff",
           x == "Meta-regression"            ~ "#d4edda",
           x == "Low risk-of-bias overall"   ~ "#e2d4f0",
@@ -7620,7 +7650,7 @@ framework_callout <- function(component_code) {
               format_p(p_sex_metareg),
               format_p(p_sex_lowrob), sep = " / "),
       `Age p (min)`   = format_p(p_age),
-      `Race p (min)`  = format_p(p_race),
+      `race p (min)`  = format_p(p_race),
       `Assay p (min)` = format_p(p_assay),
       `Egger's p`     = format_p(eggers_p %||% NA_real_),
       `Q/df (chosen / overall)` = paste0(
@@ -7647,7 +7677,7 @@ framework_callout <- function(component_code) {
         dplyr::case_when(
           x == "Sex-stratified"             ~ "#cce5ff",
           x == "Age-stratified"             ~ "#cff4fc",
-          x == "Race-stratified"            ~ "#d1e7dd",
+          x == "race-stratified"            ~ "#d1e7dd",
           x == "Assay/country-stratified"   ~ "#cfe2ff",
           x == "Meta-regression"            ~ "#d4edda",
           x == "Low risk-of-bias overall"   ~ "#e2d4f0",
@@ -7671,17 +7701,21 @@ framework_callout("volume")
 ```
 
 ### Comment
-There is high heterogeneity throughout the analyses. Age consistently shifts the distribution, although differences between age bands are non-significant. There seem to be some minor differences between sexes, but again these are non significant.<br>
-The race-specific estimates are underpowered and unstable – many are single studies or have implausibly wide ranges. On Wald tests: The only between group differences that were significant were black (1.40-1.75, n=304, I2=60%) vs white women (1.76-2.05, n=3260, I2=78%), and all races (0.94-2.40, n=4177, I2=99%) vs white women. In the meta-regression of women only, there is a significant decrease in the lower limit (from 0.94 in main MA to 0.55). <br>
-Meta-regression shows significantly higher volumes in small studies and does not explain the observed heterogeneity with an R2 = 9.9%. The extreme heterogeneity is largely unexplained by age, sex, study quality, or sample size, although there appears to be a small study effect. The RCT only analyses are limited by small sample sizes, but the lower limit (~1L) seems consistent across analyses. <br>
-**Framework recommendation: Overall pooled meta-analysis.** Meta-regression R² of 7.6% is below the 25% threshold for explained heterogeneity and Egger’s test (p=0.811) does not detect small-study bias, so the simpler unadjusted pooled estimate is preferred.
-<br>
+For 24-hour urine volume, the meta-analysis included k = 89 subgroup-level records and n = 9,144 participants. Heterogeneity was extreme throughout (I² ≈ 99%, Cochran's Q p < 0.001) and the dataset comfortably met the framework's data-sufficiency floor (k ≥ 5, n ≥ 500). <br>
+
+Stratum tests were uniformly non-significant. Sex differences were not significant on meta-regression (p = 0.438) or in the overall sex Wald test (p = 0.937). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.840. race was severely underpowered (minimum Wald p = 0.762), with several strata being single studies of implausibly wide range; the one true pairwise between-race contrast that did reach significance was Black women (1.40 – 1.75 L/24h, n = 304, I² = 60%) vs White women (1.76 – 2.05 L/24h, n = 3,260, I² = 78%), while a further apparent contrast between the all-race pooled group (0.94 – 2.40, n = 4,177) and White women is a comparison between a pooled group and one of its constituent strata and should not be interpreted as a true between-group difference. Assay/country stratification was not tested for volume. <br>
+
+Meta-regression accounted for only R² = 7.6% of heterogeneity (k = 89), which is below the framework's 10% threshold, so the meta-regression branch did not fire. Egger's test was not significant (p = 0.811), ruling out the small-study-bias override; and the no-stratum-effect override was not triggered because the meta-regression-adjusted result did not differ materially from the unadjusted overall. <br>
+
+The low risk-of-bias overall sub-analysis was consistent with the main result, as were the RCT-only sub-analyses (the latter were limited by small sample sizes but agreed on the ~1 L lower bound). No sensitivity analysis suggested a more conservative or more informative estimate. <br>
+
+The framework therefore defaulted to the unadjusted overall pooled meta-analysis. The recommended expected range is **1.0 – 2.5 L/24h** (Overall, All Studies, n = 9,144). The dominant caveat is the extreme between-study heterogeneity, which is largely unexplained by any tested moderator; a women-only meta-regression shows a marked decrease in the lower limit (from 0.94 L/24h in the main MA to 0.55 L/24h), suggesting that female-only datasets may have systematically different lower bounds.
 
 ### Plot
 ```{r}
 volume_ma_2nd_analysis$main_meta_analysis$plot %+% 
   subset(volume_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Meta-Regression"))
+         age_band %in% ("Overall"))
 ```
 \newpage
 
@@ -7704,11 +7738,11 @@ volume_ma_2nd_analysis$ma_results %>%
       TRUE           ~ as.character(round(Q_pval, 2))
     ),
     ci_95 = paste0(
-      round(lower_95, 1), " – ", round(upper_95, 1)
-    )
+      round(lower_95, 1), " – ", round(upper_95, 1)),
+    Quality = quality_filter
   ) %>%
   select(
-    age_band,
+    Quality,
     total_participants,
     pooled_estimate,
     pooled_sd,
@@ -7719,7 +7753,7 @@ volume_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    age_band           = "Age Band",
+    Quality           = "Study Quality",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -7852,7 +7886,7 @@ volume_final_results <- get_final_ma_results(volume_ma_2nd_analysis$ma_results, 
 volume_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Age Band",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -7887,10 +7921,15 @@ framework_callout("calcium")
 ```
 
 ### Comment
-There is extremely high heterogeneity throughout the analyses. Meta-regression does not narrow this difference and therefore the variability is likely due to structural differences between studies. Age and Sex appear to affect the distribution of results. Race analyses are much less robust with single studies, negative values and substantial heterogeneity. However, each of the subanalyses are severely underpowered with small numbers of studies and patients. The RCT subanalyses demonstrate tighter intervals than the other analyses, however, there are far fewer patients and this is not likely to be representative of the wider population. <br>
-	We therefore suggest using the **meta-regression result** as this accounts for ~ 36% of heterogeneity (R2 = 36%). It should be noted that there is substantial heterogeneity and therefore uncertainty in the results. These figures should not be used as a precise expected range.
+For 24-hour urine calcium, the meta-analysis included k = 100 subgroup-level records and n = 10,284 participants — the largest dataset of any analyte. Heterogeneity was extreme throughout (I² > 99%, Cochran's Q p < 0.001). <br>
 
-<br>
+Sex differences on meta-regression approached but did not reach significance (p = 0.075; overall sex Wald p = 0.675). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.409. race was severely underpowered (minimum Wald p = 0.974), with most strata being single studies and some producing negative values. The assay/country stratum test was not significant (minimum Wald p = 0.535). Several stratified analyses, notably the RCT subgroup, showed tighter intervals than the main result but had substantially fewer patients and are unlikely to be representative of the wider population. <br>
+
+Meta-regression explained R² = 29.4% of heterogeneity with k = 100, well above the framework's 10% threshold, so the meta-regression branch was satisfied. Egger's test was borderline (p = 0.093), just above the 0.10 small-study-bias threshold; the small-study-bias override was therefore not invoked but the suggestion of small-study bias is noted. <br>
+
+The low risk-of-bias overall sub-analysis was consistent with the main meta-analysis, and the RCT-only sub-analysis (with substantially smaller n) gave a tighter interval that sat within the meta-regression range. Sensitivity analyses supported the meta-regression choice. <br>
+
+The framework selected the meta-regression result. The recommended expected range is **1.9 – 6.2 mmol/24h** (Meta-regression, n = 5,418). Substantial residual heterogeneity remains even after meta-regression adjustment.
 
 ### Plot
 ```{r}
@@ -7921,9 +7960,11 @@ calcium_ma_2nd_analysis$ma_results %>%
     ),
     ci_95 = paste0(
       round(lower_95, 1), " – ", round(upper_95, 1)
-    )
+    ),
+    sex_group = str_to_title(age_band)
   ) %>%
   select(
+    sex_group,
     total_participants,
     pooled_estimate,
     pooled_sd,
@@ -7934,6 +7975,7 @@ calcium_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
+    sex_group = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -8090,19 +8132,25 @@ framework_callout("urate")
 ```
 
 ### Comment
-Most ranges lie between ~2-5mmol/24h. There is high heterogeneity, and meta-regression modestly narrows the range, suggesting a central tendency. Age seems to slightly modify spread but not location of the range. There appear to be differences between sexes, although these are not significant and the analyses appear to be underpowered. Race analyses are underpowered with mostly single studies and wide ranges. No differences on Wald tests. On meta-regression of the overall dataset, the model did not account for any heterogeneity (R2 = 0%), and the only significant difference was between the sexes (for women: -0.77 mmol/24h, p=0.024). The RCT subanalyses have results within the respective ranges of the other analyses. The wider spread of the other analyses suggests they are more representative of the wider population. <br>
-	We therefore suggest using **sex-stratified main results**. It should be noted that there were substantially fewer male participants, and this result should be interpreted with caution.
-<br>
+For 24-hour urine urate, the meta-analysis included k = 93 subgroup-level records and n = 9,544 participants. Most ranges lay between approximately 2 – 5 mmol/24h with high between-study heterogeneity (I² > 95%, Cochran's Q p < 0.001), only modestly narrowed by meta-regression. <br>
+
+Significant sex differences were detected on meta-regression (p = 0.042) with a coefficient of −0.77 mmol/24h for women. The overall sex Wald test was non-significant (p = 0.436) but underpowered. Age comparisons were not testable across powered bands (no powered pairs available). race was severely underpowered (no powered pairs) with mostly single studies and wide ranges. Assay/country stratification was not tested for urate. <br>
+
+Meta-regression on the overall dataset explained very little heterogeneity (R² = 5.9%, k = 93), below the framework's 10% threshold, and Egger's test was non-significant (p = 0.443) — so the meta-regression branch and the small-study-bias override would not have been triggered in any case. Because the sex stratum test is evaluated first in the framework, meta-regression was bypassed regardless. <br>
+
+The RCT-only sub-analyses produced results within the respective sex-stratified ranges; the wider spread of the latter is consistent with their being more representative of the wider population. The low risk-of-bias sub-analysis did not suggest a more conservative estimate. <br>
+
+The framework selected the sex-stratified main results. The recommended expected ranges are **2.0 – 5.1 mmol/24h (male, n = 860)** and **2.3 – 3.5 mmol/24h (female, n = 4,177)**. The male cohort is substantially smaller than the female cohort, so the male estimate should be interpreted with caution; an automatic QC warning flagged that the chosen Q/df ratio (69.8) exceeded the framework's 150% consistency limit relative to the overall Q/df (40.9), reflecting that the sex-stratified analysis is more heterogeneous per degree of freedom than the unadjusted overall.
 
 ### Plot
 ```{r}
 male_plot <- urate_ma_2nd_analysis$male$plot %+%
   subset(urate_ma_2nd_analysis$male$plot$data, age_band == "Overall") +
-  scale_x_continuous(limits = c(1,5.5))
+  scale_x_continuous(limits = c(-1,6))
 
 female_plot <- urate_ma_2nd_analysis$female$plot %+%
   subset(urate_ma_2nd_analysis$female$plot$data, age_band == "Overall") +
-  scale_x_continuous(limits = c(1,5.5))
+  scale_x_continuous(limits = c(-1,6))
 
 urate_final_plot <- (male_plot / female_plot) + plot_layout(axes = "collect")
 
@@ -8114,7 +8162,8 @@ urate_final_plot
 ```{r}
 urate_ma_2nd_analysis$ma_results %>% 
   filter(
-    age_band %in% c("Overall")
+    age_band %in% c("Overall"),
+    quality_filter == "All Studies"
   ) %>% filter(
     sex_group != "main meta-analysis"
   ) %>%
@@ -8286,7 +8335,7 @@ urate_final_results <- get_final_ma_results(urate_ma_2nd_analysis$ma_results, se
 urate_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -8297,7 +8346,7 @@ urate_final_results %>%
     align = "center"
   ) %>%
   tab_header(
-    title = "Finalised Meta-Analysis Results for urate",
+    title = "Finalised Meta-Analysis Results for Urate",
     subtitle = "Subdivided by Age Band"
   ) %>%
   tab_source_note(
@@ -8320,9 +8369,15 @@ framework_callout("creat")
 ```
 
 ### Comment
-There is substantial heterogeneity in all analyses. There are clear and significant differences between sexes and age-bands. However, age stratification dramatically reduces the number of eligible studies and reduces the number of participants, reducing the power of these analyses. Race sub-analyses are underpowered with mostly single studies and wide ranges. Meta-regression suggests that women have significantly lower values than men. <br>
-	Could potentially use **sex stratified ranges** only as observed adult population distributions.
-<br>
+For 24-hour urine creatinine, the meta-analysis included k = 74 subgroup-level records and n = 9,058 participants. Heterogeneity was substantial in all analyses (I² > 95%, Cochran's Q p < 0.001). <br>
+
+Highly significant sex differences were detected on meta-regression (p < 0.001), and the overall sex Wald test also reached significance (p = 0.012). Age comparisons across powered bands were not testable (no powered pairs available). race stratification was severely underpowered with mostly single studies (no powered pairs). Assay/country stratification was not tested for creatinine. <br>
+
+Meta-regression explained an exceptionally high R² = 82.0% of heterogeneity with k = 74, well above the framework's 10% threshold. Egger's test was highly significant (p < 0.001), indicating strong small-study bias. However, because the sex stratum test is evaluated first in the framework, the framework proceeded directly to sex-stratified rather than meta-regression. <br>
+
+Age stratification dramatically reduces the number of eligible studies and participants, reducing power; the low risk-of-bias sub-analysis is consistent with the sex-stratified result and does not suggest a more informative or conservative estimate. <br>
+
+The framework selected the sex-stratified main results. The recommended expected ranges are **12.2 – 16.3 mmol/24h (male, n = 760)** and **7.2 – 12.6 mmol/24h (female, n = 4,217)**. The male cohort is substantially smaller than the female cohort, so the male estimate should be interpreted with caution. The very high meta-regression R² (82%) combined with significant Egger's small-study bias suggests that future analyses should treat the meta-regression result as a useful sanity check alongside the sex-stratified ranges.
 
 ### Plot
 ```{r}
@@ -8340,7 +8395,8 @@ creatinine_final_plot
 ```{r}
 creat_ma_2nd_analysis$ma_results %>% 
   filter(
-    age_band %in% c("Overall")
+    age_band %in% c("Overall"),
+    quality_filter == "All Studies"
   ) %>% filter(
     sex_group != "main meta-analysis"
   ) %>%
@@ -8512,7 +8568,7 @@ creatinine_final_results <- get_final_ma_results(creat_ma_2nd_analysis$ma_result
 creatinine_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -8546,14 +8602,25 @@ framework_callout("oxalate")
 ```
 
 ### Comment
-There is significant variation across age, sex and race analyses along with high heterogeneity in most categories, save for some subgroups. These subgroups tend to be limited to small datasets with a small number of studies. The main analysis meta-regression demonstrates a significantly lower result as the proportion of women increases (estimate = -0.15, 95% CI: -0.22-0.07, p<0.001). Likewise increasing age seems to significantly lower the result, although this decrease reduces as age bands increase. Sample size has no significant effect. **Framework recommendation: Sex-stratified meta-analysis.** The meta-regression coefficient on proportion-female reaches significance (women_prop p=0.012), warranting separate male and female reference ranges; the meta-regression range remains a useful supplementary view. 
-<br>
+For 24-hour urine oxalate, the meta-analysis included k = 92 subgroup-level records and n = 9,725 participants. Heterogeneity was high across most strata (I² > 95%, Cochran's Q p < 0.001), save for some small subgroups limited to a small number of studies. <br>
+
+Significant sex differences were detected in the univariable meta-regression (estimate = −0.15 mmol/24h per unit increase in proportion-female, 95% CI: −0.22 to −0.07, p < 0.001) and remained significant (p = 0.012) in the multivariable framework meta-regression. The overall sex Wald test was non-significant (p = 0.541), reflecting the imprecise stratum-level comparison. Age comparisons across powered bands were not testable (no powered pairs). race stratification was severely underpowered (no powered pairs). Assay/country stratification was not tested. <br>
+
+Meta-regression explained R² = 38.3% of heterogeneity with k = 92, well above the framework's 10% threshold; Egger's test was significant (p = 0.020), indicating small-study bias. Both the meta-regression and the small-study-bias override would therefore have been satisfied — but because the sex stratum test is evaluated first, meta-regression was bypassed. <br>
+
+The low risk-of-bias sub-analysis produced sex-stratified ranges close to the main analysis; the RCT-only sub-analysis was consistent. Sample size showed no significant effect in the meta-regression. Sensitivity analyses therefore supported the sex-stratified choice. <br>
+
+The framework selected the sex-stratified main meta-analysis. The recommended expected ranges are **0.2 – 0.6 mmol/24h (male, n = 860)** and **0.2 – 0.4 mmol/24h (female, n = 4,177)**. The male cohort is substantially smaller than the female cohort. Reviewer DF flagged that enzymatic and ion-chromatography oxalate assays may give systematically different results; the current dataset uses country as a proxy for assay and was unable to detect a significant assay/country effect, but residual assay variability is a plausible contributor to the remaining heterogeneity within each sex.
 
 ### Plot
 ```{r}
-oxalate_ma_2nd_analysis$main_meta_analysis$plot %+% 
+oxalate_final_plot <- (oxalate_ma_2nd_analysis$male$plot %+% 
   subset(oxalate_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Meta-Regression"))
+         age_band %in% ("Overall"))) / (oxalate_ma_2nd_analysis$female$plot %+% 
+  subset(oxalate_ma_2nd_analysis$main_meta_analysis$plot$data, 
+         age_band %in% ("Overall"))) + plot_layout(axes = "collect")
+
+oxalate_final_plot
 ```
 \newpage
 
@@ -8561,9 +8628,10 @@ oxalate_ma_2nd_analysis$main_meta_analysis$plot %+%
 ```{r}
 oxalate_ma_2nd_analysis$ma_results %>%
   filter(
-    age_band %in% c("Meta-Regression")
+    age_band %in% c("Overall"),
+    quality_filter == "All Studies"
   ) %>% filter(
-    sex_group == "main meta-analysis"
+    sex_group != "main meta-analysis"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -8593,7 +8661,7 @@ oxalate_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    sex_group          = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -8625,15 +8693,18 @@ oxalate_rob <- urine_ma2 %>%
   left_join(
     overall_bias, by = "study_name"
   ) %>%
-  select(study_name, overall, study_type) %>%
+  select(study_name, overall, study_type, male_female) %>%
+  filter(male_female != "mixed") %>%
   mutate(
     overall = case_when(
       is.na(overall) ~ "Moderate",
       TRUE ~ overall
-    )
+    ),
+    sex_group = str_to_title(male_female)
   ) %>%
   distinct(study_name, .keep_all = TRUE) %>%
   arrange(overall) %>%
+  group_by(sex_group) %>%
   gt() %>%
   cols_label(
     study_name = "Study",
@@ -8666,10 +8737,22 @@ oxalate_rob
 
 ### 24 Hour Urine Oxalate Suggested Expected Range inc. GRADE
 ```{r}
-oxalate_grade <- calculate_grade(
-  study_design= "RCT", # Overall result consistent with RCT subanalysis
-  risk_of_bias = "Not Serious", # Overall result consistent with Low ROB subanalysis
-  inconsistency = "Not Serious", # Consistent across subanalyses
+oxalate_grade_female <- calculate_grade(
+  study_design= "Mixed", # Overall result consistent with RCT subanalysis
+  risk_of_bias = "Serious", # RoB subanalyses 
+  inconsistency = "Serious", # Consistent across subanalyses
+  indirectness = "Moderate",
+  imprecision = "Not Serious", # Consistent across subanalyses
+  publication_bias = "Strongly suspected", # Significant Cochran's Q
+  large_effect = TRUE,
+  dose_response = FALSE,
+  confounders_reduce_effect = mr_reduces_effect(oxalate_ma_2nd_analysis$ma_results)
+)
+
+oxalate_grade_male <- calculate_grade(
+  study_design= "Mixed", # Overall result consistent with RCT subanalysis
+  risk_of_bias = "Serious", # Overall result consistent with Low ROB subanalysis
+  inconsistency = "Serious", # Consistent across subanalyses
   indirectness = "Moderate",
   imprecision = "Not Serious", # Consistent across subanalyses
   publication_bias = "Strongly suspected", # Significant Cochran's Q
@@ -8679,8 +8762,9 @@ oxalate_grade <- calculate_grade(
 )
 
 oxalate_grade <- cbind(
-  sex = c("Overall"),
-  grade = oxalate_grade$grade_rating
+  sex = c("Male", "Female"),
+  grade = c(oxalate_grade_male$grade_rating,
+            oxalate_grade_female$grade_rating)
 ) %>% as_tibble() %>%
   mutate(
     grade_rating = grade_symbol(grade)
@@ -8751,15 +8835,21 @@ framework_callout("ph")
 ```
 
 ### Comment
-Although there is substantial heterogeneity across most analyses, the absolute spread of values is relatively tight. There is little absolute difference between sex, age and race with no statistical difference between them. The race sub-analysis suffers from few studies and is likely underpowered. Meta-regression shows stability in the overall result.
-	As results seem to be consistent across sensitivity and sub-analyses, we recommend that a single pooled adult range is used.
-<br>
+For 24-hour urine pH, the meta-analysis included k = 95 subgroup-level records and n = 9,226 participants. Although there was substantial heterogeneity across most analyses (I² > 95%, Cochran's Q p < 0.001), the absolute spread of values was relatively tight. <br>
+
+Stratum tests were uniformly non-significant. Sex differences were not significant on meta-regression (p = 0.279; overall sex Wald p = 0.857). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.484, with little absolute difference between bands. race was underpowered (minimum Wald p = 0.835) with few studies. The assay/country stratum test was not applicable for pH. <br>
+
+Meta-regression explained R² = 11.6% of heterogeneity with k = 95, just above the framework's 10% threshold — the meta-regression branch was satisfied. Egger's test was not significant (p = 0.512), so the small-study-bias override would not have been invoked but was not needed. Reassuringly, the meta-regression-adjusted estimate coincides closely with the unadjusted overall pooled estimate. <br>
+
+The low risk-of-bias overall and RCT-only sub-analyses were consistent with the main meta-analysis, and the absolute pH range was stable across all sensitivity analyses. <br>
+
+The framework selected the meta-regression result. The recommended expected range is **5.7 – 6.3** (pH is dimensionless, n = 9,226). For this analyte the meta-regression and unadjusted overall pooled estimates are numerically equivalent.
 
 ### Plot
 ```{r}
 ph_ma_2nd_analysis$main_meta_analysis$plot %+% 
   subset(ph_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Overall"))
+         age_band %in% ("Meta-Regression"))
 ```
 \newpage
 
@@ -8767,7 +8857,7 @@ ph_ma_2nd_analysis$main_meta_analysis$plot %+%
 ```{r}
 ph_ma_2nd_analysis$ma_results %>% 
   filter(
-    age_band %in% c("Overall")
+    age_band %in% c("Meta-Regression")
   ) %>% filter(
     sex_group == "main meta-analysis"
   ) %>%
@@ -8784,11 +8874,10 @@ ph_ma_2nd_analysis$ma_results %>%
     ),
     ci_95 = paste0(
       round(lower_95, 1), " – ", round(upper_95, 1)
-    ),
-    sex_group = str_to_title(sex_group)
+    )
   ) %>%
   select(
-    sex_group,
+    age_band,
     total_participants,
     pooled_estimate,
     pooled_sd,
@@ -8799,7 +8888,7 @@ ph_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    age_band = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -8813,8 +8902,8 @@ ph_ma_2nd_analysis$ma_results %>%
     columns = c(total_participants, pooled_estimate, pooled_sd, ci_95, I2, Q, Q_pval)
   ) %>%
   tab_header(
-    title = "ph Meta-analysis Results by Age Band",
-    subtitle = "Random-effects meta-analysis"
+    title = "pH Meta-analysis Results by Age Band",
+    subtitle = "Meta-Regression"
   ) %>%
   tab_source_note(
     source_note = md(
@@ -8892,7 +8981,7 @@ ph_grade <- cbind(
     grade_rating = grade_symbol(grade)
   )
 
-ph_final_results <- get_final_ma_results(ph_ma_2nd_analysis$ma_results, sex_specific = FALSE) %>%
+ph_final_results <- get_final_ma_results(ph_ma_2nd_analysis$ma_results, sex_specific = FALSE, meta_regression = TRUE, low_rob = FALSE) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
     pooled_sd       = round(pooled_sd, 2),
@@ -8956,14 +9045,20 @@ framework_callout("citrate")
 ```
 
 ### Comment
-Substantial heterogeneity across all analyses. There seem to be differences between sexes, but these are not significant on Wald test. Age and race subanalyses are underpowered. There seems to be significant instability in the lower limit result and therefore these results should be interpreted with caution.	<br>
-	**Framework recommendation: Overall pooled with a caveat about assay variability.** The framework detected significant between-assay differences (min Wald p<0.001 with 44.8% relative shift across 3 named assay categories), but assay-stratified reference ranges are not clinically actionable since clinicians do not know which assay was used. The overall pooled estimate is reported with a note that citrate values vary materially by assay method.
-<br>
+For 24-hour urine citrate, the meta-analysis included k = 97 subgroup-level records and n = 9,458 participants. Heterogeneity was substantial across all analyses (I² > 95%, Cochran's Q p < 0.001), with notable instability in the lower limit. <br>
+
+Sex differences on meta-regression were not significant (p = 0.363; overall sex Wald p = 0.629). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.845. race was underpowered (minimum Wald p = 0.654). A strong between-assay/country effect was identified: the minimum pairwise Wald p between named assay/country categories was < 0.001, with 2 of 3 named pairs significant after the 20% relative-shift filter and a relative shift of 44.8% between categories. <br>
+
+Meta-regression explained R² = 17.5% of heterogeneity with k = 97 — above the framework's 10% threshold — but because the assay/country stratum test fires first, the meta-regression branch was not reached. Egger's test was not significant (p = 0.148). <br>
+
+The low risk-of-bias sub-analysis was consistent with the main result; the RCT-only sub-analysis gave a slightly tighter range. <br>
+
+The framework selected the assay/country-stratified branch. However, because clinicians do not generally know which assay method or laboratory produced an individual citrate result, assay-specific reference ranges are not clinically actionable. The displayed result is therefore the overall pooled estimate with an explicit caveat that citrate values vary materially by assay method. The recommended expected range is **1.2 – 4.5 mmol/24h** (Overall, with assay-variability caveat, n = 9,458). The lower limit is unstable across sensitivity analyses, and the wide assay-related variation is a substantive limitation for clinical use of a single pooled citrate range.
 
 ### Plot
 ```{r}
 citrate_final_plot <- citrate_ma_2nd_analysis$main_meta_analysis$plot %+%
-  subset(citrate_ma_2nd_analysis$main_meta_analysis$plot$data, age_band == "Overall" & quality_filter == "Low Risk of Bias Only") +
+  subset(citrate_ma_2nd_analysis$main_meta_analysis$plot$data, age_band == "Overall" & quality_filter == "All Studies") +
   scale_x_continuous(limits = c(0,5.5))
 
 citrate_final_plot
@@ -8972,13 +9067,13 @@ citrate_final_plot
 
 ### Results Table
 ```{r}
-citrate_ma_2nd_analysis$ma_results %>% 
+citrate_ma_2nd_analysis$ma_results %>%
   filter(
     age_band %in% c("Overall")
   ) %>% filter(
     sex_group == "main meta-analysis"
   ) %>% filter(
-    quality_filter == "Low Risk of Bias Only"
+    quality_filter == "All Studies"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -8993,7 +9088,8 @@ citrate_ma_2nd_analysis$ma_results %>%
     ),
     ci_95 = paste0(
       round(lower_95, 1), " – ", round(upper_95, 1)
-    )
+    ),
+    sex_group = "Overall"
   ) %>%
   select(
     sex_group,
@@ -9007,7 +9103,7 @@ citrate_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    sex_group          = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -9082,10 +9178,10 @@ citrate_rob
 ```{r}
 citrate_grade <- calculate_grade(
   study_design= "Mixed", # Mixed overall Result
-  risk_of_bias = "Not Serious", #Low RoB sub-analysis used for estimation
+  risk_of_bias = "Serious", #Low RoB sub-analysis used for estimation
   inconsistency = "Serious", # Marked variation in values
-  indirectness = "Moderate", 
-  imprecision = "Not Serious", # Large number of patients in each analysis
+  indirectness = "Serious", # Assay variability detected
+  imprecision = "Serious", # Large number of patients in each analysis 
   publication_bias = "Suspected", # Significant Cochran's Q
   large_effect = TRUE,
   dose_response = FALSE,
@@ -9129,7 +9225,7 @@ citrate_final_results <- get_final_ma_results(citrate_ma_2nd_analysis$ma_results
 citrate_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -9163,14 +9259,21 @@ framework_callout("phosphate")
 ```
 
 ### Comment
-Substantial heterogeneity across all analyses, with most subanalyses limited to a small number of studies. There seem to be differences between sexes, but these are not significant on Wald test. Age and race subanalyses are underpowered, with race sub-analyses often limited to single studies or no data at all. Upper limit appears quite unstable across analyses. Minimal differences on Wald tests, but significant amounts of missing data limiting analyses. <br>
-	**Framework recommendation: Meta-regression.** Meta-regression accounts for a high proportion of heterogeneity (R²=76.8%) and Egger's test indicates strong small-study bias (p=0.001), so the regression-adjusted estimate is preferred over the unadjusted pooled mean. <br>
+For 24-hour urine phosphate, the meta-analysis included k = 56 subgroup-level records and n = 8,104 participants. Heterogeneity was substantial across all analyses (I² > 95%, Cochran's Q p < 0.001), and the upper limit was notably unstable across sensitivity analyses. <br>
+
+Sex differences on meta-regression approached but did not reach significance (p = 0.067; overall sex Wald p = 0.338). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.393. race was severely underpowered (minimum Wald p = 0.165), with race sub-analyses often limited to single studies or no data at all. The assay/country stratum test approached significance (minimum Wald p = 0.076) but did not pass the threshold. Significant amounts of missing data limited the stratum analyses. <br>
+
+Meta-regression explained R² = 76.8% of heterogeneity with k = 56, well above the framework's 10% threshold, so the meta-regression branch was satisfied. Egger's test was highly significant (p = 0.001), indicating strong small-study bias; the small-study-bias override would also have selected meta-regression independently. The high R² combined with modest k carries a residual saturation/over-fit concern that the reader should bear in mind. <br>
+
+The low risk-of-bias and RCT-only sub-analyses were broadly consistent with the meta-regression result, but the upper limit was less stable; the meta-regression-adjusted upper limit (~26) is tighter than the unadjusted main analysis. <br>
+
+The framework selected the meta-regression result. The recommended expected range is **19 – 26 mmol/24h** (Meta-regression, n = 3,974). The dominant caveats are (i) the very high meta-regression R² combined with k = 56, which raises a saturation risk; (ii) the unstable upper limit across sensitivity analyses; and (iii) the borderline assay/country effect, suggesting citrate-style assay variability may also apply here.
 
 ### Plot
 ```{r}
 phosphate_final_plot <- phosphate_ma_2nd_analysis$main_meta_analysis$plot %+%
   subset(phosphate_ma_2nd_analysis$main_meta_analysis$plot$data,
-         quality_filter == "All Studies" & age_band == "Overall") +
+         quality_filter == "All Studies" & age_band == "Meta-Regression") +
   scale_x_continuous(limits = c(0, 40))
 
 phosphate_final_plot
@@ -9181,7 +9284,7 @@ phosphate_final_plot
 ```{r}
 phosphate_ma_2nd_analysis$ma_results %>%
   filter(
-    age_band %in% c("Overall")
+    age_band == "Meta-Regression"
   ) %>% filter(
     sex_group == "main meta-analysis"
   ) %>%
@@ -9200,7 +9303,7 @@ phosphate_ma_2nd_analysis$ma_results %>%
     ci_95 = paste0(
       round(lower_95, 0), " – ", round(upper_95, 0)
     ),
-    sex_group = str_to_title(sex_group)
+    sex_group = str_to_title(age_band)
   ) %>%
   select(
     sex_group,
@@ -9214,7 +9317,7 @@ phosphate_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    sex_group          = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -9372,14 +9475,20 @@ framework_callout("sodium")
 ```
 
 ### Comment
-There is substantial variability across all analyses. There appear to be differences in sex and age bands, although only age-band 30-40 demonstrates significant differences between sexes (all other wald tests are non-significant). There are reductions in heterogeneity in specific scenarios e.g. males aged 40-50. However, this is likely due to these analyses being underpowered. Sex specific ranges are at high risk of bias. <br>
-  **Framework recommendation: Meta-regression.** Although meta-regression R² is modest (11.5%), the meta-regression pooled estimate differs from the overall pooled by 15.2% (≥ 5% threshold) — i.e. moderator adjustment meaningfully changes the answer, in the direction of the low risk-of-bias analysis as previously noted. <br>
+For 24-hour urine sodium, the meta-analysis included k = 94 subgroup-level records and n = 9,120 participants. Heterogeneity was substantial across all analyses (I² > 95%, Cochran's Q p < 0.001). <br>
 
+Sex differences on meta-regression were not significant (p = 0.657; overall sex Wald p = 0.599) — only the 30 – 40 age band demonstrated a significant sex difference, with all other age-banded sex tests non-significant. Age comparisons across powered bands gave a minimum pairwise Wald p of 0.716. race was underpowered (minimum Wald p = 0.815). The assay/country stratum test reached significance (minimum Wald p = 0.002), but the relative shift between categories did not pass the 20% magnitude floor required by the assay branch, so the assay branch did not fire. <br>
+
+Meta-regression explained R² = 11.5% of heterogeneity with k = 94, just above the framework's 10% threshold — the meta-regression branch was satisfied. Egger's test was not significant (p = 0.219). Additionally, the meta-regression-adjusted pooled estimate differed from the unadjusted overall by ~15% (above the 5% margin used by the no-stratum-effect override), confirming that moderator adjustment meaningfully changes the result and further supporting the meta-regression result. <br>
+
+Reductions in heterogeneity in specific scenarios (e.g. males aged 40 – 50) are likely artefacts of underpowered analyses. Sex-specific ranges are at high risk of bias from the imbalanced subgroups. The low risk-of-bias sub-analysis was consistent with the meta-regression result. <br>
+
+The framework selected the meta-regression result. The recommended expected range is **98 – 253 mmol/24h** (Meta-regression, n = 3,945). Sodium intake is highly variable culturally and dietarily, which is consistent with the residual heterogeneity even after meta-regression adjustment; the wide expected range reflects this real biological variability.
 
 ### Plot
 ```{r}
 sodium_final_plot <- sodium_ma_2nd_analysis$main_meta_analysis$plot %+%
-  subset(sodium_ma_2nd_analysis$main_meta_analysis$plot$data, age_band == "Overall" & quality_filter == "Low Risk of Bias Only") +
+  subset(sodium_ma_2nd_analysis$main_meta_analysis$plot$data, age_band == "Meta-Regression" & quality_filter == "All Studies") +
   scale_x_continuous(limits = c(50,270))
 
 sodium_final_plot
@@ -9390,11 +9499,11 @@ sodium_final_plot
 ```{r}
 sodium_ma_2nd_analysis$ma_results %>%
   filter(
-    age_band %in% c("Overall")
+    age_band %in% c("Meta-Regression")
   ) %>% filter(
     sex_group == "main meta-analysis"
   ) %>% filter(
-    quality_filter == "Low Risk of Bias Only"
+    quality_filter == "All Studies"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -9409,7 +9518,8 @@ sodium_ma_2nd_analysis$ma_results %>%
     ),
     ci_95 = paste0(
       round(lower_95, 0), " – ", round(upper_95, 0)
-    )
+    ),
+    sex_group = str_to_title(age_band)
   ) %>%
   select(
     sex_group,
@@ -9581,15 +9691,21 @@ framework_callout("potassium")
 ```
 
 ### Comment
-High heterogeneity throughout analyses, with substantial numbers of missing strata. The strata with data seem to be mainly underpowered in the race/age-stratified sub-analyses. There were no significant differences on Wald test. Meta-regression slightly reduces the intervals and I2, but substantial heterogeneity remains suggesting study-level covariates only partially explaining variability. <br>
-	**Framework recommendation: Overall pooled with a caveat about assay variability.** The framework detected between-assay differences (1 of 3 named pairs significant after the 20% shift filter); assay-stratified ranges are not clinically actionable, so the overall pooled estimate is reported with an assay variability note. R²=22.2% sits just below the 25% threshold for routine meta-regression preference. <br>
+For 24-hour urine potassium, the meta-analysis included k = 93 subgroup-level records and n = 9,418 participants. Heterogeneity was high throughout (I² > 95%, Cochran's Q p < 0.001), with substantial numbers of missing strata. <br>
 
+Sex differences on meta-regression were not significant (p = 0.205; overall sex Wald p = 0.695). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.587. race was underpowered (minimum Wald p = 0.594) and mainly limited to single studies. A significant between-assay/country effect was identified: minimum pairwise Wald p = 0.010, with 1 of 3 named pairs significant after the 20% relative-shift filter and a relative shift of 44.9% — sufficient to trigger the assay/country branch. <br>
+
+Meta-regression explained R² = 22.2% of heterogeneity with k = 93, comfortably above the framework's 10% threshold; Egger's test was not significant (p = 0.744). Under the meta-regression branch in isolation, meta-regression would have been a defensible choice. However, because the assay/country stratum test fires before meta-regression in the framework, the framework proceeded to the assay branch. <br>
+
+The low risk-of-bias and RCT-only sub-analyses were consistent with the main result. Meta-regression slightly reduced intervals and I² but substantial heterogeneity remained, suggesting study-level covariates only partially explain the variability. <br>
+
+The framework selected the assay/country-stratified branch. As with citrate, assay-specific reference ranges are not clinically actionable because clinicians do not generally know which assay method or laboratory produced an individual potassium result. The displayed result is therefore the overall pooled estimate with an explicit assay-variability caveat. The recommended expected range is **28 – 77 mmol/24h** (Overall, with assay-variability caveat, n = 9,418). The wide range reflects substantial cultural and dietary variability in potassium intake; assay variability adds further uncertainty.
 
 ### Plot
 ```{r}
-potassium_ma_2nd_analysis$main_meta_analysis$plot %+% 
-  subset(potassium_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Meta-Regression"))
+potassium_ma_2nd_analysis$main_meta_analysis$plot %+%
+  subset(potassium_ma_2nd_analysis$main_meta_analysis$plot$data,
+         age_band %in% ("Overall") & quality_filter == "All Studies")
 ```
 \newpage
 
@@ -9598,7 +9714,8 @@ potassium_ma_2nd_analysis$main_meta_analysis$plot %+%
 potassium_ma_2nd_analysis$ma_results %>%
   filter(
     sex_group == "main meta-analysis",
-    age_band %in% ("Meta-Regression")
+    age_band %in% ("Overall"),
+    quality_filter == "All Studies"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -9614,7 +9731,7 @@ potassium_ma_2nd_analysis$ma_results %>%
     ci_95 = paste0(
       round(lower_95, 0), " – ", round(upper_95, 0)
     ),
-    sex_group = "Meta-Regression"
+    sex_group = str_to_title(sex_group)
   ) %>%
   select(
     sex_group,
@@ -9628,7 +9745,7 @@ potassium_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    sex_group          = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -9643,7 +9760,7 @@ potassium_ma_2nd_analysis$ma_results %>%
   ) %>%
   tab_header(
     title = "Potassium Meta-analysis Results",
-    subtitle = "Meta-Regression"
+    subtitle = "Random Effects Meta-analysis"
   ) %>%
   tab_source_note(
     source_note = md(
@@ -9704,9 +9821,9 @@ potassium_rob
 potassium_grade <- calculate_grade(
   study_design= "Mixed", 
   risk_of_bias = "Moderate", # Low + Low/Moderate ROB subanalyses aren't dissimilar to MR result
-  inconsistency = "Moderate",
-  indirectness = "Moderate",
-  imprecision = "Moderate",
+  inconsistency = "Serious",
+  indirectness = "Serious",
+  imprecision = "Serious", # assay differences detected
   publication_bias = "Strongly suspected", # Significant Cochran's Q
   large_effect = TRUE,
   dose_response = FALSE,
@@ -9751,7 +9868,7 @@ potassium_final_results <- get_final_ma_results(potassium_ma_2nd_analysis$ma_res
 potassium_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -9785,25 +9902,31 @@ framework_callout("magnesium")
 ```
 
 ### Comment
-High heterogeneity throughout analyses, with substantial, albeit non-significant, variation between strata. No clear consistent fluctuation between age groups. Meta-regression slightly reduces the intervals and I2, but substantial heterogeneity remains suggesting study-level covariates only partially explaining variability. <br>
-  Meta-analysis of RCTs demonstrates similar heterogeneity, however the results are broadly in line with the remainder of the analyses. Risk of bias subanalyses are consistent with the RCT only and meta-regression result. <br>
-	**Framework recommendation: Overall pooled.** With only k=11 studies, the meta-regression is saturated (R²=100% indicates an over-fit model rather than meaningful explanation of heterogeneity). The unadjusted overall pooled estimate is preferred until more studies become available. <br>
+For 24-hour urine magnesium, the meta-analysis included k = 87 subgroup-level records and n = 9,513 participants. Heterogeneity was high throughout (I² > 95%, Cochran's Q p < 0.001), with substantial — albeit non-significant — variation between strata. <br>
 
+Sex differences on meta-regression were not significant (p = 0.421; overall sex Wald p = 0.585). Age comparisons across powered bands gave a minimum pairwise Wald p of 0.571 with no clear age-related fluctuation. race was underpowered (minimum Wald p = 0.793). The assay/country stratum test was not significant (minimum Wald p = 0.363). <br>
+
+Meta-regression explained R² = 17.3% of heterogeneity with k = 87, above the framework's 10% threshold — under the framework algorithm the meta-regression branch is satisfied. Egger's test was not significant (p = 0.359). <br>
+
+The low risk-of-bias overall sub-analysis was consistent with the RCT-only sub-analysis and aligned with the meta-regression result. <br>
+
+The framework selected the meta-regression result. The recommended expected range is **3.1 – 4.8 mmol/24h** (Meta-Regression, n = 4,724).
 
 ### Plot
 ```{r}
-magnesium_ma_2nd_analysis$main_meta_analysis$plot %+% 
-  subset(magnesium_ma_2nd_analysis$main_meta_analysis$plot$data, 
+magnesium_ma_2nd_analysis$main_meta_analysis$plot %+%
+  subset(magnesium_ma_2nd_analysis$main_meta_analysis$plot$data,
          age_band %in% ("Meta-Regression"))
 ```
 \newpage
 
 ### Results Table
 ```{r}
-magnesium_ma_2nd_analysis$ma_results %>% 
+magnesium_ma_2nd_analysis$ma_results %>%
   filter(
     sex_group == "main meta-analysis",
-    age_band %in% ("Meta-Regression")
+    age_band %in% ("Meta-Regression"),
+    quality_filter == "All Studies"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -9819,7 +9942,7 @@ magnesium_ma_2nd_analysis$ma_results %>%
     ci_95 = paste0(
       round(lower_95, 1), " – ", round(upper_95, 1)
     ),
-    sex_group = "Meta-Regression"
+    sex_group = str_to_title(age_band)
   ) %>%
   select(
     sex_group,
@@ -9833,7 +9956,7 @@ magnesium_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    sex_group          = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -9990,15 +10113,27 @@ framework_callout("ammonium")
 ```
 
 ### Comment
-Heterogeneity remains high across analyses, however there is reasonable consistency across strata. Meta-regression reduces both interval and I2, suggesting at least partial adjustment for between study variation. Few studies in men alone and no meta-regression in this group, and therefore the 30-40 vs 60+ significant wald test result is not interpretable. Race sub-analyses are underpowered. <br>
-  There is the suggestion of age-related decline, however these analyses are underpowered and therefore not robust enough to utilise. <br>
-	**Framework recommendation: Sex-stratified meta-analysis.** The meta-regression coefficient on proportion-female reaches significance (women_prop p=0.035), warranting separate male and female reference ranges. Note that data are sparser in men, so the male estimate should be interpreted with caution. <br>
+For 24-hour urine ammonium, the meta-analysis included k = 45 subgroup-level records and n = 4,841 participants. Heterogeneity remained high across analyses (I² > 90%, Cochran's Q p < 0.001), but with reasonable consistency across strata. <br>
+
+Significant sex differences were detected on meta-regression (p = 0.035). The overall sex Wald test was non-significant (p = 0.285). Age comparisons across powered bands were not testable (no powered pairs available); a significant 30 – 40 vs 60+ band-level comparison was detected but only in men, where the sample size is too small to support a stand-alone meta-regression, so that result is not interpretable. race was severely underpowered (no powered pairs). Assay/country stratification was not tested. <br>
+
+Meta-regression explained R² = 45.8% of heterogeneity with k = 45, well above the framework's 10% threshold. Egger's test approached but did not reach significance (p = 0.081). Because the sex stratum test is evaluated first in the framework, meta-regression was not reached as the preferred analysis. <br>
+
+Meta-regression on the overall dataset reduced both interval width and I², suggesting at least partial adjustment for between-study variation; the RCT-only and low risk-of-bias sub-analyses were broadly consistent with the sex-stratified main results. An age-related decline is suggested in some sub-analyses but they are underpowered. <br>
+
+The framework selected the sex-stratified main results. The recommended expected ranges are **28 – 46 mmol/24h (male, n = 535)** and **20 – 40 mmol/24h (female, n = 3,857)**. The male cohort is substantially smaller than the female cohort, so the male estimate should be interpreted with caution. No meta-regression is available for the male sub-cohort, which limits the ability to adjust for moderators in men.
 
 ### Plot
 ```{r}
-ammonium_ma_2nd_analysis$main_meta_analysis$plot %+% 
-  subset(ammonium_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Overall") & quality_filter == "Low Risk of Bias Only")
+ammonium_male_plot <- ammonium_ma_2nd_analysis$male$plot %+%
+  subset(ammonium_ma_2nd_analysis$male$plot$data, age_band == "Overall")
+
+ammonium_female_plot <- ammonium_ma_2nd_analysis$female$plot %+%
+  subset(ammonium_ma_2nd_analysis$female$plot$data, age_band == "Overall")
+
+ammonium_final_plot <- (ammonium_male_plot / ammonium_female_plot) + plot_layout(axes = "collect")
+
+ammonium_final_plot
 ```
 \newpage
 
@@ -10006,9 +10141,9 @@ ammonium_ma_2nd_analysis$main_meta_analysis$plot %+%
 ```{r}
 ammonium_ma_2nd_analysis$ma_results %>%
   filter(
-    sex_group == "main meta-analysis",
-    age_band %in% ("Overall"),
-    quality_filter == "Low Risk of Bias Only"
+    age_band %in% c("Overall"),
+    sex_group != "main meta-analysis",
+    quality_filter == "All Studies"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -10024,7 +10159,7 @@ ammonium_ma_2nd_analysis$ma_results %>%
     ci_95 = paste0(
       round(lower_95, 0), " – ", round(upper_95, 0)
     ),
-    sex_group = "Overall"
+    sex_group = str_to_title(sex_group)
   ) %>%
   select(
     sex_group,
@@ -10162,7 +10297,7 @@ ammonium_final_results <- get_final_ma_results(ammonium_ma_2nd_analysis$ma_resul
 ammonium_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -10196,16 +10331,21 @@ framework_callout("chloride")
 ```
 
 ### Comment
-Substantial heterogeneity throughout analyses. Minimal data for age and race stratifications. Meta-regression does reduce interval and I2 in both male and female analyses. <br>
-	**Framework recommendation: Meta-regression.** Meta-regression explains 29.7% of heterogeneity (≥ 25% threshold) with k=51 studies, and is preferred over the unadjusted pooled estimate. Other stratification analyses remain underpowered.
- <br>
+For 24-hour urine chloride, the meta-analysis included k = 51 subgroup-level records and n = 3,534 participants. Heterogeneity was substantial throughout (I² > 95%, Cochran's Q p < 0.001), with minimal data available for age and race stratifications. <br>
 
+Sex differences on meta-regression approached but did not reach significance (p = 0.059; overall sex Wald p = 0.646). Age comparisons were not testable across powered bands (no powered pairs). race was severely underpowered (no powered pairs). Assay/country stratification was not tested. <br>
+
+Meta-regression explained R² = 29.7% of heterogeneity with k = 51 — well above the framework's 10% threshold — so the meta-regression branch was satisfied. Egger's test was not significant (p = 0.529). Meta-regression also reduced interval width and I² in both the male and female sub-analyses. <br>
+
+The low risk-of-bias and RCT-only sub-analyses were consistent with the meta-regression result; other stratification analyses remained underpowered. <br>
+
+The framework selected the meta-regression result. The recommended expected range is **84 – 218 mmol/24h** (Meta-regression, n = 3,173). The dominant caveat is the very limited data for stratified analyses, with no powered age or race comparisons available. The wide range reflects the substantial dietary variability of chloride intake.
 
 ### Plot
 ```{r}
-chloride_ma_2nd_analysis$main_meta_analysis$plot %+% 
-  subset(chloride_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Overall") & quality_filter == "All Studies")
+chloride_ma_2nd_analysis$main_meta_analysis$plot %+%
+  subset(chloride_ma_2nd_analysis$main_meta_analysis$plot$data,
+         age_band %in% ("Meta-Regression") & quality_filter == "All Studies")
 ```
 \newpage
 
@@ -10214,7 +10354,7 @@ chloride_ma_2nd_analysis$main_meta_analysis$plot %+%
 chloride_ma_2nd_analysis$ma_results %>%
   filter(
     sex_group == "main meta-analysis",
-    age_band %in% ("Overall"),
+    age_band %in% ("Meta-Regression"),
     quality_filter == "All Studies"
   ) %>%
   mutate(
@@ -10231,7 +10371,7 @@ chloride_ma_2nd_analysis$ma_results %>%
     ci_95 = paste0(
       round(lower_95, 0), " – ", round(upper_95, 0)
     ),
-    sex_group = "Overall"
+    sex_group = "Meta-Regression"
   ) %>%
   select(
     sex_group,
@@ -10245,7 +10385,7 @@ chloride_ma_2nd_analysis$ma_results %>%
   ) %>%
   gt() %>%
   cols_label(
-    sex_group          = "Sex",
+    sex_group          = "Analysis",
     total_participants  = "Patients, n",
     pooled_estimate = "Pooled Estimate",
     pooled_sd       = "SD",
@@ -10368,7 +10508,7 @@ chloride_final_results <- get_final_ma_results(chloride_ma_2nd_analysis$ma_resul
 chloride_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -10402,15 +10542,27 @@ framework_callout("sulphate")
 ```
 
 ### Comment
-There are few studies in this analysis, with wide variation in results and high heterogeneity throughout the different strata. The meta-regression result is not valid. There is marked variation between men and women, although non-significant and appear due to variation within the substantially larger female cohort.<br>
-	The overall meta-analysis result has the most robust evidence given the similarity to RCT results. Low RoB sub-analyses are underpowered but fit within the overall meta-analysis result. THerefore this should be used as a conservative estimate. <br>
+For 24-hour urine sulphate, the meta-analysis included k = 41 subgroup-level records and n = 4,857 participants — the second-smallest dataset after urea. Heterogeneity was high throughout (I² > 95%, Cochran's Q p < 0.001), with marked variation between men and women. <br>
 
+Highly significant sex differences were detected on meta-regression (p < 0.001). The overall sex Wald test was non-significant (p = 0.638) but underpowered. Age comparisons across powered bands were not testable (no powered pairs available). race was severely underpowered (no powered pairs). Assay/country stratification was not tested. <br>
+
+Meta-regression explained R² = 95.1% of heterogeneity with k = 41 — formally above the 10% threshold, but the very high R² combined with modest k raises a saturation/over-fit concern. Egger's test was not significant (p = 0.415). Because the sex stratum test is evaluated first in the framework, the meta-regression branch was bypassed regardless. <br>
+
+The low risk-of-bias sub-analysis was underpowered but produced ranges within the sex-stratified main results; the RCT-only sub-analysis was similarly consistent. <br>
+
+The framework selected the sex-stratified main results. The recommended expected ranges are **17 – 26 mmol/24h (male, n = 642)** and **7 – 30 mmol/24h (female, n = 3,794)**. The male cohort is substantially smaller than the female cohort, so the male estimate should be interpreted with caution. The high meta-regression R² combined with modest k means that the meta-regression result would not be a safe alternative even though it formally passes the framework threshold.
 
 ### Plot
 ```{r}
-sulphate_ma_2nd_analysis$main_meta_analysis$plot %+% 
-  subset(sulphate_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Overall") & quality_filter == "All Studies")
+sulphate_male_plot <- sulphate_ma_2nd_analysis$male$plot %+%
+  subset(sulphate_ma_2nd_analysis$male$plot$data, age_band == "Overall")
+
+sulphate_female_plot <- sulphate_ma_2nd_analysis$female$plot %+%
+  subset(sulphate_ma_2nd_analysis$female$plot$data, age_band == "Overall")
+
+sulphate_final_plot <- (sulphate_male_plot / sulphate_female_plot) + plot_layout(axes = "collect")
+
+sulphate_final_plot
 ```
 \newpage
 
@@ -10418,8 +10570,8 @@ sulphate_ma_2nd_analysis$main_meta_analysis$plot %+%
 ```{r}
 sulphate_ma_2nd_analysis$ma_results %>%
   filter(
-    sex_group == "main meta-analysis",
-    age_band %in% ("Overall"),
+    age_band %in% c("Overall"),
+    sex_group != "main meta-analysis",
     quality_filter == "All Studies"
   ) %>%
   mutate(
@@ -10574,7 +10726,7 @@ sulphate_final_results <- get_final_ma_results(sulphate_ma_2nd_analysis$ma_resul
 sulphate_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Sex",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -10608,14 +10760,21 @@ framework_callout("urea")
 ```
 
 ### Comment
-There were minimal data for urea. Given there were minimal differences between sexes, and improvement in I2 with meta-regression, we suggest utilising the overall meta-regression result as the representative pooled population distribution. <br>
+For 24-hour urine urea, the meta-analysis included k = 13 subgroup-level records and n = 3,876 participants. The dataset was substantially augmented by the inclusion of summarised Nurses' Health Study II (premenopausal and postmenopausal) cohorts kindly provided by Curhan et al., taking k from 11 to 13 and n from 525 to 3,876. Heterogeneity was high (I² > 95%, Cochran's Q p < 0.001); the data-sufficiency floor (k ≥ 5, n ≥ 500) is now comfortably met. <br>
 
+Sex differences on meta-regression were not significant (p = 0.110; overall sex Wald p = 0.663). Age, race and assay/country stratum tests were not testable — no powered pairs were available because the dataset remains the smallest of any analyte and the strata are sparse. <br>
+
+Meta-regression returned R² = 100%, which indicates a saturated/over-fit model rather than meaningful explanation of heterogeneity, given k = 13 < 20 (the framework's sanity floor on k for meta-regression preference). Egger's test was not significant (p = 0.278), so the small-study-bias override would not fire either. <br>
+
+The low risk-of-bias and RCT-only sub-analyses are too sparse to provide a more informative or conservative estimate. <br>
+
+The framework therefore defaulted to the unadjusted overall pooled meta-analysis. The recommended expected range is **234 – 445 mmol/24h** (Overall, All Studies, n = 3,876). The dominant caveat is the small number of contributing study cohorts (k = 13), even after the NHS II augmentation. Future analyses may benefit further from additional contemporary cohort data; the saturated meta-regression model could become interpretable once k ≥ 20.
 
 ### Plot
 ```{r}
-urea_ma_2nd_analysis$main_meta_analysis$plot %+% 
-  subset(urea_ma_2nd_analysis$main_meta_analysis$plot$data, 
-         age_band %in% ("Meta-Regression"))
+urea_ma_2nd_analysis$main_meta_analysis$plot %+%
+  subset(urea_ma_2nd_analysis$main_meta_analysis$plot$data,
+         age_band %in% ("Overall") & quality_filter == "All Studies")
 ```
 \newpage
 
@@ -10624,7 +10783,8 @@ urea_ma_2nd_analysis$main_meta_analysis$plot %+%
 urea_ma_2nd_analysis$ma_results %>%
   filter(
     sex_group == "main meta-analysis",
-    age_band %in% ("Meta-Regression")
+    age_band %in% ("Overall"),
+    quality_filter == "All Studies"
   ) %>%
   mutate(
     pooled_estimate = round(pooled_estimate, 2),
@@ -10777,7 +10937,7 @@ urea_final_results <- get_final_ma_results(urea_ma_2nd_analysis$ma_results, sex_
 urea_final_results %>%
   gt() %>%
   cols_label(
-    age_band       = "Meta-Regression",
+    age_band       = "Analysis",
     total_participants  = "Patients, n",
     ci_95           = "95% CI",
     Q               = "Q statistic",
@@ -10900,6 +11060,13 @@ final_gt
 if (!dir.exists("shiny_app_data")) dir.create("shiny_app_data", showWarnings = FALSE)
 saveRDS(final_table, "shiny_app_data/final_table.rds")
 message("Saved framework-aligned final_table.rds (", nrow(final_table), " rows)")
+
+# Also persist the current guideline reference ranges + bias tables for the app
+saveRDS(current_ref_range, "shiny_app_data/current_ref_range.rds")
+saveRDS(bias_observational, "shiny_app_data/bias_observational.rds")
+saveRDS(bias_rcts,          "shiny_app_data/bias_rcts.rds")
+message("Saved current_ref_range.rds (", nrow(current_ref_range),
+        " rows), bias_observational.rds, bias_rcts.rds")
 ```
 
 ```{r save_creat_completeness}
@@ -11030,5 +11197,6 @@ for (comp in names(component_cols)) {
 
 gt_tbl
 ```
+
 
 
